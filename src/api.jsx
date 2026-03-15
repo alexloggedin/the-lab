@@ -1,20 +1,48 @@
+import { USE_MOCK } from './dev/useMockData';
+import { mockFiles, mockFolders, mockMetadata, mockVersions, mockShares } from './dev/fixtures';
 import axios from 'axios';
 
-const base = window.OC
-  ? (path) => window.OC.generateUrl(`/apps/wipshare${path}`)
-  : (path) => `/apps/wipshare${path}`;
+const base = (path) =>
+  window.OC ? window.OC.generateUrl(`/apps/wipshare${path}`) : path;
 
 export const api = {
-  getFiles:      (path = '') => axios.get(base(`/api/files?path=${encodeURIComponent(path)}`)),
-  streamUrl:     (path)      => base(`/api/files/${encodeURIComponent(path)}`),
-  uploadFile:    (path, file) => axios.put(base(`/api/upload/${encodeURIComponent(path)}`), file, {
-                                   headers: { 'Content-Type': file.type }
-                                 }),
-  getShares:     ()          => axios.get(base('/api/shares')),
-  createShare:   (data)      => axios.post(base('/api/shares'), data),
-  deleteShare:   (id)        => axios.delete(base(`/api/shares/${id}`)),
-  getVersions:   (path)      => axios.get(base(`/api/versions?path=${encodeURIComponent(path)}`)),
-  streamVersion: (path, vid) => base(`/api/versions/stream?path=${encodeURIComponent(path)}&versionId=${vid}`),
-  restoreVersion:(path, vid) => axios.post(base('/api/versions/restore'), { path, versionId: vid }),
-  getActivity:   ()          => axios.get(base('/api/activity')),
+  getFiles: (path = '') =>
+    USE_MOCK
+      ? Promise.resolve({ data: path ? mockFiles : mockFolders })
+      : axios.get(base(`/api/files?path=${encodeURIComponent(path)}`)),
+
+  getMetadata: (path) =>
+    USE_MOCK
+      ? Promise.resolve({ data: mockMetadata })
+      : axios.get(base(`/api/metadata?path=${encodeURIComponent(path)}`)),
+
+  getVersions: (path) =>
+    USE_MOCK
+      ? Promise.resolve({ data: mockVersions })
+      : axios.get(base(`/api/versions?path=${encodeURIComponent(path)}`)),
+
+  getShares: () =>
+    USE_MOCK
+      ? Promise.resolve({ data: mockShares })
+      : axios.get(base('/api/shares')),
+
+  createShare: (data) =>
+    USE_MOCK
+      ? Promise.resolve({ data: { id: '2', token: 'newXyz', url: 'https://share.yourdomain.com/s/newXyz' } })
+      : axios.post(base('/api/shares'), data),
+
+  deleteShare: (id) =>
+    USE_MOCK
+      ? Promise.resolve({ data: { success: true } })
+      : axios.delete(base(`/api/shares/${id}`)),
+
+  updateMetadata: (path, data) =>
+    USE_MOCK
+      ? Promise.resolve({ data: { success: true } })
+      : axios.post(base('/api/metadata'), { path, ...data }),
+
+  streamUrl: (path) =>
+    USE_MOCK
+      ? '/mock-audio/test.wav'  // drop a real file in public/mock-audio/
+      : base(`/api/files/${encodeURIComponent(path)}`),
 };

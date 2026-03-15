@@ -1,0 +1,1 @@
+export const USE_MOCK = import.meta.env.DEV;

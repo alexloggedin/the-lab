@@ -1,19 +1,19 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import { resolve } from 'path'
 
 export default defineConfig({
   plugins: [react()],
   build: {
-    outDir: '.',
+    outDir: 'dist',
+    emptyOutDir: true,
     rollupOptions: {
       input: 'src/main.jsx',
       output: {
-        entryFileNames: 'js/wipshare.js',
-        chunkFileNames:  'js/[name].js',
-        assetFileNames:  (info) =>
-          info.name?.endsWith('.css') ? 'css/wipshare.css' : 'js/[name][extname]',
+        entryFileNames: 'wipshare.js',
+        assetFileNames: (info) =>
+          info.name?.endsWith('.css') ? 'wipshare.css' : '[name][extname]',
       }
     },
-    emptyOutDir: false, // don't wipe appinfo/, lib/ etc.
   }
-});
+})
