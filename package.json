@@ -1,22 +1,17 @@
 {
-  "name": "notestutorial",
-  "description": "A simple Nextcloud app tutorial for building a notes app",
-  "version": "20.0.0",
-  "author": "Julius Härtl",
-  "contributors": [
-    {
-      "name": "John Molakvoæ",
-      "email": "skjnldsv@protonmail.com"
-    }
-  ],
+  "name": "theLAB",
+  "description": "A nextcloud app for sharing/managing projects",
+  "version": "1.0.0",
+  "author": "Alex Little",
+  "contributors": [],
   "bugs": {
-    "url": "https://github.com/nextcloud/app-tutorial/issues"
+    "url": "https://github.com/alexloggedin/the-lab/issues"
   },
   "repository": {
-    "url": "git+https://github.com/nextcloud/app-tutorial.git",
+    "url": "git+https://github.com/alexloggedin/the-lab.git",
     "type": "git"
   },
-  "homepage": "https://github.com/nextcloud/app-tutorial",
+  "homepage": "https://github.com/alexloggedin/the-lab",
   "license": "agpl",
   "private": true,
   "scripts": {
