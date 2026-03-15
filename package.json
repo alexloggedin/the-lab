@@ -1,0 +1,65 @@
+{
+  "name": "notestutorial",
+  "description": "A simple Nextcloud app tutorial for building a notes app",
+  "version": "20.0.0",
+  "author": "Julius Härtl",
+  "contributors": [
+    {
+      "name": "John Molakvoæ",
+      "email": "skjnldsv@protonmail.com"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/nextcloud/app-tutorial/issues"
+  },
+  "repository": {
+    "url": "git+https://github.com/nextcloud/app-tutorial.git",
+    "type": "git"
+  },
+  "homepage": "https://github.com/nextcloud/app-tutorial",
+  "license": "agpl",
+  "private": true,
+  "scripts": {
+    "build": "webpack --node-env production --progress",
+    "dev": "webpack --node-env development --progress",
+    "watch": "webpack --node-env development --progress --watch",
+    "serve": "webpack --node-env development serve --progress",
+    "lint": "eslint --ext .js,.vue src",
+    "lint:fix": "eslint --ext .js,.vue src --fix",
+    "stylelint": "stylelint css/*.css css/*.scss src/**/*.scss src/**/*.vue",
+    "stylelint:fix": "stylelint css/*.css css/*.scss src/**/*.scss src/**/*.vue --fix"
+  },
+  "dependencies": {
+    "@nextcloud/axios": "^2.3.0",
+    "@nextcloud/dialogs": "^3.2.0",
+    "@nextcloud/router": "^2.1.1",
+    "@nextcloud/vue": "^9.6.0",
+    "axios": "^1.13.6",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "vue": "^3.5.30",
+    "wavesurfer.js": "^7.12.3"
+  },
+  "browserslist": [
+    "extends @nextcloud/browserslist-config"
+  ],
+  "engines": {
+    "node": "^24.0.0",
+    "npm": "^11.3.0"
+  },
+  "devDependencies": {
+    "@nextcloud/babel-config": "^1.0.0",
+    "@nextcloud/browserslist-config": "^2.3.0",
+    "@nextcloud/eslint-config": "^8.2.1",
+    "@nextcloud/stylelint-config": "^2.3.0",
+    "@nextcloud/webpack-vue-config": "^7.0.2",
+    "@vitejs/plugin-react": "^6.0.1",
+    "vite": "^8.0.0"
+  },
+  "main": ".eslintrc.js",
+  "directories": {
+    "lib": "lib",
+    "test": "tests"
+  },
+  "keywords": []
+}

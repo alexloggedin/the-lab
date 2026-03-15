@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <id>thelab</id>
+  <name>the LAB</name>
+  <summary>A minimal audio and video sharing interface for Nextcloud</summary>
+  <description>
+    Browse, preview, and share WIP audio and video files with collaborators
+    via a clean, minimal interface. Supports waveform playback, version history,
+    and password-protected share links.
+  </description>
+  <version>1.0.0</version>
+  <licence>agpl</licence>
+  <author mail="alexlittle330@gmail.com" homepage="https://github.com/alexloggedin/the-lab">
+    Alex Little
+  </author>
+  <namespace>TheLab</namespace>
+  <category>multimedia</category>
+  <dependencies>
+    <nextcloud min-version="27" max-version="30"/>
+  </dependencies>
+</info>
