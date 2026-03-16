@@ -30,6 +30,22 @@ class ApiController extends Controller
   }
 
   /**
+   * Ensures the theLAB root folder exists, creating it if needed.
+   * @NoAdminRequired
+   */
+  public function initLabFolder(): JSONResponse
+  {
+    $userFolder = $this->rootFolder->getUserFolder($this->userId);
+    $labPath = 'theLAB';
+
+    if (!$userFolder->nodeExists($labPath)) {
+      $userFolder->newFolder($labPath);
+    }
+
+    return new JSONResponse(['success' => true, 'path' => $labPath]);
+  }
+
+  /**
    * Lists files and folders at the given path.
    * @NoAdminRequired
    */
