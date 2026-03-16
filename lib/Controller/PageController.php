@@ -24,7 +24,7 @@ class PageController extends Controller
 
     $response = new TemplateResponse('thelab', 'index', [
       'vite_dev' => $viteDev,
-    ]);
+    ], 'blank');
 
     $csp = new ContentSecurityPolicy();
     $csp->addAllowedMediaDomain('blob:');

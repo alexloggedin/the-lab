@@ -2,8 +2,14 @@ import { USE_MOCK } from './dev/useMockData';
 import { mockFiles, mockFolders, mockMetadata, mockVersions, mockShares } from './dev/fixtures';
 import axios from 'axios';
 
-const base = (path) =>
-  window.OC ? window.OC.generateUrl(`/apps/thelab${path}`) : path;
+const base = (path) => {
+  if (window.OC?.generateUrl) {
+    return window.OC.generateUrl(`/apps/thelab${path}`);
+  }
+  // Fallback: use the webroot injected by PHP
+  const root = window._nc_base ?? '';
+  return `${root}/index.php/apps/thelab${path}`;
+};
 
 export const api = {
   initLab: () =>

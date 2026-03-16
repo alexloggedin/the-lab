@@ -1,26 +1,18 @@
-<?php
-if ($_['vite_dev']) {
-  $nonce = \OC::$server->getContentSecurityPolicyNonceManager()->getNonce();
-} else {
-  \OCP\Util::addScript('thelab', 'thelab');
-  \OCP\Util::addStyle('thelab', 'thelab');
-}
-?>
-
-<div id="app">
-  <div id="app-content">
-    <div id="thelab-root"></div>
-  </div>
-</div>
-
-<?php if ($_['vite_dev']): ?>
-  <script type="module" nonce="<?php p($nonce) ?>">
-    import RefreshRuntime from 'http://localhost:5173/@react-refresh'
-    RefreshRuntime.injectIntoGlobalHook(window)
-    window.$RefreshReg$ = () => {}
-    window.$RefreshSig$ = () => (type) => type
-    window.__vite_plugin_react_preamble_installed__ = true
+<?php /** @var bool $vite_dev */ ?>
+<script nonce="<?php p(\OC_Util::getNonce()); ?>">
+  window._nc_base = <?php echo json_encode(\OC::$WEBROOT); ?>;
+</script>
+<?php if ($vite_dev): ?>
+  <script type="module"
+          src="http://localhost:5173/src/main.jsx"
+          nonce="<?php p(\OC_Util::getNonce()); ?>">
   </script>
-  <script type="module" nonce="<?php p($nonce) ?>" src="http://localhost:5173/@vite/client"></script>
-  <script type="module" nonce="<?php p($nonce) ?>" src="http://localhost:5173/src/main.jsx"></script>
+<?php else: ?>
+  <link rel="stylesheet" href="<?php p(\OCP\Util::linkTo('thelab', 'css/thelab.css')); ?>">
+  <script type="module"
+          src="<?php p(\OCP\Util::linkTo('thelab', 'js/thelab.js')); ?>"
+          nonce="<?php p(\OC_Util::getNonce()); ?>">
+  </script>
 <?php endif; ?>
+
+<div id="thelab-root"></div>
