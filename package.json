@@ -16,6 +16,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
+    "dev:docker": "VITE_USE_MOCK=false vite",
     "build": "vite build && npm run copy-dist",
     "copy-dist": "cp dist/thelab.js js/thelab.js && cp dist/thelab.css css/thelab.css",
     "lint": "eslint --ext .js,.vue src",

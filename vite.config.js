@@ -1,9 +1,24 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { resolve } from 'path'
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [react()],
+
+  server: {
+    port: 5173,
+    proxy: command === 'serve' ? {
+      '^(?!/@vite|/@react-refresh|/src|/node_modules).*': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq, req) => {
+            console.log('PROXY -->', req.url)
+          })
+        }
+      }
+    } : {},
+  },
+
   build: {
     outDir: 'dist',
     emptyOutDir: true,
@@ -16,4 +31,4 @@ export default defineConfig({
       }
     },
   }
-})
+}))
