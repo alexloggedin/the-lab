@@ -127,3 +127,51 @@ input:focus { outline: none; border-color: var(--muted); }
 }
 
 .muted { color: var(--muted); font-size: 12px; }
+
+#thelab-root button {
+  background:      none !important;
+  border:          none;
+  color:           var(--muted);
+  cursor:          pointer;
+  font-family:     'DM Mono', monospace;
+  font-size:       11px;
+  letter-spacing:  0.06em;
+  text-transform:  uppercase;
+  padding:         3px 7px;
+  border-radius:   2px;
+  box-shadow:      none !important;
+  transition:      color 0.1s;
+}
+
+#thelab-root button:hover {
+  color:      var(--accent);
+  background: none !important;
+  box-shadow: none !important;
+}
+
+#thelab-root button:focus {
+  outline:    none;
+  box-shadow: none !important;
+}
+
+#thelab-root button:active {
+  transform:  scale(0.98);
+  background: none !important;
+}
+
+#thelab-root .abtn {
+  border:        1px solid var(--border);
+  color:         var(--muted);
+  padding:       6px 16px;
+  border-radius: 2px;
+}
+
+#thelab-root .abtn:hover {
+  border-color: var(--muted);
+  color:        var(--accent);
+}
+
+#thelab-root .abtn.primary {
+  border-color: #3a3a3a;
+  color:        var(--text);
+}
