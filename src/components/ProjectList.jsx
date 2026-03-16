@@ -1,16 +1,47 @@
 import { useState, useEffect } from 'react';
 import FileRow from './FileRow.jsx';
+import ShareModal from './ShareModal.jsx';
 import { api } from '../api.jsx';
 
 export default function ProjectList({ folders, openFolder, onFolderClick }) {
   const [files, setFiles] = useState([]);
+  const [metadata, setMetadata] = useState({});
+  const [shareFolder, setShareFolder] = useState(null);
 
   useEffect(() => {
     if (!openFolder) {
       setFiles([]);
+      setMetadata({});
       return;
     }
-    api.getFiles(openFolder.path).then(res => setFiles(res.data));
+
+    let cancelled = false;
+
+    const fetchMetadataInBatches = async (files, batchSize = 5) => {
+      for (let i = 0; i < files.length; i += batchSize) {
+        if (cancelled) return;
+        const batch = files.slice(i, i + batchSize);
+        const entries = await Promise.all(
+          batch.map(f =>
+            api.getMetadata(f.path).then(r => [f.path, r.data])
+          )
+        );
+        if (cancelled) return;
+        setMetadata(prev => ({
+          ...prev,
+          ...Object.fromEntries(entries),
+        }));
+      }
+    };
+
+    api.getFiles(openFolder.path).then(async res => {
+      if (cancelled) return;
+      const audioFiles = res.data;
+      setFiles(audioFiles);
+      await fetchMetadataInBatches(audioFiles);
+    });
+
+    return () => { cancelled = true; };
   }, [openFolder]);
 
   if (!folders.length) {
@@ -42,10 +73,35 @@ export default function ProjectList({ folders, openFolder, onFolderClick }) {
               <span className="proj-date">
                 {new Date(folder.modified * 1000).toLocaleDateString()}
               </span>
+              <div className="proj-actions" onClick={e => e.stopPropagation()}>
+                <button
+                  className={shareFolder?.path === folder.path ? 'fbtn on' : 'fbtn'}
+                  onClick={() =>
+                    setShareFolder(prev =>
+                      prev?.path === folder.path ? null : folder
+                    )
+                  }
+                >
+                  share folder
+                </button>
+              </div>
+
             </div>
 
+            {shareFolder?.path === folder.path && (
+              <ShareModal
+                filePath={folder.path}
+                fileName={folder.name}
+                isFolder={true}            // ← tells ShareModal to show upload toggle
+              />
+            )}
+
             {isOpen && files.map(file => (
-              <FileRow key={file.path} file={file} />
+              <FileRow
+                key={file.path}
+                file={file}
+                meta={metadata[file.path] ?? null}
+              />
             ))}
 
           </div>

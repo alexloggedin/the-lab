@@ -3,8 +3,9 @@ import { api } from '../api';
 import AudioPlayer from './AudioPlayer';
 
 export default function VersionHistory({ filePath, mimeType }) {
-  const [versions,  setVersions]  = useState([]);
+  const [versions, setVersions] = useState([]);
   const [previewId, setPreviewId] = useState(null);
+  const [previewIsPlaying, setPreviewIsPlaying] = useState(false);
 
   useEffect(() => {
     api.getVersions(filePath).then(r => setVersions(r.data));
@@ -22,23 +23,36 @@ export default function VersionHistory({ filePath, mimeType }) {
     <div className="version-list">
       {versions.map(v => (
         <div key={v.versionId} className="version-row">
-          <span className="version-date">
-            {new Date(v.modified * 1000).toLocaleString()}
-          </span>
-          <span className="version-size">
-            {(v.size / 1024 / 1024).toFixed(1)} MB
-          </span>
-          <button onClick={() =>
-            setPreviewId(previewId === v.versionId ? null : v.versionId)
-          }>
-            preview
-          </button>
-          <button onClick={() => handleRestore(v.versionId)}>
-            restore
-          </button>
-          {previewId === v.versionId && (
-            <AudioPlayer fileUrl={api.streamVersion(filePath, v.versionId)} />
-          )}
+          <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <span className="version-date">
+                {new Date(v.modified * 1000).toLocaleString()}
+              </span>
+              <span className="version-size">
+                {(v.size / 1024 / 1024).toFixed(1)} MB
+              </span>
+              <button onClick={() => {
+                const opening = previewId !== v.versionId;
+                setPreviewId(opening ? v.versionId : null);
+                setPreviewIsPlaying(opening);
+              }}>
+                preview
+              </button>
+              <button onClick={() => handleRestore(v.versionId)}>
+                restore
+              </button>
+            </div>
+
+            {previewId === v.versionId && (
+              <AudioPlayer
+                fileUrl={api.streamVersion(filePath, v.versionId)}
+                isPlaying={previewIsPlaying}
+                onPlayPause={setPreviewIsPlaying}
+              />
+            )}
+
+          </div>
         </div>
       ))}
     </div>

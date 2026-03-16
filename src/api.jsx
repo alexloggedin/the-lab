@@ -45,4 +45,14 @@ export const api = {
     USE_MOCK
       ? '/mock-audio/test.wav'  // drop a real file in public/mock-audio/
       : base(`/api/files/${encodeURIComponent(path)}`),
+
+  streamVersion: (path, versionId) =>
+    USE_MOCK
+      ? '/mock-audio/test.wav'
+      : base(`/api/versions/stream?path=${encodeURIComponent(path)}&versionId=${encodeURIComponent(versionId)}`),
+
+  restoreVersion: (path, versionId) =>
+    USE_MOCK
+      ? Promise.resolve({ data: { success: true } })
+      : axios.post(base('/api/versions/restore'), { path, versionId }),
 };

@@ -12,21 +12,14 @@ const Pill = ({ value }) => value
 const formatSize = (bytes) =>
     (bytes / 1024 / 1024).toFixed(1) + ' MB';
 
-export default function FileRow({ file }) {
+export default function FileRow({ file, meta }) {
 
     const [activePanel, setActivePanel] = useState(null);
-    const [meta, setMeta] = useState(null);
 
     const isAudio = file.mimetype?.startsWith('audio/');
     const isVideo = file.mimetype?.startsWith('video/');
 
     const [isPlaying, setIsPlaying] = useState(false);
-
-    useEffect(() => {
-        if (activePanel && !meta) {
-            api.getMetadata(file.path).then(res => setMeta(res.data));
-        }
-    }, [activePanel]);
 
     const togglePanel = (panel) => {
         setActivePanel(prev => prev === panel ? null : panel);
@@ -84,7 +77,7 @@ export default function FileRow({ file }) {
                         className={activePanel === 'share' ? 'fbn on' : 'fbtn'}
                         onClick={() => togglePanel('share')}
                     >
-                        share
+                        share file
                     </button>
                 </div>
             </div>

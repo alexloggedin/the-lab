@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6373eb2c0d99ca27e4415f1b0e5949d1",
+    "content-hash": "67dc10c32073389ac81e95bb74cbf86f",
     "packages": [],
     "packages-dev": [
         {
@@ -684,16 +684,16 @@
         },
         {
             "name": "nextcloud/ocp",
-            "version": "dev-stable25",
+            "version": "v26.0.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nextcloud-deps/ocp.git",
-                "reference": "31e4bbd0e476d12b675b648a38b73ab38711bb9b"
+                "reference": "43bc0a0267d97b02966e0270e00e9d51192564af"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nextcloud-deps/ocp/zipball/31e4bbd0e476d12b675b648a38b73ab38711bb9b",
-                "reference": "31e4bbd0e476d12b675b648a38b73ab38711bb9b",
+                "url": "https://api.github.com/repos/nextcloud-deps/ocp/zipball/43bc0a0267d97b02966e0270e00e9d51192564af",
+                "reference": "43bc0a0267d97b02966e0270e00e9d51192564af",
                 "shasum": ""
             },
             "require": {
@@ -721,9 +721,9 @@
             "description": "Composer package containing Nextcloud's public API (classes, interfaces)",
             "support": {
                 "issues": "https://github.com/nextcloud-deps/ocp/issues",
-                "source": "https://github.com/nextcloud-deps/ocp/tree/stable25"
+                "source": "https://github.com/nextcloud-deps/ocp/tree/v26.0.9"
             },
-            "time": "2023-01-06T00:37:46+00:00"
+            "time": "2023-11-10T00:31:54+00:00"
         },
         {
             "name": "nikic/php-parser",
@@ -3987,9 +3987,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "nextcloud/ocp": 20
-    },
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {},
@@ -3997,5 +3995,5 @@
     "platform-overrides": {
         "php": "7.4"
     },
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }

@@ -101,9 +101,6 @@ input:focus { outline: none; border-color: var(--muted); }
   margin-bottom: 8px;
 }
 .version-row {
-  display:       flex;
-  align-items:   center;
-  gap:           16px;
   padding:       6px 0;
   border-bottom: 1px solid var(--border);
   font-size:     12px;

@@ -17,11 +17,12 @@ export default function AudioPlayer({ fileUrl, isPlaying, onPlayPause }) {
       url: fileUrl,
     });
 
-    ws.current.on('ready', () => {
-      if (isPlaying) {
-        ws.current.play();
-      }
-    });
+  ws.current.on('ready', () => {
+    console.log('wavesurfer ready, isPlaying:', isPlaying);
+    if (isPlaying) {
+      ws.current.play();
+    }
+  });
 
     // Tell FileRow when the track finishes
     ws.current.on('finish', () => onPlayPause(false));
