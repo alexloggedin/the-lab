@@ -1,1 +1,1 @@
-export const USE_MOCK = import.meta.env.DEV;
+export const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false' && import.meta.env.DEV;
