@@ -1,10 +1,10 @@
 <?php
-\OCP\Util::addScript('wipshare', 'wipshare');
-\OCP\Util::addStyle('wipshare', 'wipshare');
+\OCP\Util::addScript('thelab', 'thelab');
+\OCP\Util::addStyle('thelab', 'thelab');
 ?>
 
 <div id="app">
   <div id="app-content">
-    <div id="wipshare-root"></div>
+    <div id="thelab-root"></div>
   </div>
 </div>

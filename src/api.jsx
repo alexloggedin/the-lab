@@ -3,7 +3,7 @@ import { mockFiles, mockFolders, mockMetadata, mockVersions, mockShares } from '
 import axios from 'axios';
 
 const base = (path) =>
-  window.OC ? window.OC.generateUrl(`/apps/wipshare${path}`) : path;
+  window.OC ? window.OC.generateUrl(`/apps/thelab${path}`) : path;
 
 export const api = {
   getFiles: (path = '') =>
@@ -43,8 +43,8 @@ export const api = {
 
   streamUrl: (path) =>
     USE_MOCK
-      ? '/mock-audio/test.wav'  // drop a real file in public/mock-audio/
-      : base(`/api/files/${encodeURIComponent(path)}`),
+      ? '/mock-audio/test.wav'
+      : base(`/api/stream?path=${encodeURIComponent(path)}`),
 
   streamVersion: (path, versionId) =>
     USE_MOCK

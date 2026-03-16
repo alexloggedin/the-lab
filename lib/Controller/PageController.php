@@ -2,6 +2,7 @@
 namespace OCA\TheLab\Controller;
 
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IRequest;
 
@@ -16,6 +17,15 @@ class PageController extends Controller {
    * @NoCSRFRequired
    */
   public function index(): TemplateResponse {
-    return new TemplateResponse('wipshare', 'index');
+    $response = new TemplateResponse('thelab', 'index');
+
+    $csp = new ContentSecurityPolicy();
+    $csp->addAllowedMediaDomain('blob:');
+    $csp->addAllowedMediaDomain("'self'");
+    $csp->addAllowedScriptDomain("'self'");
+    $csp->addAllowedConnectDomain("'self'");
+    $response->setContentSecurityPolicy($csp);
+
+    return $response;
   }
 }

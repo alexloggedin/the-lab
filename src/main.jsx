@@ -8,5 +8,5 @@ import './styles/globals.css';
 import axios from 'axios';
 axios.defaults.headers.common['requesttoken'] = window.OC?.requestToken ?? '';
 
-createRoot(document.getElementById('wipshare-root')).render(<App />);
+createRoot(document.getElementById('thelab-root')).render(<App />);
 

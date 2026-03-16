@@ -10,9 +10,9 @@ export default defineConfig({
     rollupOptions: {
       input: 'src/main.jsx',
       output: {
-        entryFileNames: 'wipshare.js',
+        entryFileNames: 'thelab.js',
         assetFileNames: (info) =>
-          info.name?.endsWith('.css') ? 'wipshare.css' : '[name][extname]',
+          info.name?.endsWith('.css') ? 'thelab.css' : '[name][extname]',
       }
     },
   }
