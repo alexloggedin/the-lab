@@ -69,3 +69,19 @@ clean-dev:
 test:
 	./vendor/phpunit/phpunit/phpunit -c phpunit.xml
 	./vendor/phpunit/phpunit/phpunit -c phpunit.integration.xml
+
+dev-enable-vite:
+	docker cp .vite-dev $(shell docker compose -f docker-dev/docker-compose.dev.yml ps -q nextcloud):/var/www/html/custom_apps/thelab/.vite-dev
+
+dev-disable-vite:
+	docker exec $(shell docker compose -f docker-dev/docker-compose.dev.yml ps -q nextcloud) rm -f /var/www/html/custom_apps/thelab/.vite-dev
+
+deploy-prod:
+	@echo "Building frontend..."
+	npm run build
+	@echo "Syncing to container..."
+	./sync.sh
+	@echo "Ensuring Vite dev mode is off..."
+	docker exec $(shell docker compose -f docker-dev/docker-compose.dev.yml ps -q nextcloud) \
+		rm -f /var/www/html/custom_apps/thelab/.vite-dev
+	@echo "Done."
