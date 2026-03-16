@@ -9,24 +9,11 @@ export default defineConfig(({ mode }) => ({
   server: mode === 'development' ? {
     port: 5173,
     proxy: {
-      // Forward everything EXCEPT Vite's own assets to Docker
-      '/apps/thelab/api': {
+      // Proxy everything to Docker EXCEPT Vite's own dev paths
+      '^(?!/@vite|/@react-refresh|/src|/node_modules).*': {
         target: 'http://localhost:8080',
         changeOrigin: true,
-      },
-      // Also proxy the page itself so we get real window.OC context
-      '/index.php': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-      },
-      '/core': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-      },
-      '/ocs': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-      },
+      }
     }
   } : {},
 
