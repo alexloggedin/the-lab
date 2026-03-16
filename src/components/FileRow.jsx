@@ -44,7 +44,14 @@ export default function FileRow({ file }) {
     return (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div className="file-row">
-
+                {meta?.albumArt && (
+                    <img
+                        src={meta.albumArt}
+                        alt="album art"
+                        style={{ width: 28, height: 28, borderRadius: 2, objectFit: 'cover', flexShrink: 0 }}
+                    />
+                )}
+                
                 <span className="file-name">{file.name}</span>
 
                 <Pill value={meta?.bpm ? `${meta.bpm} bpm` : null} />
