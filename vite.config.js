@@ -12,7 +12,6 @@ export default defineConfig(({ command }) => ({
         changeOrigin: true,
         configure: (proxy) => {
           proxy.on('proxyReq', (proxyReq, req) => {
-            console.log('PROXY -->', req.url)
           })
         }
       }

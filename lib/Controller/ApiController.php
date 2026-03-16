@@ -30,8 +30,26 @@ class ApiController extends Controller
   }
 
   /**
+   * Ensures the theLAB root folder exists, creating it if needed.
+   * @NoAdminRequired
+   * @NoCSRFRequired
+   */
+  public function initLabFolder(): JSONResponse
+  {
+    $userFolder = $this->rootFolder->getUserFolder($this->userId);
+    $labPath = 'theLAB';
+
+    if (!$userFolder->nodeExists($labPath)) {
+      $userFolder->newFolder($labPath);
+    }
+
+    return new JSONResponse(['success' => true, 'path' => $labPath]);
+  }
+
+  /**
    * Lists files and folders at the given path.
    * @NoAdminRequired
+   * @NoCSRFRequired
    */
   public function getFiles(string $path = ''): JSONResponse
   {
@@ -40,6 +58,11 @@ class ApiController extends Controller
     // Strip leading 'files/' prefix
     $cleanPath = preg_replace('#^files/#', '', $path);
     $cleanPath = ltrim($cleanPath, '/');
+
+    // Ensure all file requests stay within theLAB
+    if ($cleanPath !== 'theLAB' && !str_starts_with($cleanPath, 'theLAB/')) {
+      return new JSONResponse(['error' => 'Access outside theLAB is not permitted'], 403);
+    }
 
     // Get the node at this path
     $node = $cleanPath ? $userFolder->get($cleanPath) : $userFolder;
@@ -87,6 +110,7 @@ class ApiController extends Controller
    * Handles file uploads. Overwrites if the file already exists,
    * which triggers Nextcloud's automatic versioning.
    * @NoAdminRequired
+   * @NoCSRFRequired
    */
   public function uploadFile(string $path): JSONResponse
   {
@@ -114,6 +138,7 @@ class ApiController extends Controller
   /**
    * Lists all public share links created by the current user.
    * @NoAdminRequired
+   * @NoCSRFRequired
    */
   public function getShares(): JSONResponse
   {
@@ -141,6 +166,7 @@ class ApiController extends Controller
   /**
    * Creates a new public share link.
    * @NoAdminRequired
+   * @NoCSRFRequired
    */
   public function createShare(
     string $path,
@@ -184,6 +210,7 @@ class ApiController extends Controller
   /**
    * Revokes a share link by ID.
    * @NoAdminRequired
+   * @NoCSRFRequired
    */
   public function deleteShare(string $id): JSONResponse
   {
@@ -196,6 +223,7 @@ class ApiController extends Controller
    * Lists version history for a file.
    * Requires the files_versions app to be enabled in Nextcloud.
    * @NoAdminRequired
+   * @NoCSRFRequired
    */
   public function getVersions(string $path): JSONResponse
   {
@@ -235,6 +263,7 @@ class ApiController extends Controller
    * Restores a file to a previous version.
    * The current file becomes the newest version automatically.
    * @NoAdminRequired
+   * @NoCSRFRequired
    */
   public function restoreVersion(string $path, string $versionId): JSONResponse
   {
@@ -246,6 +275,7 @@ class ApiController extends Controller
    * Returns recent file activity for the current user.
    * Requires the activity app to be enabled in Nextcloud.
    * @NoAdminRequired
+   * @NoCSRFRequired
    */
   public function getActivity(): JSONResponse
   {

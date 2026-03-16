@@ -1,0 +1,22 @@
+@host = http://localhost:8080
+@auth = admin:admin
+
+### Sanity check - Nextcloud is alive
+GET http://localhost:8080
+
+### Sanity check - Auth works
+GET http://localhost:8080/index.php/apps/thelab
+Authorization: Basic admin:admin
+OCS-APIREQUEST: true
+
+### Init - Create theLAB folder
+POST http://localhost:8080/index.php/apps/thelab/api/init
+Authorization: Basic admin:admin
+OCS-APIREQUEST: true
+Content-Type: application/json
+Content-Length: 0
+
+### Verify - List theLAB contents
+GET {{host}}/index.php/apps/thelab/api/files?path=theLAB
+Authorization: Basic {{auth}}
+OCS-APIREQUEST: true
