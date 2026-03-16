@@ -1,21 +1,23 @@
-// vite.config.js
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ command }) => ({
   plugins: [react()],
 
-  // Only add the proxy config in dev mode
-  server: mode === 'development' ? {
+  server: {
     port: 5173,
-    proxy: {
-      // Proxy everything to Docker EXCEPT Vite's own dev paths
+    proxy: command === 'serve' ? {
       '^(?!/@vite|/@react-refresh|/src|/node_modules).*': {
         target: 'http://localhost:8080',
         changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq, req) => {
+            console.log('PROXY -->', req.url)
+          })
+        }
       }
-    }
-  } : {},
+    } : {},
+  },
 
   build: {
     outDir: 'dist',

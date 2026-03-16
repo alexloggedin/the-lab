@@ -1,12 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>theLAB</title>
-  </head>
-  <body>
-    <div id="thelab-root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>theLAB — dev</title>
+</head>
+<body>
+  <div id="app">
+    <div id="app-content">
+      <div id="thelab-root"></div>
+    </div>
+  </div>
+
+  <script>
+    // Simulate window.OC so api.jsx's base() function works in pure frontend dev
+    window.OC = {
+      generateUrl: (path) => path,
+      requestToken: 'mock-token',
+    }
+  </script>
+</body>
 </html>

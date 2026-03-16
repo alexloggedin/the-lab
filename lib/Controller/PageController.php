@@ -20,11 +20,10 @@ class PageController extends Controller
    */
   public function index(): TemplateResponse
   {
-    $response = new TemplateResponse('thelab', 'index');
+    $viteDev = file_exists(__DIR__ . '/../../.vite-dev');
 
-    $response->setParams([
-      'vite_dev' => getenv('THELAB_VITE_DEV') === 'true',
-      'vite_port' => '5173',
+    $response = new TemplateResponse('thelab', 'index', [
+      'vite_dev' => $viteDev,
     ]);
 
     $csp = new ContentSecurityPolicy();
@@ -32,6 +31,13 @@ class PageController extends Controller
     $csp->addAllowedMediaDomain("'self'");
     $csp->addAllowedScriptDomain("'self'");
     $csp->addAllowedConnectDomain("'self'");
+
+    if ($viteDev) {
+      $csp->addAllowedScriptDomain('http://localhost:5173');
+      $csp->addAllowedConnectDomain('http://localhost:5173');
+      $csp->addAllowedConnectDomain('ws://localhost:5173');
+    }
+
     $response->setContentSecurityPolicy($csp);
 
     return $response;

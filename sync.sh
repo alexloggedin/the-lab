@@ -36,6 +36,7 @@ docker cp lib/.       $CONTAINER:/var/www/html/custom_apps/thelab/lib/
 docker cp templates/. $CONTAINER:/var/www/html/custom_apps/thelab/templates/
 docker cp js/.        $CONTAINER:/var/www/html/custom_apps/thelab/js/
 docker cp css/.       $CONTAINER:/var/www/html/custom_apps/thelab/css/
+docker cp .vite-dev $CONTAINER:/var/www/html/custom_apps/thelab/.vite-dev 2>/dev/null || true
 
 echo "Setting permissions..."
 docker exec $CONTAINER chown -R www-data:www-data /var/www/html/custom_apps/thelab
