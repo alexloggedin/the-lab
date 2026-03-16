@@ -3,12 +3,13 @@ import ProjectList from './components/ProjectList.jsx';
 import { api } from './api.jsx';
 
 export default function App() {
-  const [folders,    setFolders]    = useState([]);
+  const [folders, setFolders] = useState([]);
   const [openFolder, setOpenFolder] = useState(null);
-  const [loading,    setLoading]    = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.getFiles()
+    api.initLab()
+      .then(() => api.getFiles('theLAB'))
       .then(res => setFolders(res.data))
       .finally(() => setLoading(false));
   }, []);

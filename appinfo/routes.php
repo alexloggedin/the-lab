@@ -25,5 +25,6 @@ return [
     ['name' => 'api#updateAlbumArt', 'url' => '/api/albumart', 'verb' => 'POST'],
 
     ['name' => 'api#getActivity', 'url' => '/api/activity', 'verb' => 'GET'],
+    ['name' => 'api#initLabFolder', 'url' => '/api/init', 'verb' => 'POST'],
   ]
 ];

@@ -6,6 +6,10 @@ const base = (path) =>
   window.OC ? window.OC.generateUrl(`/apps/thelab${path}`) : path;
 
 export const api = {
+  initLab: () =>
+    USE_MOCK
+      ? Promise.resolve({ data: { success: true } })
+      : axios.post(base('/api/init')),
   getFiles: (path = '') =>
     USE_MOCK
       ? Promise.resolve({ data: path ? mockFiles : mockFolders })
