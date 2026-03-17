@@ -17,7 +17,7 @@ class ApiController extends Controller
 
   private IRootFolder $rootFolder;
   private IShareManager $shareManager;
-  private string $userId;
+  private ?string $userId = null;
 
   public function __construct(
     string $appName,
@@ -25,7 +25,7 @@ class ApiController extends Controller
     IRootFolder $rootFolder,
     IShareManager $shareManager,
     IURLGenerator $urlGenerator,
-    string $userId
+    ?string $userId
   ) {
     parent::__construct($appName, $request);
     $this->rootFolder = $rootFolder;
@@ -226,57 +226,4 @@ class ApiController extends Controller
       return new JSONResponse(['error' => $e->getMessage()], 500);
     }
   }
-
-  /**
-   * Returns public share data for a given token.
-   *
-   * @PublicPage
-   * @NoCSRFRequired
-   * @NoAdminRequired
-   */
-  public function getShareByToken(string $token): JSONResponse
-  {
-    try {
-      $share = $this->shareManager->getShareByToken($token);
-    } catch (\OCP\Share\Exceptions\ShareNotFound $e) {
-      return new JSONResponse(['error' => 'Share not found'], 404);
-    }
-
-    // Check expiry manually — Nextcloud does not auto-invalidate on fetch
-    $expiry = $share->getExpirationDate();
-    if ($expiry && $expiry < new \DateTime()) {
-      return new JSONResponse(['error' => 'Share has expired'], 404);
-    }
-
-    $node = $share->getNode();
-
-    // Optionally read ID3 metadata for audio files
-    $meta = [];
-    if ($node instanceof \OCP\Files\File) {
-      $localPath = $node->getStorage()->getLocalFile($node->getInternalPath());
-      // getid3 must be installed — see composer.json
-      $parser = new \ID3Parser\ID3Parser();
-      $tags = $parser->analyze($localPath);
-      \getid3_lib::CopyTagsToComments($tags);
-      $comments = $tags['comments'] ?? [];
-      $meta = [
-        'bpm' => $comments['bpm'][0] ?? null,
-        'key' => $comments['initial_key'][0] ?? null,
-        'genre' => $comments['genre'][0] ?? null,
-      ];
-    }
-
-    return new JSONResponse([
-      'token' => $token,
-      'fileName' => $node->getName(),
-      'filePath' => $node->getInternalPath(),
-      'mimetype' => $node instanceof \OCP\Files\File
-        ? $node->getMimeType()
-        : 'httpd/unix-directory',
-      'isFolder' => $node instanceof \OCP\Files\Folder,
-      'hideDownload' => $share->getHideDownload(),
-      'meta' => $meta,
-    ]);
-  }
-
 }

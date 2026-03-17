@@ -100,3 +100,9 @@ Content-Type: application/json
   "path": "theLAB/my-project/track.wav",
   "versionId": "1741800000"
 }
+
+### Verify Share link
+GET {{host}}/apps/thelab/api/share/atfFfMtB6ApCLWb
+
+### other test
+GET {{base}}/api/share/atfFfMtB6ApCLWb
