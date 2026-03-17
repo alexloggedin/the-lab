@@ -20,11 +20,6 @@ export const api = {
       ? Promise.resolve({ data: mockMetadata })
       : axios.get(base(`/api/metadata?path=${encodeURIComponent(path)}`)),
 
-  getVersions: (path) =>
-    USE_MOCK
-      ? Promise.resolve({ data: mockVersions })
-      : axios.get(base(`/api/versions?path=${encodeURIComponent(path)}`)),
-
   getShares: () =>
     USE_MOCK
       ? Promise.resolve({ data: mockShares })
@@ -49,14 +44,4 @@ export const api = {
     USE_MOCK
       ? '/mock-audio/test.wav'
       : base(`/api/stream?path=${encodeURIComponent(path)}`),
-
-  streamVersion: (path, versionId) =>
-    USE_MOCK
-      ? '/mock-audio/test.wav'
-      : base(`/api/versions/stream?path=${encodeURIComponent(path)}&versionId=${encodeURIComponent(versionId)}`),
-
-  restoreVersion: (path, versionId) =>
-    USE_MOCK
-      ? Promise.resolve({ data: { success: true } })
-      : axios.post(base('/api/versions/restore'), { path, versionId }),
 };
