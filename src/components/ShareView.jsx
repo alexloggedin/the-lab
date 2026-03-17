@@ -4,15 +4,21 @@ import AudioPlayer from './AudioPlayer.jsx';
 import VideoPlayer from './VideoPlayer.jsx';
 
 export default function ShareView({ token }) {
+
   // share: null = loading, populated = loaded
-  const [share,    setShare]    = useState(null);
+  const [share, setShare] = useState(null);
+
   // notFound: true triggers the invalid/expired state
   const [notFound, setNotFound] = useState(false);
+
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const handlePlayPause = () => setIsPlaying(prev => !prev);
 
   useEffect(() => {
     api.getShareByToken(token)
       .then(res => setShare(res.data))
-      .catch(()  => setNotFound(true));
+      .catch(() => setNotFound(true));
   }, [token]);
   // [token] dependency means re-fetch if the token prop changes
 
@@ -58,11 +64,11 @@ export default function ShareView({ token }) {
         {/* File header: label, name, metadata pills */}
         <div style={{ marginBottom: '24px' }}>
           <p style={{
-            fontSize:      '11px',
-            color:         'var(--muted)',
+            fontSize: '11px',
+            color: 'var(--muted)',
             textTransform: 'uppercase',
             letterSpacing: '0.08em',
-            marginBottom:  '6px',
+            marginBottom: '6px',
           }}>
             {share.isFolder ? 'shared folder' : 'shared file'}
           </p>
@@ -74,8 +80,8 @@ export default function ShareView({ token }) {
           {/* Only render the pill row if there is at least one metadata value */}
           {(share.meta?.bpm || share.meta?.key || share.meta?.genre) && (
             <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
-              {share.meta.bpm   && <span className="pill">{share.meta.bpm} bpm</span>}
-              {share.meta.key   && <span className="pill">{share.meta.key}</span>}
+              {share.meta.bpm && <span className="pill">{share.meta.bpm} bpm</span>}
+              {share.meta.key && <span className="pill">{share.meta.key}</span>}
               {share.meta.genre && <span className="pill">{share.meta.genre}</span>}
             </div>
           )}
@@ -83,24 +89,31 @@ export default function ShareView({ token }) {
 
         {/* Media player — only one renders at a time */}
         {isAudio && (
-          <AudioPlayer fileUrl={api.streamUrl(share.filePath)} />
+          <AudioPlayer
+            fileUrl={api.streamUrl(share.filePath)}
+            isPlaying={isPlaying}
+            onPlayPause={setIsPlaying}
+          />
         )}
         {isVideo && (
           <VideoPlayer fileUrl={api.streamUrl(share.filePath)} />
         )}
 
-        {/* Download link — only shown if the owner did not hide it */}
+        <div>
+        <button onClick={() => setIsPlaying(prev => !prev)}>
+          Play
+        </button>
         {!share.hideDownload && (
           <a
             href={api.streamUrl(share.filePath)}
             download={share.fileName}
             style={{
-              display:        'inline-block',
-              marginTop:      '20px',
-              fontSize:       '11px',
-              color:          'var(--muted)',
-              textTransform:  'uppercase',
-              letterSpacing:  '0.07em',
+              display: 'inline-block',
+              marginTop: '20px',
+              fontSize: '11px',
+              color: 'var(--muted)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.07em',
               textDecoration: 'none',
             }}
           >
@@ -108,6 +121,7 @@ export default function ShareView({ token }) {
           </a>
         )}
 
+        </div>
       </div>
     </div>
   );

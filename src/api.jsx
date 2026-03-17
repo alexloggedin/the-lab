@@ -10,7 +10,7 @@ export const api = {
     USE_MOCK
       ? Promise.resolve({ data: { success: true } })
       : axios.post(base('/api/init')),
-  getFiles: (path = '') =>
+  getFiles: (path = 'theLAB') =>
     USE_MOCK
       ? Promise.resolve({ data: path != "theLAB" ? mockFiles : mockFolders })
       : axios.get(base(`/api/files?path=${encodeURIComponent(path)}`)),
