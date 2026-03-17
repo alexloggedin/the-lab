@@ -42,7 +42,7 @@ export default function FolderShareView({ share, token }) {
                             }
                         </button>
                         <a
-                            href={api.publicStreamUrl(token)}
+                            href={api.publicStreamUrl(token, file.path)}
                             download={file.name}
                         >
                             download
@@ -52,7 +52,7 @@ export default function FolderShareView({ share, token }) {
                     {/* Inline player appears only under the active file row */}
                     {activeFile?.path === file.path && (
                         <AudioPlayer
-                            fileUrl={api.publicStreamUrl(token)}
+                            fileUrl={api.publicStreamUrl(token, file.path)}
                             isPlaying={isPlaying}
                             onPlayPause={setIsPlaying}
                         />
