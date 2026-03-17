@@ -82,7 +82,7 @@ export default function ProjectList({ folders, openFolder, onFolderClick }) {
                     )
                   }
                 >
-                  share folder
+                  {shareFolder?.path === folder.path ? 'close' : 'share'}
                 </button>
               </div>
 
@@ -92,7 +92,7 @@ export default function ProjectList({ folders, openFolder, onFolderClick }) {
               <ShareModal
                 filePath={folder.path}
                 fileName={folder.name}
-                isFolder={true}            // ← tells ShareModal to show upload toggle
+                isFolder={true}
               />
             )}
 

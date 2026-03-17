@@ -77,7 +77,7 @@ export default function FileRow({ file, meta }) {
                         className={activePanel === 'share' ? 'fbn on' : 'fbtn'}
                         onClick={() => togglePanel('share')}
                     >
-                        share file
+                        {activePanel === 'share' ? 'close' : 'share'}
                     </button>
                 </div>
             </div>

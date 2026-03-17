@@ -8,8 +8,8 @@ export default function ShareModal({ filePath, fileName, isFolder = false }) {
     const [form, setForm] = useState({
         password: '',
         expiryDate: '',
-        hideDownload: true,
-        allowUpload: false,  // ← add this
+        hideDownload: false,
+        allowUpload: false, 
     });
 
     useEffect(() => {
@@ -75,13 +75,15 @@ export default function ShareModal({ filePath, fileName, isFolder = false }) {
             </div>
 
             <div className="share-row">
-                <span className="share-lbl">hide download button</span>
-                <div
-                    className={form.hideDownload ? 'toggle on' : 'toggle'}
-                    onClick={() => handleFormChange('hideDownload', !form.hideDownload)}
-                >
-                    <div className="toggle-knob" />
-                </div>
+                <label className="share-lbl">
+                    <input
+                        type="checkbox"
+                        checked={form.hideDownload}
+                        onChange={() => handleFormChange('hideDownload', !form.hideDownload)}
+                    />
+                    hide download
+                </label>
+
             </div>
 
             {isFolder && (

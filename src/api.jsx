@@ -1,5 +1,5 @@
 import { USE_MOCK } from './dev/useMockData';
-import { mockFiles, mockFolders, mockMetadata, mockVersions, mockShares } from './dev/fixtures';
+import { mockFiles, mockFolders, mockMetadata, mockShareLinks } from './dev/fixtures';
 import axios from 'axios';
 
 const base = (path) =>
@@ -22,7 +22,7 @@ export const api = {
 
   getShares: () =>
     USE_MOCK
-      ? Promise.resolve({ data: mockShares })
+      ? Promise.resolve({ data: mockShareLinks })
       : axios.get(base('/api/shares')),
 
   createShare: (data) =>
@@ -47,24 +47,42 @@ export const api = {
 
   getShareByToken: (token) =>
     USE_MOCK
-      ? token === 'invalid'
-        // Simulates an expired or missing share
-        ? Promise.reject(new Error('not found'))
-        // Simulates a valid share with fixture data
-        : Promise.resolve({
-          data: {
-            token,
-            fileName: 'track_01_v3.wav',
-            filePath: 'ep-demos/track_01_v3.wav',
-            mimetype: 'audio/wav',
-            isFolder: false,
-            hideDownload: false,
-            meta: {
-              bpm: '128',
-              key: 'Am',
-              genre: 'Electronic',
-            }
-          }
-        })
+      ? getMockShareInfoFromToken(token)
       : axios.get(base(`/api/share/${token}`)),
 };
+
+function getMockShareInfoFromToken (token) {
+  console.log(token)
+  switch (token) {
+    case "invalid":
+      return Promise.reject(new Error('not found'));
+    case "folder":
+      return Promise.resolve({
+        data: {
+          token,
+          fileName: 'ep-demos',
+          filePath: 'ep-demos',
+          mimetype: 'httpd/unix-directory',
+          isFolder: true,
+          hideDownload: false,
+        }
+      })
+    default:
+      return Promise.resolve({
+        data: {
+          token,
+          fileName: 'track_01_v3.wav',
+          filePath: 'ep-demos/track_01_v3.wav',
+          mimetype: 'audio/wav',
+          isFolder: false,
+          hideDownload: false,
+          meta: {
+            bpm: '128',
+            key: 'Am',
+            genre: 'Electronic',
+          }
+        }
+      })
+  }
+
+}

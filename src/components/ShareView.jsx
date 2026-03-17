@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../api.jsx';
 import AudioPlayer from './AudioPlayer.jsx';
 import VideoPlayer from './VideoPlayer.jsx';
+import FolderShareView from './FolderShareView.jsx';
 
 export default function ShareView({ token }) {
 
@@ -22,12 +23,14 @@ export default function ShareView({ token }) {
   }, [token]);
   // [token] dependency means re-fetch if the token prop changes
 
+  console.log(share);
+
   // ─── State: invalid or expired ───────────────────────────────────────────
   if (notFound) {
     return (
       <div className="app-container">
         <div className="topbar">
-          <span className="wordmark">wip share</span>
+          <span className="wordmark">theLAB</span>
         </div>
         <p className="muted" style={{ marginTop: '48px' }}>
           this link is invalid or has expired.
@@ -41,7 +44,7 @@ export default function ShareView({ token }) {
     return (
       <div className="app-container">
         <div className="topbar">
-          <span className="wordmark">wip share</span>
+          <span className="wordmark">theLAB</span>
         </div>
         <p className="muted" style={{ marginTop: '48px' }}>loading...</p>
       </div>
@@ -56,20 +59,14 @@ export default function ShareView({ token }) {
     <div className="app-container">
 
       <div className="topbar">
-        <span className="wordmark">wip share</span>
+        <span className="wordmark">theLAB</span>
       </div>
 
       <div style={{ padding: '40px 0' }}>
 
         {/* File header: label, name, metadata pills */}
-        <div style={{ marginBottom: '24px' }}>
-          <p style={{
-            fontSize: '11px',
-            color: 'var(--muted)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            marginBottom: '6px',
-          }}>
+        <div>
+          <p>
             {share.isFolder ? 'shared folder' : 'shared file'}
           </p>
 
@@ -87,40 +84,39 @@ export default function ShareView({ token }) {
           )}
         </div>
 
-        {/* Media player — only one renders at a time */}
-        {isAudio && (
-          <AudioPlayer
-            fileUrl={api.streamUrl(share.filePath)}
-            isPlaying={isPlaying}
-            onPlayPause={setIsPlaying}
-          />
-        )}
-        {isVideo && (
-          <VideoPlayer fileUrl={api.streamUrl(share.filePath)} />
-        )}
+        {share.isFolder
+          ? <FolderShareView share={share} />
+          : (
+            <>
+              {isAudio && (
+                <AudioPlayer
+                  fileUrl={api.streamUrl(share.filePath)}
+                  isPlaying={isPlaying}
+                  onPlayPause={setIsPlaying}
+                />
+              )}
+              {isVideo && <VideoPlayer fileUrl={api.streamUrl(share.filePath)} />}
+            </>
+          )
+        }
 
         <div>
-        <button onClick={() => setIsPlaying(prev => !prev)}>
-          {isPlaying ? "Pause" : "Play"}
-        </button>
-        {!share.hideDownload && (
-          <a
-            href={api.streamUrl(share.filePath)}
-            download={share.fileName}
-            style={{
-              display: 'inline-block',
-              marginTop: '20px',
-              fontSize: '11px',
-              color: 'var(--muted)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.07em',
-              textDecoration: 'none',
-            }}
-          >
-            download
-          </a>
-        )}
-
+          {!share.isFolder && (
+            <button onClick={() => setIsPlaying(prev => !prev)}>
+              {isPlaying ? "Pause" : "Play"}
+            </button>
+          )}
+  
+          {/* TODO - Add handling for downloading entire folders */}
+          
+          {(!share.hideDownload && !share.isFolder) && (
+            <a
+              href={api.streamUrl(share.filePath)}
+              download={share.fileName}
+            >
+              download
+            </a>
+          )}
         </div>
       </div>
     </div>
