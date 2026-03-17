@@ -14,16 +14,13 @@ export default function ShareView({ token }) {
 
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const handlePlayPause = () => setIsPlaying(prev => !prev);
-
   useEffect(() => {
+    console.log(token)
     api.getShareByToken(token)
       .then(res => setShare(res.data))
       .catch(() => setNotFound(true));
   }, [token]);
   // [token] dependency means re-fetch if the token prop changes
-
-  console.log(share);
 
   // ─── State: invalid or expired ───────────────────────────────────────────
   if (notFound) {
@@ -85,17 +82,17 @@ export default function ShareView({ token }) {
         </div>
 
         {share.isFolder
-          ? <FolderShareView share={share} />
+          ? <FolderShareView share={share} token={token} />
           : (
             <>
               {isAudio && (
                 <AudioPlayer
-                  fileUrl={api.streamUrl(share.filePath)}
+                  fileUrl={api.publicStreamUrl(token)}
                   isPlaying={isPlaying}
                   onPlayPause={setIsPlaying}
                 />
               )}
-              {isVideo && <VideoPlayer fileUrl={api.streamUrl(share.filePath)} />}
+              {isVideo && <VideoPlayer fileUrl={api.publicStreamUrl(token)} />}
             </>
           )
         }
@@ -111,7 +108,7 @@ export default function ShareView({ token }) {
           
           {(!share.hideDownload && !share.isFolder) && (
             <a
-              href={api.streamUrl(share.filePath)}
+              href={api.publicStreamUrl(share.token)}
               download={share.fileName}
             >
               download

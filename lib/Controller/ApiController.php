@@ -53,6 +53,7 @@ class ApiController extends Controller
 
   /**
    * Lists files and folders at the given path.
+   * @PublicPage
    * @NoAdminRequired
    * @NoCSRFRequired
    */
@@ -201,11 +202,10 @@ class ApiController extends Controller
     return new JSONResponse([
       'id' => $share->getFullId(),
       'token' => $share->getToken(),
-      'url' => $this->urlGenerator
-        ->linkToRouteAbsolute(
-          'files_sharing.Share.showShare',
-          ['token' => $share->getToken()]
-        ),
+      'url' => $this->urlGenerator->linkToRouteAbsolute(
+        'thelab.page.showShare',
+        ['token' => $share->getToken()]
+      )
     ]);
   }
 

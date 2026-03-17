@@ -49,9 +49,19 @@ export const api = {
     USE_MOCK
       ? getMockShareInfoFromToken(token)
       : axios.get(base(`/api/share/${token}`)),
+
+  getShareContents: (token) =>
+    USE_MOCK
+      ? Promise.resolve({ data: mockFiles })
+      : axios.get(base(`/api/share/${token}/files`)),
+      
+  publicStreamUrl: (token) =>
+    USE_MOCK
+      ? '/mock-audio/test.wav'
+      : base(`/api/share/${token}/stream`),
 };
 
-function getMockShareInfoFromToken (token) {
+function getMockShareInfoFromToken(token) {
   console.log(token)
   switch (token) {
     case "invalid":

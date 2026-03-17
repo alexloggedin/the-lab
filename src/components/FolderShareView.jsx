@@ -2,15 +2,15 @@ import { useState, useEffect } from 'react';
 import { api } from '../api.jsx';
 import AudioPlayer from './AudioPlayer.jsx';
 
-export default function FolderShareView({ share }) {
+export default function FolderShareView({ share, token }) {
     const [files, setFiles] = useState([]);
     const [activeFile, setActiveFile] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
 
     useEffect(() => {
-        // Re-uses the existing getFiles endpoint, scoped to the shared folder path
-        api.getFiles(share.filePath).then(res => setFiles(res.data));
-    }, [share.filePath]);
+        api.getShareContents(token)
+            .then(res => setFiles(res.data));
+    }, [token]);
 
     const handlePlay = (file) => {
         if (activeFile?.path === file.path) {
@@ -42,7 +42,7 @@ export default function FolderShareView({ share }) {
                             }
                         </button>
                         <a
-                            href={api.streamUrl(file.path)}
+                            href={api.publicStreamUrl(token)}
                             download={file.name}
                         >
                             download
@@ -52,7 +52,7 @@ export default function FolderShareView({ share }) {
                     {/* Inline player appears only under the active file row */}
                     {activeFile?.path === file.path && (
                         <AudioPlayer
-                            fileUrl={api.streamUrl(file.path)}
+                            fileUrl={api.publicStreamUrl(token)}
                             isPlaying={isPlaying}
                             onPlayPause={setIsPlaying}
                         />

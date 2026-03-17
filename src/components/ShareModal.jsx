@@ -14,7 +14,10 @@ export default function ShareModal({ filePath, fileName, isFolder = false }) {
 
     useEffect(() => {
         api.getShares().then(res => {
-            const fileShares = res.data.filter(s => s.path === filePath);
+            console.log("Raw response", res)
+            console.log(filePath)
+            const fileShares = res.data.filter(s => s.path === 'files/'+filePath);
+            console.log("fileShare List: ", fileShares);
             setShares(fileShares);
         });
     }, [filePath]);
@@ -29,15 +32,15 @@ export default function ShareModal({ filePath, fileName, isFolder = false }) {
             password: form.password,
             expiryDate: form.expiryDate,
             hideDownload: form.hideDownload,
-            permissions: isFolder && form.allowUpload ? 5 : 1,  // ← add this
+            permissions: 1,  
         });
+        console.log(fileName, filePath);
         setShares(prev => [...prev, res.data]);
         setForm({ password: '', expiryDate: '', hideDownload: true, allowUpload: false });
         setCreating(false);
     };
 
     const handleRevoke = async (id) => {
-        if (!confirm('Revoke this link? Anyone with the link will lose access.')) return;
         await api.deleteShare(id);
         setShares(prev => prev.filter(s => s.id !== id));
     };
@@ -116,7 +119,6 @@ export default function ShareModal({ filePath, fileName, isFolder = false }) {
                         {shares.map(share => (
                             <div key={share.id} className="share-item">
                                 <span className="si-url">{share.url}</span>
-                                <span className="si-scope">{isFolder ? 'folder' : 'file'}</span>
                                 {share.expiry && (
                                     <span className="si-meta">
                                         expires {new Date(share.expiry).toLocaleDateString()}

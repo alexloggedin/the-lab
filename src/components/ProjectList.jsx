@@ -17,6 +17,7 @@ export default function ProjectList({ folders, openFolder, onFolderClick }) {
 
     let cancelled = false;
 
+    // TODO: Implement Metadata calls
     const fetchMetadataInBatches = async (files, batchSize = 5) => {
       for (let i = 0; i < files.length; i += batchSize) {
         if (cancelled) return;
@@ -38,7 +39,6 @@ export default function ProjectList({ folders, openFolder, onFolderClick }) {
       if (cancelled) return;
       const audioFiles = res.data;
       setFiles(audioFiles);
-      await fetchMetadataInBatches(audioFiles);
     });
 
     return () => { cancelled = true; };

@@ -1,7 +1,6 @@
 <?php
 namespace OCA\TheLab\Controller;
 
-use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\PublicShareController as NCPublicShareController;
 use OCP\IRequest;
 use OCP\ISession;
@@ -9,6 +8,7 @@ use OCP\Share\IManager;
 use OCP\Share\IShare;
 use OCP\Share\Exceptions\ShareNotFound;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\AppFramework\Http\StreamResponse;
 
 class PublicShareController extends NCPublicShareController
 {
@@ -47,25 +47,6 @@ class PublicShareController extends NCPublicShareController
     protected function isPasswordProtected(): bool
     {
         return $this->share?->getPassword() !== null;
-    }
-
-    /**
-     * Serves the React app shell. Annotations make this accessible without login.
-     *
-     * @PublicPage
-     * @NoCSRFRequired
-     */
-    public function showShare(): TemplateResponse
-    {
-        \OCP\Util::addScript('thelab', 'thelab');
-        \OCP\Util::addStyle('thelab', 'thelab');
-
-        return new TemplateResponse(
-            'thelab',
-            'public',
-            ['token' => $this->getToken()],
-            'base'
-        );
     }
 
     /**
@@ -121,6 +102,64 @@ class PublicShareController extends NCPublicShareController
             'hideDownload' => $share->getHideDownload(),
             'meta' => $meta,
         ]);
+    }
+
+    /**
+     * @PublicPage
+     * @NoCSRFRequired
+     */
+    public function getShareContents(string $token): JSONResponse
+    {
+        try {
+            $share = $this->shareManager->getShareByToken($token);
+        } catch (ShareNotFound $e) {
+            return new JSONResponse(['error' => 'Share not found'], 404);
+        }
+
+        $node = $share->getNode();
+
+        if (!($node instanceof \OCP\Files\Folder)) {
+            return new JSONResponse(['error' => 'Not a folder'], 400);
+        }
+
+        $items = [];
+        foreach ($node->getDirectoryListing() as $child) {
+            $items[] = [
+                'name' => $child->getName(),
+                'mimetype' => method_exists($child, 'getMimeType')
+                    ? $child->getMimeType()
+                    : 'httpd/unix-directory',
+                'size' => $child->getSize(),
+                'type' => $child->getType(),
+            ];
+        }
+
+        return new JSONResponse($items);
+    }
+
+    /**
+     * @PublicPage
+     * @NoCSRFRequired
+     */
+    public function streamFile(string $token): StreamResponse
+    {
+        try {
+            $share = $this->shareManager->getShareByToken($token);
+        } catch (ShareNotFound $e) {
+            return new JSONResponse(['error' => 'Share not found'], 404);
+        }
+
+        $node = $share->getNode();
+
+        if (!($node instanceof \OCP\Files\File)) {
+            return new JSONResponse(['error' => 'Not a file'], 400);
+        }
+
+        $response = new StreamResponse($node->fopen('r'));
+        $response->addHeader('Content-Type', $node->getMimeType());
+        $response->addHeader('Content-Length', $node->getSize());
+        $response->addHeader('Accept-Ranges', 'bytes');
+        return $response;
     }
 
 }

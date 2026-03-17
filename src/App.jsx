@@ -18,9 +18,7 @@ export default function App() {
       .finally(() => setLoading(false));
   }, [shareToken]);
 
-
   if (shareToken) return <ShareView token={shareToken} />;
-
 
   if (loading) {
     return <div className="app-container" style={{ color: 'var(--muted)' }}>loading...</div>;
