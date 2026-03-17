@@ -101,7 +101,7 @@ export default function ShareView({ token }) {
 
         <div>
         <button onClick={() => setIsPlaying(prev => !prev)}>
-          Play
+          {isPlaying ? "Pause" : "Play"}
         </button>
         {!share.hideDownload && (
           <a
