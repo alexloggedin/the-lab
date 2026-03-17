@@ -29,38 +29,37 @@ export const mockFolders = [
 ];
 
 export const mockMetadata = {
-  title:    'Track 01',
-  artist:   '',
-  album:    'EP Demos — Spring',
-  genre:    'Electronic',
-  bpm:      '128',
-  key:      'Am',
-  year:     '2026',
-  comment:  'needs brass stabs in verse 2',
+  title: 'Track 01',
+  artist: '',
+  album: 'EP Demos — Spring',
+  genre: 'Electronic',
+  bpm: '128',
+  key: 'Am',
+  year: '2026',
+  comment: 'needs brass stabs in verse 2',
   duration: 227,
-  bitrate:  1411200,
+  bitrate: 1411200,
   albumArt: null,
 };
 
 export const mockVersions = [
   {
-    versionId:   '1700000000',
-    href:        '/remote.php/dav/versions/admin/versions/42/1700000000',
-    size:        4200000,
-    modified:    1700000000,
+    versionId: '1700000000',
+    href: '/remote.php/dav/versions/admin/versions/42/1700000000',
+    size: 4200000,
+    modified: 1700000000,
     contentType: 'audio/wav',
   },
   {
-    versionId:   '1699000000',
-    href:        '/remote.php/dav/versions/admin/versions/42/1699000000',
-    size:        3900000,
-    modified:    1699000000,
+    versionId: '1699000000',
+    href: '/remote.php/dav/versions/admin/versions/42/1699000000',
+    size: 3900000,
+    modified: 1699000000,
     contentType: 'audio/wav',
   },
 ];
 
-
-export const mockShares = [
+export const mockShareLinks = [
   {
     id: '1',
     path: 'ep-demos/track_01_v3.wav',

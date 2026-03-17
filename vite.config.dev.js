@@ -4,8 +4,6 @@ import react from '@vitejs/plugin-react'
 export default defineConfig(({ mode }) => {
   console.log('Vite mode:', mode)
 
-  // Proxies only the paths that belong to Nextcloud.
-  // Everything else (/, /?share=token, /src, /@vite) stays on Vite.
   const dockerProxy = {
     '^/index\\.php': {
       target: 'http://localhost:8080',
@@ -42,8 +40,6 @@ export default defineConfig(({ mode }) => {
         host: 'localhost',
         port: 5173,
       },
-      // docker mode  → proxy Nextcloud paths to container
-      // dev mode     → no proxy, all requests stay on Vite, mock data used
       proxy: mode === 'docker' ? dockerProxy : {},
     },
 

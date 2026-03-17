@@ -30,7 +30,7 @@ GET {{base}}/api/files?path=theLAB
 Authorization: Basic {{auth}}
 
 ### 5. List a subfolder (edit path to match a real folder)
-GET {{base}}/api/files?path=theLAB/my-project
+GET {{base}}/api/files?path=theLAB/projects
 Authorization: Basic {{auth}}
 
 ###
@@ -85,18 +85,14 @@ Content-Type: application/json
 }
 
 ###
-# ─── VERSIONS ─────────────────────────────────────────────────────────────────
+# ─── SHARES ─────────────────────────────────────────────────────────────────
 
-### 12. List versions
-GET {{base}}/api/versions?path=theLAB/my-project/track.wav
-Authorization: Basic {{auth}}
+### Verify Share link
+GET {{base}}/apps/thelab/s/Cgnmifay8Lw8TXt
 
-### 13. Restore a version (paste versionId from response above)
-POST {{base}}/api/versions/restore
-Authorization: Basic {{auth}}
-Content-Type: application/json
+### Should return folder contents with no auth
+GET http://localhost:8080/index.php/apps/thelab/api/share/nZTGHNRj3k8cWfq/files
 
-{
-  "path": "theLAB/my-project/track.wav",
-  "versionId": "1741800000"
-}
+
+### Stream file via share token — no auth header
+GET http://localhost:8080/index.php/apps/thelab/api/share/Cgnmifay8Lw8TXt/stream

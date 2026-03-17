@@ -17,7 +17,7 @@ class ApiController extends Controller
 
   private IRootFolder $rootFolder;
   private IShareManager $shareManager;
-  private string $userId;
+  private ?string $userId = null;
 
   public function __construct(
     string $appName,
@@ -25,7 +25,7 @@ class ApiController extends Controller
     IRootFolder $rootFolder,
     IShareManager $shareManager,
     IURLGenerator $urlGenerator,
-    string $userId
+    ?string $userId
   ) {
     parent::__construct($appName, $request);
     $this->rootFolder = $rootFolder;
@@ -53,6 +53,7 @@ class ApiController extends Controller
 
   /**
    * Lists files and folders at the given path.
+   * @PublicPage
    * @NoAdminRequired
    * @NoCSRFRequired
    */
@@ -201,11 +202,10 @@ class ApiController extends Controller
     return new JSONResponse([
       'id' => $share->getFullId(),
       'token' => $share->getToken(),
-      'url' => $this->urlGenerator
-        ->linkToRouteAbsolute(
-          'files_sharing.Share.showShare',
-          ['token' => $share->getToken()]
-        ),
+      'url' => $this->urlGenerator->linkToRouteAbsolute(
+        'thelab.page.showShare',
+        ['token' => $share->getToken()]
+      )
     ]);
   }
 
@@ -214,16 +214,16 @@ class ApiController extends Controller
    * @NoAdminRequired
    * @NoCSRFRequired
    */
-public function deleteShare(string $id): JSONResponse
-{
+  public function deleteShare(string $id): JSONResponse
+  {
     try {
-        $share = $this->shareManager->getShareById($id);
-        $this->shareManager->deleteShare($share);
-        return new JSONResponse(['success' => true]);
+      $share = $this->shareManager->getShareById($id);
+      $this->shareManager->deleteShare($share);
+      return new JSONResponse(['success' => true]);
     } catch (ShareNotFound $e) {
-        return new JSONResponse(['error' => 'Share not found'], 404);
+      return new JSONResponse(['error' => 'Share not found'], 404);
     } catch (\Exception $e) {
-        return new JSONResponse(['error' => $e->getMessage()], 500);
+      return new JSONResponse(['error' => $e->getMessage()], 500);
     }
-}
+  }
 }

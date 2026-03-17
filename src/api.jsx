@@ -1,5 +1,5 @@
 import { USE_MOCK } from './dev/useMockData';
-import { mockFiles, mockFolders, mockMetadata, mockVersions, mockShares } from './dev/fixtures';
+import { mockFiles, mockFolders, mockMetadata, mockShareLinks } from './dev/fixtures';
 import axios from 'axios';
 
 const base = (path) =>
@@ -10,9 +10,9 @@ export const api = {
     USE_MOCK
       ? Promise.resolve({ data: { success: true } })
       : axios.post(base('/api/init')),
-  getFiles: (path = '') =>
+  getFiles: (path = 'theLAB') =>
     USE_MOCK
-      ? Promise.resolve({ data: path ? mockFiles : mockFolders })
+      ? Promise.resolve({ data: path != "theLAB" ? mockFiles : mockFolders })
       : axios.get(base(`/api/files?path=${encodeURIComponent(path)}`)),
 
   getMetadata: (path) =>
@@ -22,7 +22,7 @@ export const api = {
 
   getShares: () =>
     USE_MOCK
-      ? Promise.resolve({ data: mockShares })
+      ? Promise.resolve({ data: mockShareLinks })
       : axios.get(base('/api/shares')),
 
   createShare: (data) =>
@@ -44,4 +44,55 @@ export const api = {
     USE_MOCK
       ? '/mock-audio/test.wav'
       : base(`/api/stream?path=${encodeURIComponent(path)}`),
+
+  getShareByToken: (token) =>
+    USE_MOCK
+      ? getMockShareInfoFromToken(token)
+      : axios.get(base(`/api/share/${token}`)),
+
+  getShareContents: (token) =>
+    USE_MOCK
+      ? Promise.resolve({ data: mockFiles })
+      : axios.get(base(`/api/share/${token}/files`)),
+      
+  publicStreamUrl: (token) =>
+    USE_MOCK
+      ? '/mock-audio/test.wav'
+      : base(`/api/share/${token}/stream`),
 };
+
+function getMockShareInfoFromToken(token) {
+  console.log(token)
+  switch (token) {
+    case "invalid":
+      return Promise.reject(new Error('not found'));
+    case "folder":
+      return Promise.resolve({
+        data: {
+          token,
+          fileName: 'ep-demos',
+          filePath: 'ep-demos',
+          mimetype: 'httpd/unix-directory',
+          isFolder: true,
+          hideDownload: false,
+        }
+      })
+    default:
+      return Promise.resolve({
+        data: {
+          token,
+          fileName: 'track_01_v3.wav',
+          filePath: 'ep-demos/track_01_v3.wav',
+          mimetype: 'audio/wav',
+          isFolder: false,
+          hideDownload: false,
+          meta: {
+            bpm: '128',
+            key: 'Am',
+            genre: 'Electronic',
+          }
+        }
+      })
+  }
+
+}

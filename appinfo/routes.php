@@ -2,6 +2,7 @@
 return [
   'routes' => [
     ['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
+    ['name' => 'page#showShare', 'url' => '/s/{token}', 'verb' => 'GET'],
 
     ['name' => 'api#getFiles', 'url' => '/api/files', 'verb' => 'GET'],
     ['name' => 'api#streamFile', 'url' => '/api/stream', 'verb' => 'GET'],
@@ -22,5 +23,9 @@ return [
 
     ['name' => 'api#getActivity', 'url' => '/api/activity', 'verb' => 'GET'],
     ['name' => 'api#initLabFolder', 'url' => '/api/init', 'verb' => 'POST'],
+
+    ['name' => 'publicShare#getShareByToken', 'url' => '/api/share/{token}', 'verb' => 'GET'],
+    ['name' => 'publicShare#getShareContents', 'url' => '/api/share/{token}/files', 'verb' => 'GET'],
+    ['name' => 'publicShare#streamFile', 'url' => '/api/share/{token}/stream', 'verb' => 'GET']
   ]
 ];

@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>theLAB — dev</title>
+  <title>theLAB — REACT DEV</title>
 </head>
 <body>
   <div id="app">
@@ -12,11 +12,13 @@
   </div>
 
   <script>
-    // Simulate window.OC so api.jsx's base() function works in pure frontend dev
     window.OC = {
       generateUrl: (path) => path,
       requestToken: 'mock-token',
     }
   </script>
+
+  <!-- Entry point — Vite injects HMR client and serves this module -->
+  <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>
