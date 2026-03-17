@@ -8,6 +8,7 @@ use OCP\Files\IRootFolder;
 use OCP\IRequest;
 use OCP\Share\IManager as IShareManager;
 use OCP\Share\IShare;
+use OCP\Share\Exceptions\ShareNotFound;
 use OCP\IURLGenerator;
 
 
@@ -198,7 +199,7 @@ class ApiController extends Controller
     $share = $this->shareManager->createShare($share);
 
     return new JSONResponse([
-      'id' => $share->getId(),
+      'id' => $share->getFullId(),
       'token' => $share->getToken(),
       'url' => $this->urlGenerator
         ->linkToRouteAbsolute(
@@ -213,11 +214,16 @@ class ApiController extends Controller
    * @NoAdminRequired
    * @NoCSRFRequired
    */
-  public function deleteShare(string $id): JSONResponse
-  {
-    // $id now arrives as the full prefixed ID, e.g. "ocinternal:42"
-    $share = $this->shareManager->getShareById($id);
-    $this->shareManager->deleteShare($share);
-    return new JSONResponse(['success' => true]);
-  }
+public function deleteShare(string $id): JSONResponse
+{
+    try {
+        $share = $this->shareManager->getShareById($id);
+        $this->shareManager->deleteShare($share);
+        return new JSONResponse(['success' => true]);
+    } catch (ShareNotFound $e) {
+        return new JSONResponse(['error' => 'Share not found'], 404);
+    } catch (\Exception $e) {
+        return new JSONResponse(['error' => $e->getMessage()], 500);
+    }
+}
 }
