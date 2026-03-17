@@ -12,7 +12,7 @@ export const api = {
       : axios.post(base('/api/init')),
   getFiles: (path = '') =>
     USE_MOCK
-      ? Promise.resolve({ data: path ? mockFiles : mockFolders })
+      ? Promise.resolve({ data: path != "theLAB" ? mockFiles : mockFolders })
       : axios.get(base(`/api/files?path=${encodeURIComponent(path)}`)),
 
   getMetadata: (path) =>
@@ -44,4 +44,27 @@ export const api = {
     USE_MOCK
       ? '/mock-audio/test.wav'
       : base(`/api/stream?path=${encodeURIComponent(path)}`),
+
+  getShareByToken: (token) =>
+    USE_MOCK
+      ? token === 'invalid'
+        // Simulates an expired or missing share
+        ? Promise.reject(new Error('not found'))
+        // Simulates a valid share with fixture data
+        : Promise.resolve({
+          data: {
+            token,
+            fileName: 'track_01_v3.wav',
+            filePath: 'ep-demos/track_01_v3.wav',
+            mimetype: 'audio/wav',
+            isFolder: false,
+            hideDownload: false,
+            meta: {
+              bpm: '128',
+              key: 'Am',
+              genre: 'Electronic',
+            }
+          }
+        })
+      : axios.get(base(`/api/share/${token}`)),
 };
