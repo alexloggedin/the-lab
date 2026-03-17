@@ -22,5 +22,8 @@ return [
 
     ['name' => 'api#getActivity', 'url' => '/api/activity', 'verb' => 'GET'],
     ['name' => 'api#initLabFolder', 'url' => '/api/init', 'verb' => 'POST'],
+
+    ['name' => 'public_share#showShare',    'url' => '/s/{token}', 'verb' => 'GET'],
+    ['name' => 'api#getShareByToken',       'url' => '/api/share/{token}', 'verb' => 'GET'],
   ]
 ];
