@@ -20,3 +20,8 @@ Content-Length: 0
 GET {{host}}/index.php/apps/thelab/api/files?path=theLAB
 Authorization: Basic {{auth}}
 OCS-APIREQUEST: true
+
+### Vertify - Get Shares
+GET {{host}}/index.php/apps/thelab/api/shares
+Authorization: Basic {{auth}}
+OCS-APIREQUEST: true

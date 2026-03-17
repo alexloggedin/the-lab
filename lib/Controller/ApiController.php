@@ -8,6 +8,8 @@ use OCP\Files\IRootFolder;
 use OCP\IRequest;
 use OCP\Share\IManager as IShareManager;
 use OCP\Share\IShare;
+use OCP\IURLGenerator;
+
 
 class ApiController extends Controller
 {
@@ -21,11 +23,13 @@ class ApiController extends Controller
     IRequest $request,
     IRootFolder $rootFolder,
     IShareManager $shareManager,
+    IURLGenerator $urlGenerator,
     string $userId
   ) {
     parent::__construct($appName, $request);
     $this->rootFolder = $rootFolder;
     $this->shareManager = $shareManager;
+    $this->urlGenerator = $urlGenerator;
     $this->userId = $userId;
   }
 
@@ -122,7 +126,7 @@ class ApiController extends Controller
     if ($dir !== '.' && !$userFolder->nodeExists($dir)) {
       $userFolder->newFolder($dir);
     }
-
+    
     if ($userFolder->nodeExists($path)) {
       $cleanPath = preg_replace('#^files/#', '', $path);
 
@@ -151,11 +155,8 @@ class ApiController extends Controller
       'id' => $share->getId(),
       'path' => $share->getNode()->getInternalPath(),
       'token' => $share->getToken(),
-      'url' => \OC::$server->getURLGenerator()
-        ->linkToRouteAbsolute(
-          'files_sharing.Share.showShare',
-          ['token' => $share->getToken()]
-        ),
+      'url' => $this->urlGenerator
+        ->linkToRouteAbsolute('files_sharing.Share.showShare', ['token' => $share->getToken()]),
       'expiry' => $share->getExpirationDate()?->format('Y-m-d'),
       'hasPassword' => $share->getPassword() !== null,
     ], $shares);
@@ -199,7 +200,7 @@ class ApiController extends Controller
     return new JSONResponse([
       'id' => $share->getId(),
       'token' => $share->getToken(),
-      'url' => \OC::$server->getURLGenerator()
+      'url' => $this->urlGenerator()
         ->linkToRouteAbsolute(
           'files_sharing.Share.showShare',
           ['token' => $share->getToken()]
