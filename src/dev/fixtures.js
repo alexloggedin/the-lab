@@ -43,10 +43,22 @@ export const mockMetadata = {
 };
 
 export const mockVersions = [
-  { versionId: '1741800000', size: 12000000, modified: 1741800000 },
-  { versionId: '1741700000', size: 11500000, modified: 1741700000 },
-  { versionId: '1741600000', size: 11200000, modified: 1741600000 },
+  {
+    versionId:   '1700000000',
+    href:        '/remote.php/dav/versions/admin/versions/42/1700000000',
+    size:        4200000,
+    modified:    1700000000,
+    contentType: 'audio/wav',
+  },
+  {
+    versionId:   '1699000000',
+    href:        '/remote.php/dav/versions/admin/versions/42/1699000000',
+    size:        3900000,
+    modified:    1699000000,
+    contentType: 'audio/wav',
+  },
 ];
+
 
 export const mockShares = [
   {

@@ -8,6 +8,8 @@ use OCP\Files\IRootFolder;
 use OCP\IRequest;
 use OCP\Share\IManager as IShareManager;
 use OCP\Share\IShare;
+use OCP\IURLGenerator;
+
 
 class ApiController extends Controller
 {
@@ -21,11 +23,13 @@ class ApiController extends Controller
     IRequest $request,
     IRootFolder $rootFolder,
     IShareManager $shareManager,
+    IURLGenerator $urlGenerator,
     string $userId
   ) {
     parent::__construct($appName, $request);
     $this->rootFolder = $rootFolder;
     $this->shareManager = $shareManager;
+    $this->urlGenerator = $urlGenerator;
     $this->userId = $userId;
   }
 
@@ -148,14 +152,11 @@ class ApiController extends Controller
     );
 
     $result = array_map(fn($share) => [
-      'id' => $share->getId(),
+      'id' => $share->getFullId(),
       'path' => $share->getNode()->getInternalPath(),
       'token' => $share->getToken(),
-      'url' => \OC::$server->getURLGenerator()
-        ->linkToRouteAbsolute(
-          'files_sharing.Share.showShare',
-          ['token' => $share->getToken()]
-        ),
+      'url' => $this->urlGenerator
+        ->linkToRouteAbsolute('files_sharing.Share.showShare', ['token' => $share->getToken()]),
       'expiry' => $share->getExpirationDate()?->format('Y-m-d'),
       'hasPassword' => $share->getPassword() !== null,
     ], $shares);
@@ -199,7 +200,7 @@ class ApiController extends Controller
     return new JSONResponse([
       'id' => $share->getId(),
       'token' => $share->getToken(),
-      'url' => \OC::$server->getURLGenerator()
+      'url' => $this->urlGenerator
         ->linkToRouteAbsolute(
           'files_sharing.Share.showShare',
           ['token' => $share->getToken()]
@@ -214,73 +215,9 @@ class ApiController extends Controller
    */
   public function deleteShare(string $id): JSONResponse
   {
-    $share = $this->shareManager->getShareById('ocinternal:' . $id);
+    // $id now arrives as the full prefixed ID, e.g. "ocinternal:42"
+    $share = $this->shareManager->getShareById($id);
     $this->shareManager->deleteShare($share);
     return new JSONResponse(['success' => true]);
-  }
-
-  /**
-   * Lists version history for a file.
-   * Requires the files_versions app to be enabled in Nextcloud.
-   * @NoAdminRequired
-   * @NoCSRFRequired
-   */
-  public function getVersions(string $path): JSONResponse
-  {
-    $versions = \OCA\Files_Versions\Storage::getVersions(
-      $this->userId,
-      '/' . $path
-    );
-
-    $result = array_map(fn($v) => [
-      'versionId' => $v['version'],
-      'size' => $v['size'],
-      'modified' => $v['version'], // version ID is a Unix timestamp
-    ], array_values($versions));
-
-    return new JSONResponse($result);
-  }
-
-  /**
-   * Streams a specific historical version of a file.
-   * @NoAdminRequired
-   * @NoCSRFRequired
-   */
-  public function streamVersion(string $path, string $versionId): StreamResponse
-  {
-    $file = \OCA\Files_Versions\Storage::getVersionedFile(
-      $this->userId,
-      '/' . $path,
-      $versionId
-    );
-    $response = new StreamResponse($file->fopen('r'));
-    $response->addHeader('Content-Type', $file->getMimeType());
-    $response->addHeader('Accept-Ranges', 'bytes');
-    return $response;
-  }
-
-  /**
-   * Restores a file to a previous version.
-   * The current file becomes the newest version automatically.
-   * @NoAdminRequired
-   * @NoCSRFRequired
-   */
-  public function restoreVersion(string $path, string $versionId): JSONResponse
-  {
-    \OCA\Files_Versions\Storage::rollback($path, $versionId, $this->userId);
-    return new JSONResponse(['success' => true]);
-  }
-
-  /**
-   * Returns recent file activity for the current user.
-   * Requires the activity app to be enabled in Nextcloud.
-   * @NoAdminRequired
-   * @NoCSRFRequired
-   */
-  public function getActivity(): JSONResponse
-  {
-    $manager = \OC::$server->get(\OCA\Activity\Data::class);
-    $events = $manager->get($this->userId, 0, 50);
-    return new JSONResponse($events);
   }
 }

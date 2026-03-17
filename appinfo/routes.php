@@ -16,10 +16,6 @@ return [
     ['name' => 'api#createShare', 'url' => '/api/shares', 'verb' => 'POST'],
     ['name' => 'api#deleteShare', 'url' => '/api/shares/{id}', 'verb' => 'DELETE'],
 
-    ['name' => 'api#getVersions', 'url' => '/api/versions', 'verb' => 'GET'],
-    ['name' => 'api#streamVersion', 'url' => '/api/versions/stream', 'verb' => 'GET'],
-    ['name' => 'api#restoreVersion', 'url' => '/api/versions/restore', 'verb' => 'POST'],
-
     ['name' => 'api#getMetadata', 'url' => '/api/metadata', 'verb' => 'GET'],
     ['name' => 'api#updateMetadata', 'url' => '/api/metadata', 'verb' => 'POST'],
     ['name' => 'api#updateAlbumArt', 'url' => '/api/albumart', 'verb' => 'POST'],
