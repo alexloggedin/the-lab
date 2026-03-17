@@ -7,6 +7,7 @@ use OCP\ISession;
 use OCP\Share\IManager;
 use OCP\Share\IShare;
 use OCP\Share\Exceptions\ShareNotFound;
+use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\StreamResponse;
 
@@ -126,6 +127,7 @@ class PublicShareController extends NCPublicShareController
         foreach ($node->getDirectoryListing() as $child) {
             $items[] = [
                 'name' => $child->getName(),
+                'path' => $child->getName(), // relative to the shared folder root
                 'mimetype' => method_exists($child, 'getMimeType')
                     ? $child->getMimeType()
                     : 'httpd/unix-directory',
@@ -141,7 +143,7 @@ class PublicShareController extends NCPublicShareController
      * @PublicPage
      * @NoCSRFRequired
      */
-    public function streamFile(string $token): StreamResponse
+    public function streamFile(string $token): Response
     {
         try {
             $share = $this->shareManager->getShareByToken($token);
@@ -151,8 +153,18 @@ class PublicShareController extends NCPublicShareController
 
         $node = $share->getNode();
 
+        $fileName = $this->request->getParam('file');
+
+        if ($fileName !== null && $node instanceof \OCP\Files\Folder) {
+            try {
+                $node = $node->get($fileName);
+            } catch (\OCP\Files\NotFoundException $e) {
+                return new JSONResponse(['error' => 'File not found in share'], 404);
+            }
+        }
+
         if (!($node instanceof \OCP\Files\File)) {
-            return new JSONResponse(['error' => 'Not a file'], 400);
+            return new JSONResponse(['error' => 'Not a streamable file'], 400);
         }
 
         $response = new StreamResponse($node->fopen('r'));
