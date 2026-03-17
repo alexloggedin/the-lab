@@ -126,7 +126,7 @@ class ApiController extends Controller
     if ($dir !== '.' && !$userFolder->nodeExists($dir)) {
       $userFolder->newFolder($dir);
     }
-    
+
     if ($userFolder->nodeExists($path)) {
       $cleanPath = preg_replace('#^files/#', '', $path);
 
@@ -152,7 +152,7 @@ class ApiController extends Controller
     );
 
     $result = array_map(fn($share) => [
-      'id' => $share->getId(),
+      'id' => $share->getFullId(),
       'path' => $share->getNode()->getInternalPath(),
       'token' => $share->getToken(),
       'url' => $this->urlGenerator
@@ -200,7 +200,7 @@ class ApiController extends Controller
     return new JSONResponse([
       'id' => $share->getId(),
       'token' => $share->getToken(),
-      'url' => $this->urlGenerator()
+      'url' => $this->urlGenerator
         ->linkToRouteAbsolute(
           'files_sharing.Share.showShare',
           ['token' => $share->getToken()]
@@ -215,10 +215,12 @@ class ApiController extends Controller
    */
   public function deleteShare(string $id): JSONResponse
   {
-    $share = $this->shareManager->getShareById('ocinternal:' . $id);
+    // $id now arrives as the full prefixed ID, e.g. "ocinternal:42"
+    $share = $this->shareManager->getShareById($id);
     $this->shareManager->deleteShare($share);
     return new JSONResponse(['success' => true]);
   }
+
 
   /**
    * Lists version history for a file.
