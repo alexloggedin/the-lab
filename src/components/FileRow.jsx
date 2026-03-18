@@ -15,6 +15,7 @@ const formatSize = (bytes) =>
 export default function FileRow({ file, meta }) {
 
     const [activePanel, setActivePanel] = useState(null);
+    const [resolvedUrl, setResolvedUrl] = useState(null);
 
     const isAudio = file.mimetype?.startsWith('audio/');
     const isVideo = file.mimetype?.startsWith('video/');
@@ -34,6 +35,11 @@ export default function FileRow({ file, meta }) {
         }
     };
 
+    useEffect(() => {
+        if (!file.path) return;
+        api.streamUrl(file.path).then(setResolvedUrl);
+    }, [file.path]);
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div className="file-row">
@@ -44,7 +50,7 @@ export default function FileRow({ file, meta }) {
                         style={{ width: 28, height: 28, borderRadius: 2, objectFit: 'cover', flexShrink: 0 }}
                     />
                 )}
-                
+
                 <span className="file-name">{file.name}</span>
 
                 <Pill value={meta?.bpm ? `${meta.bpm} bpm` : null} />
@@ -84,14 +90,14 @@ export default function FileRow({ file, meta }) {
 
             {activePanel === 'player' && isAudio && (
                 <AudioPlayer
-                    fileUrl={api.streamUrl(file.path)}
+                    fileUrl={resolvedUrl}
                     isPlaying={isPlaying}
                     onPlayPause={setIsPlaying}
                 />
             )}
 
             {activePanel === 'player' && isVideo && (
-                <VideoPlayer fileUrl={api.streamUrl(file.path)} />
+                <VideoPlayer fileUrl={resolvedUrl} />
             )}
 
             {activePanel === 'history' && (
