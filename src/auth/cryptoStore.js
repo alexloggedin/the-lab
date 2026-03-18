@@ -1,89 +1,121 @@
 // src/auth/cryptoStore.js
+// Uses IndexedDB to store a non-extractable CryptoKey.
 
-const SESSION_KEY_NAME = 'vault_crypto_key';
+const DB_NAME    = 'vault_keystore';
+const DB_VERSION = 1;
+const STORE_NAME = 'keys';
+const KEY_ID     = 'vault_main_key';
+
+// ─── IndexedDB helpers ────────────────────────────────────────────────────────
+
+const openDB = () => new Promise((resolve, reject) => {
+  const req = indexedDB.open(DB_NAME, DB_VERSION);
+
+  req.onupgradeneeded = (e) => {
+    e.target.result.createObjectStore(STORE_NAME);
+  };
+
+  req.onsuccess = (e) => resolve(e.target.result);
+  req.onerror   = (e) => reject(e.target.error);
+});
+
+const dbGet = async (key) => {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx  = db.transaction(STORE_NAME, 'readonly');
+    const req = tx.objectStore(STORE_NAME).get(key);
+    req.onsuccess = () => resolve(req.result ?? null);
+    req.onerror   = () => reject(req.error);
+  });
+};
+
+const dbSet = async (key, value) => {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx  = db.transaction(STORE_NAME, 'readwrite');
+    const req = tx.objectStore(STORE_NAME).put(value, key);
+    req.onsuccess = () => resolve();
+    req.onerror   = () => reject(req.error);
+  });
+};
+
+const dbDelete = async (key) => {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx  = db.transaction(STORE_NAME, 'readwrite');
+    const req = tx.objectStore(STORE_NAME).delete(key);
+    req.onsuccess = () => resolve();
+    req.onerror   = () => reject(req.error);
+  });
+};
 
 // ─── Key management ───────────────────────────────────────────────────────────
 
 /**
- * Generate a new AES-GCM 256-bit key and persist it to sessionStorage.
- * Called once on first login. Returns the CryptoKey object.
+ * Generate a new AES-GCM 256-bit key and persist it to IndexedDB.
  *
- * AES-GCM is authenticated encryption — it detects tampering as well as
- * keeping data confidential. 256-bit key length is the strongest available.
- *
- * Reference: https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/generateKey
+ * extractable: false means the raw key bytes can never be read out by
+ * JavaScript. The key can only be used for encrypt/decrypt operations.
+ * An XSS attacker can use the key in the current session but cannot
+ * steal it to use elsewhere.
  */
 export const generateAndStoreKey = async () => {
   const key = await crypto.subtle.generateKey(
     { name: 'AES-GCM', length: 256 },
-    true,          // extractable: we need to export it for storage
+    false,          // NOT extractable — key bytes never leave the browser engine
     ['encrypt', 'decrypt']
   );
 
-  // Export as raw bytes and store as a base64 string in sessionStorage
-  const rawKey = await crypto.subtle.exportKey('raw', key);
-  const keyB64 = btoa(String.fromCharCode(...new Uint8Array(rawKey)));
-  sessionStorage.setItem(SESSION_KEY_NAME, keyB64);
+  await dbSet(KEY_ID, key);
   return key;
 };
 
 /**
- * Load the CryptoKey from sessionStorage.
- * Returns null if no key is stored (session has ended or key was never generated).
+ * Load the CryptoKey from IndexedDB.
+ * Returns null if no key exists — user must log in again.
  */
 export const loadKey = async () => {
-  const keyB64 = sessionStorage.getItem(SESSION_KEY_NAME);
-  if (!keyB64) return null;
-
   try {
-    const rawKey = Uint8Array.from(atob(keyB64), c => c.charCodeAt(0));
-    return await crypto.subtle.importKey(
-      'raw',
-      rawKey,
-      { name: 'AES-GCM' },
-      false,         // not extractable once reimported — no need to export again
-      ['encrypt', 'decrypt']
-    );
+    const key = await dbGet(KEY_ID);
+    return key ?? null;
   } catch {
-    // Key data is corrupted — treat as expired session
-    sessionStorage.removeItem(SESSION_KEY_NAME);
     return null;
   }
+};
+
+/**
+ * Delete the stored key. Called on logout and credential clear.
+ */
+export const deleteKey = async () => {
+  try {
+    await dbDelete(KEY_ID);
+  } catch { /* ignore */ }
 };
 
 // ─── Encrypt / Decrypt ────────────────────────────────────────────────────────
 
 /**
- * Encrypt a plain string with the given CryptoKey.
- * Returns a base64-encoded string of: [12-byte IV] + [ciphertext].
- *
- * A fresh random IV is generated for every encryption operation.
- * This is required for AES-GCM security — never reuse an IV with the same key.
+ * Encrypt a string. Returns base64: [12-byte IV][ciphertext].
+ * A fresh random IV is generated per call.
  */
 export const encrypt = async (plaintext, key) => {
-  const iv = crypto.getRandomValues(new Uint8Array(12)); // AES-GCM standard IV length
+  const iv      = crypto.getRandomValues(new Uint8Array(12));
   const encoded = new TextEncoder().encode(plaintext);
+  const cipher  = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
 
-  const ciphertext = await crypto.subtle.encrypt(
-    { name: 'AES-GCM', iv },
-    key,
-    encoded
-  );
-
-  // Prepend IV to ciphertext so we can extract it on decryption
-  const combined = new Uint8Array(iv.byteLength + ciphertext.byteLength);
+  const combined = new Uint8Array(iv.byteLength + cipher.byteLength);
   combined.set(iv, 0);
-  combined.set(new Uint8Array(ciphertext), iv.byteLength);
+  combined.set(new Uint8Array(cipher), iv.byteLength);
 
   return btoa(String.fromCharCode(...combined));
 };
 
 /**
- * Decrypt a base64-encoded string (from encrypt()) with the given CryptoKey.
- * Returns the original plaintext string, or throws on failure.
+ * Decrypt a base64 string produced by encrypt().
+ * Throws if data is tampered — AES-GCM authentication tag fails.
  */
 export const decrypt = async (ciphertextB64, key) => {
-  const combined = Uint8Array.from(atob(ciphertextB64), c => c.charCodeAt(0));
+  const combined   = Uint8Array.from(atob(ciphertextB64), c => c.charCodeAt(0));
   const iv         = combined.slice(0, 12);
   const ciphertext = combined.slice(12);
 

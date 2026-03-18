@@ -1,6 +1,6 @@
 // src/auth/authStore.js
 
-import { generateAndStoreKey, loadKey, encrypt, decrypt } from './cryptoStore.js';
+import { generateAndStoreKey, loadKey, deleteKey, encrypt, decrypt } from './cryptoStore.js';
 
 // ─── Storage keys ─────────────────────────────────────────────────────────────
 
@@ -83,9 +83,9 @@ export const getCredentials = async () => {
  * flashing the login page for returning users while async decryption runs.
  */
 export const hasStoredCredentials = () => {
-    const lastActive = readTimestamp(KEYS.LAST_ACTIVE);
-    if (!lastActive || now() - lastActive > INACTIVITY_TTL_MS) return false;
-    return localStorage.getItem(KEYS.CREDS) !== null;
+  const lastActive = readTimestamp(KEYS.LAST_ACTIVE);
+  if (!lastActive || now() - lastActive > INACTIVITY_TTL_MS) return false;
+  return localStorage.getItem(KEYS.CREDS) !== null;
 };
 
 /**
@@ -134,6 +134,6 @@ export const getAuthHeader = async () => {
  * Clear all credentials from both localStorage and sessionStorage.
  */
 export const clearCredentials = () => {
-    Object.values(KEYS).forEach(k => localStorage.removeItem(k));
-    sessionStorage.removeItem('vault_crypto_key');
+  Object.values(KEYS).forEach(k => localStorage.removeItem(k));
+  deleteKey();ƒ
 };
