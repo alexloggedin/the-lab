@@ -16,6 +16,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
+    "dev:nextcloud": "VITE_USE_MOCK=false vite --mode nextcloud",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint src --ext .js,.jsx",

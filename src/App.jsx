@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from './hooks/useAuth.js';
 import LoginPage from './components/LoginPage.jsx';
 import ProjectList from './components/ProjectList.jsx';
-import { api } from './api.jsx';
+import { api } from './api.js';
 import { USE_MOCK } from './dev/useMockData.js';
 
 export default function App() {

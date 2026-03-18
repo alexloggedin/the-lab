@@ -82,7 +82,7 @@ export const useAuth = () => {
       try {
         const creds = await pollForCredentials(pollEndpoint, pollToken);
         if (creds) {
-          await saveCredentials(creds);
+          await saveCredentials({ ...creds, serverUrl: serverUrl.trim() });
           setCredentials(creds);
           setAuthStatus('authenticated');
           setLoginState('idle');

@@ -9,8 +9,9 @@ export default defineConfig(({ mode }) => ({
     port: 5173,
     proxy: mode === 'nextcloud' ? {
       '^/remote\\.php': { target: 'http://localhost:8080', changeOrigin: true },
-      '^/index\\.php':  { target: 'http://localhost:8080', changeOrigin: true },
-      '^/ocs':          { target: 'http://localhost:8080', changeOrigin: true },
+      '^/index\\.php': { target: 'http://localhost:8080', changeOrigin: true },
+      '^/ocs': { target: 'http://localhost:8080', changeOrigin: true },
+      '^/login': { target: 'http://localhost:8080', changeOrigin: true },
     } : {},
   },
 
