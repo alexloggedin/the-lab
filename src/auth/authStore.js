@@ -1,93 +1,139 @@
 // src/auth/authStore.js
-// -----------------------------------------------------------------------------
-// DEVELOPMENT VERSION — credentials stored as plain JSON in localStorage.
-// Replace with encrypted version (cryptoStore.js) before release.
-// -----------------------------------------------------------------------------
 
-const KEY = 'vault_credentials';
+import { generateAndStoreKey, loadKey, encrypt, decrypt } from './cryptoStore.js';
 
-const INACTIVITY_TTL_MS = 7  * 24 * 60 * 60 * 1000; // 7 days
-const ROTATION_TTL_MS   = 30 * 24 * 60 * 60 * 1000; // 30 days
+// ─── Storage keys ─────────────────────────────────────────────────────────────
+
+const KEYS = {
+    CREDS: 'vault_credentials',    // encrypted JSON blob
+    LAST_ACTIVE: 'vault_last_active',    // ms timestamp — last vault use
+    CRED_AGE: 'vault_credential_age', // ms timestamp — when appPassword was stored
+};
+
+const INACTIVITY_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+const ROTATION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 const now = () => Date.now();
 
+const readTimestamp = (key) => {
+    const raw = localStorage.getItem(key);
+    return raw ? parseInt(raw, 10) : null;
+};
+
 // ─── Public API ───────────────────────────────────────────────────────────────
-// Signatures are identical to the encrypted version so nothing else needs to change.
 
+/**
+ * Encrypt and save credentials.
+ * Generates a fresh AES-GCM key on every login — old ciphertext from
+ * previous sessions becomes permanently unreadable.
+ */
 export const saveCredentials = async ({ serverUrl, username, appPassword }) => {
-  const payload = {
-    serverUrl:   serverUrl.replace(/\/$/, ''),
-    username,
-    appPassword,
-    lastActive:  now(),
-    credentialAge: now(),
-  };
-  localStorage.setItem(KEY, JSON.stringify(payload));
+    // Temporarily at the top of saveCredentials in authStore.js:
+    console.log('saveCredentials called for:', username);
+
+    const key = await generateAndStoreKey();
+    const payload = JSON.stringify({
+        serverUrl: serverUrl.replace(/\/$/, ''),
+        username,
+        appPassword,
+    });
+
+    const encrypted = await encrypt(payload, key);
+    localStorage.setItem(KEYS.CREDS, encrypted);
+
+    const ts = String(now());
+    localStorage.setItem(KEYS.LAST_ACTIVE, ts);
+    localStorage.setItem(KEYS.CRED_AGE, ts);
 };
 
+/**
+ * Decrypt and return credentials.
+ * Returns null when:
+ *   - Nothing stored
+ *   - Session key is gone (all tabs were closed)
+ *   - Inactivity TTL exceeded
+ *   - Decryption fails (tampered data)
+ */
 export const getCredentials = async () => {
-  const raw = localStorage.getItem(KEY);
-  if (!raw) return null;
-
-  try {
-    const creds = JSON.parse(raw);
-    if (now() - creds.lastActive > INACTIVITY_TTL_MS) {
-      clearCredentials();
-      return null;
+    // Check expiry first — no decryption needed
+    const lastActive = readTimestamp(KEYS.LAST_ACTIVE);
+    if (!lastActive || now() - lastActive > INACTIVITY_TTL_MS) {
+        clearCredentials();
+        return null;
     }
-    return creds;
-  } catch {
-    clearCredentials();
-    return null;
-  }
+
+    const encrypted = localStorage.getItem(KEYS.CREDS);
+    if (!encrypted) return null;
+
+    const key = await loadKey();
+    if (!key) return null; // sessionStorage was cleared — session ended
+
+    try {
+        return JSON.parse(await decrypt(encrypted, key));
+    } catch {
+        // Decryption failed — data corrupted or tampered
+        clearCredentials();
+        return null;
+    }
 };
 
+/**
+ * Fast synchronous check: are credentials likely present?
+ * Does NOT decrypt — used for the initial render decision to avoid
+ * flashing the login page for returning users while async decryption runs.
+ */
 export const hasStoredCredentials = () => {
-  const raw = localStorage.getItem(KEY);
-  if (!raw) return false;
-  try {
-    const creds = JSON.parse(raw);
-    return now() - creds.lastActive <= INACTIVITY_TTL_MS;
-  } catch {
-    return false;
-  }
+    const lastActive = readTimestamp(KEYS.LAST_ACTIVE);
+    if (!lastActive || now() - lastActive > INACTIVITY_TTL_MS) return false;
+    return localStorage.getItem(KEYS.CREDS) !== null;
 };
 
+/**
+ * Reset the inactivity clock. Call when the user does something meaningful.
+ */
 export const touchActivity = () => {
-  const raw = localStorage.getItem(KEY);
-  if (!raw) return;
-  try {
-    const creds = JSON.parse(raw);
-    creds.lastActive = now();
-    localStorage.setItem(KEY, JSON.stringify(creds));
-  } catch { /* ignore */ }
+    localStorage.setItem(KEYS.LAST_ACTIVE, String(now()));
 };
 
+/**
+ * Returns true when the appPassword is older than ROTATION_TTL_MS.
+ */
 export const needsRotation = () => {
-  const raw = localStorage.getItem(KEY);
-  if (!raw) return false;
-  try {
-    const creds = JSON.parse(raw);
-    return now() - creds.credentialAge > ROTATION_TTL_MS;
-  } catch {
-    return false;
-  }
+    const credAge = readTimestamp(KEYS.CRED_AGE);
+    if (!credAge) return false;
+    return now() - credAge > ROTATION_TTL_MS;
 };
 
+/**
+ * Re-encrypt with a new appPassword. Resets the rotation clock.
+ */
 export const rotateAppPassword = async (newAppPassword) => {
-  const creds = await getCredentials();
-  if (!creds) throw new Error('Cannot rotate: not authenticated');
-  creds.appPassword   = newAppPassword;
-  creds.credentialAge = now();
-  localStorage.setItem(KEY, JSON.stringify(creds));
+    const creds = await getCredentials();
+    if (!creds) throw new Error('Cannot rotate: not authenticated');
+
+    const key = await loadKey();
+    if (!key) throw new Error('Cannot rotate: no session key');
+
+    const payload = JSON.stringify({ ...creds, appPassword: newAppPassword });
+    const encrypted = await encrypt(payload, key);
+    localStorage.setItem(KEYS.CREDS, encrypted);
+    localStorage.setItem(KEYS.CRED_AGE, String(now()));
 };
 
+/**
+ * Build the Authorization header value for HTTP Basic Auth.
+ * Async because it requires credential decryption.
+ */
 export const getAuthHeader = async () => {
-  const creds = await getCredentials();
-  if (!creds) return null;
-  return `Basic ${btoa(`${creds.username}:${creds.appPassword}`)}`;
+    const creds = await getCredentials();
+    if (!creds) return null;
+    return `Basic ${btoa(`${creds.username}:${creds.appPassword}`)}`;
 };
 
+/**
+ * Clear all credentials from both localStorage and sessionStorage.
+ */
 export const clearCredentials = () => {
-  localStorage.removeItem(KEY);
+    Object.values(KEYS).forEach(k => localStorage.removeItem(k));
+    sessionStorage.removeItem('vault_crypto_key');
 };
