@@ -1,7 +1,7 @@
 // src/webdav.js
 
 const davBase = () =>
-    window.location.origin; // WebDAV lives at origin, not under /apps/thelab
+    window.location.origin; // WebDAV lives at origin, not under /apps/theVault
 
 const currentUser = () =>
     window.OC?.currentUser ?? window.OC?.getCurrentUser()?.uid ?? '';
@@ -66,7 +66,7 @@ export const parseMultistatus = (xmlText) => {
 
 /**
  * Get the oc:fileid for a file at the given user-relative path.
- * e.g. getFileId('theLAB/mysong.wav') → '42'
+ * e.g. getFileId('theVault/mysong.wav') → '42'
  *
  * Source: https://docs.nextcloud.com/server/latest/developer_manual/client_apis/WebDAV/basic.html
  */

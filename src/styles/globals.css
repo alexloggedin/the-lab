@@ -11,7 +11,7 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-body, #thelab-root {
+body, #vault-root {
   background:  var(--bg);
   color:       var(--text);
   font-family: 'DM Mono', monospace;
@@ -128,7 +128,7 @@ input:focus { outline: none; border-color: var(--muted); }
 
 .muted { color: var(--muted); font-size: 12px; }
 
-#thelab-root button {
+#vault-root button {
   background:      none !important;
   border:          none;
   color:           var(--muted);
@@ -143,35 +143,35 @@ input:focus { outline: none; border-color: var(--muted); }
   transition:      color 0.1s;
 }
 
-#thelab-root button:hover {
+#vault-root button:hover {
   color:      var(--accent);
   background: none !important;
   box-shadow: none !important;
 }
 
-#thelab-root button:focus {
+#vault-root button:focus {
   outline:    none;
   box-shadow: none !important;
 }
 
-#thelab-root button:active {
+#vault-root button:active {
   transform:  scale(0.98);
   background: none !important;
 }
 
-#thelab-root .abtn {
+#vault-root .abtn {
   border:        1px solid var(--border);
   color:         var(--muted);
   padding:       6px 16px;
   border-radius: 2px;
 }
 
-#thelab-root .abtn:hover {
+#vault-root .abtn:hover {
   border-color: var(--muted);
   color:        var(--accent);
 }
 
-#thelab-root .abtn.primary {
+#vault-root .abtn.primary {
   border-color: #3a3a3a;
   color:        var(--text);
 }
