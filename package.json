@@ -1,7 +1,7 @@
 {
-  "name": "theLAB",
-  "description": "A nextcloud app for sharing/managing projects",
-  "version": "1.0.0",
+  "name": "thevault",
+  "description": "A standalone app for managing and sharing audio/video projects via Nextcloud WebDAV",
+  "version": "0.1.0",
   "author": "Alex Little",
   "contributors": [],
   "bugs": {
@@ -16,23 +16,16 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "dev:docker": "vite --mode docker",
-    "build": "vite build && npm run copy-dist",
-    "copy-dist": "cp dist/thelab.js js/thelab.js && cp dist/thelab.css css/thelab.css",
-    "lint": "eslint --ext .js,.vue src",
-    "lint:fix": "eslint --ext .js,.vue src --fix",
-    "stylelint": "stylelint css/*.css css/*.scss src/**/*.scss src/**/*.vue",
-    "stylelint:fix": "stylelint css/*.css css/*.scss src/**/*.scss src/**/*.vue --fix"
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext .js,.jsx",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
-    "@nextcloud/axios": "^2.3.0",
-    "@nextcloud/dialogs": "^3.2.0",
-    "@nextcloud/router": "^2.1.1",
-    "@nextcloud/vue": "^9.6.0",
     "axios": "^1.13.6",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "vue": "^3.5.30",
     "wavesurfer.js": "^7.12.3"
   },
   "browserslist": [
@@ -46,13 +39,15 @@
     "@nextcloud/browserslist-config": "^2.3.0",
     "@nextcloud/eslint-config": "^8.2.1",
     "@nextcloud/stylelint-config": "^2.3.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/testing-library__jest-dom": "^5.14.9",
     "@vitejs/plugin-react": "^6.0.1",
-    "vite": "^8.0.0"
+    "jsdom": "^27.0.1",
+    "vite": "^8.0.0",
+    "vitest": "^3.2.4"
   },
   "main": ".eslintrc.js",
-  "directories": {
-    "lib": "lib",
-    "test": "tests"
-  },
   "keywords": []
 }

@@ -27,7 +27,7 @@ export default function ShareView({ token }) {
     return (
       <div className="app-container">
         <div className="topbar">
-          <span className="wordmark">theLAB</span>
+          <span className="wordmark">theVault</span>
         </div>
         <p className="muted" style={{ marginTop: '48px' }}>
           this link is invalid or has expired.
@@ -41,7 +41,7 @@ export default function ShareView({ token }) {
     return (
       <div className="app-container">
         <div className="topbar">
-          <span className="wordmark">theLAB</span>
+          <span className="wordmark">theVault</span>
         </div>
         <p className="muted" style={{ marginTop: '48px' }}>loading...</p>
       </div>
@@ -56,7 +56,7 @@ export default function ShareView({ token }) {
     <div className="app-container">
 
       <div className="topbar">
-        <span className="wordmark">theLAB</span>
+        <span className="wordmark">theVault</span>
       </div>
 
       <div style={{ padding: '40px 0' }}>

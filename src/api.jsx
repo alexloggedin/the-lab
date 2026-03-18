@@ -3,16 +3,16 @@ import { mockFiles, mockFolders, mockMetadata, mockShareLinks } from './dev/fixt
 import axios from 'axios';
 
 const base = (path) =>
-  window.OC ? window.OC.generateUrl(`/apps/thelab${path}`) : path;
+  window.OC ? window.OC.generateUrl(`/apps/theVault${path}`) : path;
 
 export const api = {
   initLab: () =>
     USE_MOCK
       ? Promise.resolve({ data: { success: true } })
       : axios.post(base('/api/init')),
-  getFiles: (path = 'theLAB') =>
+  getFiles: (path = 'theVault') =>
     USE_MOCK
-      ? Promise.resolve({ data: path != "theLAB" ? mockFiles : mockFolders })
+      ? Promise.resolve({ data: path !== 'theVault' ? mockFiles : mockFolders })
       : axios.get(base(`/api/files?path=${encodeURIComponent(path)}`)),
 
   getMetadata: (path) =>

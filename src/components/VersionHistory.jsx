@@ -11,7 +11,7 @@ export default function VersionHistory({ filePath, mimeType }) {
   const [previewId,      setPreviewId]      = useState(null);
   const [previewPlaying, setPreviewPlaying] = useState(false);
 
-  // filePath is the user-relative path, e.g. "theLAB/project/song.wav"
+  // filePath is the user-relative path, e.g. "theVault/project/song.wav"
   const fileName = filePath.split('/').pop();
 
   useEffect(() => {

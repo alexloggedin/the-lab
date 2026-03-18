@@ -1,9 +1,18 @@
-.idea
-*.iml
-/vendor/
-/build/
+# Dependencies
 node_modules/
-/.php-cs-fixer.cache
-js/*hot-update.*
-/vendor
-/dist
+
+# Build output
+dist/
+
+# Environment / local config
+.env
+.env.local
+.env.*.local
+
+# Editor
+.idea/
+*.iml
+.DS_Store
+
+# Vite
+*.local
