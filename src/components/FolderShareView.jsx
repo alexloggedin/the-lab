@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { api } from '../api.jsx';
+import { api } from '../api.js';
 import AudioPlayer from './AudioPlayer.jsx';
 
 export default function FolderShareView({ share, token }) {

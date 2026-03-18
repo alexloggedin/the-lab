@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { api } from '../api.jsx';
+import { api } from '../api.js';
 import AudioPlayer from './AudioPlayer.jsx';
 import VideoPlayer from './VideoPlayer.jsx';
 import FolderShareView from './FolderShareView.jsx';

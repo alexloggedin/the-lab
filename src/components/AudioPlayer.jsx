@@ -1,48 +1,111 @@
-import { useEffect, useRef } from 'react';
+// src/components/AudioPlayer.jsx
+import { useEffect, useRef, useState } from 'react';
 import WaveSurfer from 'wavesurfer.js';
+import { getAuthHeader } from '../auth/authStore.js';
+import { USE_MOCK } from '../dev/useMockData.js';
 
 export default function AudioPlayer({ fileUrl, isPlaying, onPlayPause }) {
   const containerRef = useRef(null);
-  const ws = useRef(null);
+  const wavesurferRef = useRef(null);
+  const [blobUrl, setBlobUrl] = useState(null);
+  const [ready, setReady] = useState(false); // WaveSurfer decoded and ready
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
+  // Step 1 — fetch the file and create a blob URL
   useEffect(() => {
-    ws.current = WaveSurfer.create({
+    if (!fileUrl) return;
+
+    setBlobUrl(null);
+    setReady(false);
+    setError(null);
+
+    if (USE_MOCK || !fileUrl.startsWith('http')) {
+      setBlobUrl(fileUrl);
+      return;
+    }
+
+    let objectUrl = null;
+    setLoading(true);
+
+    getAuthHeader().then(authHeader => {
+      fetch(fileUrl, {
+        credentials: 'omit',
+        headers: authHeader ? { Authorization: authHeader } : {},
+      })
+        .then(res => {
+          if (!res.ok) throw new Error(`Failed to load audio: ${res.status}`);
+          return res.blob();
+        })
+        .then(blob => {
+          console.log('blob type:', blob.type, 'size:', blob.size); // temporary
+          objectUrl = URL.createObjectURL(blob);
+          setBlobUrl(objectUrl);
+        })
+        .catch(err => setError(err.message))
+        .finally(() => setLoading(false));
+    });
+
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      wavesurferRef.current?.destroy();
+      wavesurferRef.current = null;
+    };
+  }, [fileUrl]);
+
+  // Step 2 — initialize WaveSurfer once blob URL exists and container is mounted
+  useEffect(() => {
+    if (!blobUrl || !containerRef.current) return;
+
+    // Destroy any previous instance
+    wavesurferRef.current?.destroy();
+    wavesurferRef.current = null;
+    setReady(false);
+
+    const style = getComputedStyle(containerRef.current);
+
+    const ws = WaveSurfer.create({
       container: containerRef.current,
-      waveColor: '#444',
-      progressColor: '#ffffff',
+      waveColor: style.getPropertyValue('--border').trim() || '#2a2a2a',
+      progressColor: style.getPropertyValue('--accent').trim() || '#ffffff',
       height: 48,
       barWidth: 2,
       barGap: 1,
-      barRadius: 2,
-      url: fileUrl,
+      cursorWidth: 1,
     });
 
-  ws.current.on('ready', () => {
-    console.log('wavesurfer ready, isPlaying:', isPlaying);
-    if (isPlaying) {
-      ws.current.play();
-    }
-  });
+    wavesurferRef.current = ws;
 
-    // Tell FileRow when the track finishes
-    ws.current.on('finish', () => onPlayPause(false));
+    ws.on('ready', () => {
+      setReady(true);
+      // If play was requested before decode finished, start now
+      if (isPlaying) ws.play();
+    });
 
-    return () => ws.current.destroy();
-  }, [fileUrl]);
+    ws.on('error', (err) => {
+      console.error('WaveSurfer error:', err);
+      setError(`Could not decode audio: ${err}`);
+    });
 
-  // React to isPlaying changes coming from FileRow
+    ws.on('finish', () => onPlayPause(false));
+
+    ws.load(blobUrl);
+
+    return () => {
+      ws.destroy();
+      wavesurferRef.current = null;
+    };
+  }, [blobUrl]);
+
+  // Step 3 — sync play/pause after WaveSurfer is ready
   useEffect(() => {
-    if (!ws.current) return;
-    if (isPlaying) {
-      ws.current.play();
-    } else {
-      ws.current.pause();
-    }
-  }, [isPlaying]);
+    const ws = wavesurferRef.current;
+    if (!ws || !ready) return;
+    if (isPlaying) ws.play(); else ws.pause();
+  }, [isPlaying, ready]);
 
-  return (
-    <div style={{ padding: '12px 0' }}>
-      <div ref={containerRef} />
-    </div>
-  );
+  if (loading) return <p className="muted" style={{ padding: '8px 0' }}>loading audio...</p>;
+  if (error) return <p className="muted" style={{ padding: '8px 0' }}>{error}</p>;
+
+  return <div ref={containerRef} style={{ width: '100%', margin: '8px 0' }} />;
 }

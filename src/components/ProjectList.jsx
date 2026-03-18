@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import FileRow from './FileRow.jsx';
 import ShareModal from './ShareModal.jsx';
-import { api } from '../api.jsx';
+import { api } from '../api.js';
 
 export default function ProjectList({ folders, openFolder, onFolderClick }) {
   const [files, setFiles] = useState([]);
@@ -34,6 +34,8 @@ export default function ProjectList({ folders, openFolder, onFolderClick }) {
         }));
       }
     };
+
+    console.log(openFolder.path)
 
     api.getFiles(openFolder.path).then(async res => {
       if (cancelled) return;
