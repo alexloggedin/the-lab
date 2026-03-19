@@ -126,17 +126,6 @@ export interface ShareLink {
 }
 
 /**
- * Share link information to be sent to createShare endpoint.
- */
-export interface ShareLinkForm {
-  path: string;
-  hideDownload: boolean;
-  expiryDate: string;
-  password: string;
-  permissions: number;
-}
-
-/**
  * The share info object returned when resolving a public share token.
  * Used by ShareView when someone opens a public share link.
  * Contains nested audio/video metadata for display on the share page.
@@ -152,6 +141,27 @@ export interface ShareInfo {
     key?: string;
     genre?: string;
   };
+}
+
+export interface OCSParsedResponse {
+  ocs: {
+    meta: {
+      statuscode: number,
+      message: string,
+    }
+    data: OCSResponseItem | OCSResponseItem[]
+  }
+}
+
+export interface OCSResponseItem {
+  id: string,
+  path: string,         
+  url: string,
+  token: string,
+  item_type: string,
+  hide_download: Number,
+  expiration: string | null,
+  permissions: number,
 }
 
 // ─── API Response Wrapper ─────────────────────────────────────────────────

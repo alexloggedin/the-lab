@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api.js';
-import type { ShareLink} from '../types';
+import type { ShareLink } from '../types';
 
 interface Props {
     filePath: string;
@@ -8,55 +8,64 @@ interface Props {
     isFolder?: boolean;  // optional — defaults to false
 }
 
-interface ModalForm {
-    password: string,
-    expiryDate: string,
-    hideDownload: boolean,
-    allowUpload: boolean,
+interface ShareHeaderProps {
+    isFolder: boolean,
+    fileName: string
 }
 
 export default function ShareModal({ filePath, fileName, isFolder = false }: Props) {
     const [shares, setShares] = useState<ShareLink[]>([]);
     const [creating, setCreating] = useState<boolean>(false);
     const [copied, setCopied] = useState<string | null>(null);
-    const [form, setForm] = useState<ModalForm>({
-        password: '',
-        expiryDate: '',
-        hideDownload: false,
-        allowUpload: false,
-    });
+    const [error, setError] = useState<any>(null);
+    const [hideDownload, setHideDownload] = useState<boolean>(false);
+
+    const ocsPath = filePath.startsWith('/') ? filePath : `/${filePath}`;
 
     useEffect(() => {
+        console.log('[ShareModal] loading shares for path:', ocsPath);
+
         api.getShares().then(res => {
-            console.log("Raw response", res)
-            console.log(filePath)
-            const fileShares = res.data.filter(s => s.path === 'files/' + filePath);
-            console.log("fileShare List: ", fileShares);
+            console.log('[ShareModal] all shares:', res.data);
+            const fileShares = res.data.filter(s => s.path === ocsPath);
+            console.log('[ShareModal] filtered shares for this item:', fileShares);
             setShares(fileShares);
+        }).catch(err => {
+            console.error('[ShareModal] getShares error:', err);
+            setError('could not load shares');
         });
     }, [filePath]);
 
-    const handleFormChange = (field:string, value:string|boolean) =>
-        setForm(prev => ({ ...prev, [field]: value }));
-
     const handleCreate = async () => {
         setCreating(true);
-        const res = await api.createShare({
-            path: filePath,
-            password: form.password,
-            expiryDate: form.expiryDate,
-            hideDownload: form.hideDownload,
-            permissions: 1,
-        });
-        console.log(fileName, filePath);
-        setShares(prev => [...prev, res.data]);
-        setForm({ password: '', expiryDate: '', hideDownload: true, allowUpload: false });
-        setCreating(false);
+        setError(null);
+
+        if (ocsPath.includes('..') || !ocsPath.startsWith('/theVault')) {
+            setError('invalid share path');
+            return;
+        }
+
+        try {
+            const res = await api.createShare(ocsPath, hideDownload);
+            console.log('[ShareModal] created share:', res.data);
+            
+            setShares(prev => [...prev, res.data]);
+        } catch (err: any) {
+            console.error('[ShareModal] createShare error:', err);
+            setError(err.message);
+        } finally {
+            setCreating(false);
+        }
     };
 
     const handleRevoke = async (id: string) => {
-        await api.deleteShare(id);
-        setShares(prev => prev.filter(s => s.id !== id));
+        try {
+            await api.deleteShare(id);
+            setShares(prev => prev.filter(s => s.id !== id));
+        } catch (err: any) {
+            console.error('[ShareModal] deleteShare error:', err);
+            setError(err.message);
+        }
     };
 
     const handleCopy = (url: string) => {
@@ -67,53 +76,21 @@ export default function ShareModal({ filePath, fileName, isFolder = false }: Pro
 
     return (
         <div className="share-panel">
-            <ShareHeader
-                fileName={fileName}
-                isFolder={isFolder}
-            />
-            <div className="share-field">
-                <span className="share-lbl">expires</span>
-                <input
-                    type="date"
-                    className="share-input"
-                    value={form.expiryDate}
-                    onChange={e => handleFormChange('expiryDate', e.target.value)}
-                />
-            </div>
-            <div className="share-field">
-                <span className="share-lbl">password (optional)</span>
-                <input
-                    type="password"
-                    className="share-input"
-                    placeholder="leave blank for no password"
-                    value={form.password}
-                    onChange={e => handleFormChange('password', e.target.value)}
-                />
-            </div>
+            <ShareHeader fileName={fileName} isFolder={isFolder} />
 
+            {error && <p className="share-error">{error}</p>}
+
+            {/* Hide download toggle */}
             <div className="share-row">
-                <label className="share-lbl">
+                <label className="share-lbl share-toggle-label">
                     <input
                         type="checkbox"
-                        checked={form.hideDownload}
-                        onChange={() => handleFormChange('hideDownload', !form.hideDownload)}
+                        checked={hideDownload}
+                        onChange={() => setHideDownload(prev => !prev)}
                     />
-                    hide download
+                    hide download on share page
                 </label>
-
             </div>
-
-            {isFolder && (
-                <div className="share-row">
-                    <span className="share-lbl">allow collaborators to upload</span>
-                    <div
-                        className={form.allowUpload ? 'toggle on' : 'toggle'}
-                        onClick={() => handleFormChange('allowUpload', !form.allowUpload)}
-                    >
-                        <div className="toggle-knob" />
-                    </div>
-                </div>
-            )}
 
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <button
@@ -133,12 +110,6 @@ export default function ShareModal({ filePath, fileName, isFolder = false }: Pro
                         {shares.map(share => (
                             <div key={share.id} className="share-item">
                                 <span className="si-url">{share.url}</span>
-                                {share.expiry && (
-                                    <span className="si-meta">
-                                        expires {new Date(share.expiry).toLocaleDateString()}
-                                    </span>
-                                )}
-                                {share.hasPassword && <span className="si-meta">password</span>}
                                 <button className="abtn" onClick={() => handleCopy(share.url)}>
                                     {copied === share.url ? 'copied' : 'copy'}
                                 </button>
@@ -150,14 +121,8 @@ export default function ShareModal({ filePath, fileName, isFolder = false }: Pro
                     </div>
                 </>
             )}
-
         </div>
     );
-}
-
-interface ShareHeaderProps {
-    isFolder: boolean;
-    fileName: string;
 }
 
 function ShareHeader({ isFolder, fileName }: ShareHeaderProps) {
@@ -173,9 +138,7 @@ function ShareHeader({ isFolder, fileName }: ShareHeaderProps) {
             <span style={{ fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
                 {isFolder ? 'sharing folder' : 'sharing file'}
             </span>
-            <span style={{ fontSize: '12px', color: 'var(--text)' }}>
-                {fileName}
-            </span>
+            <span style={{ fontSize: '12px', color: 'var(--text)' }}>{fileName}</span>
         </div>
-    )
+    );
 }
