@@ -4,7 +4,7 @@ import AudioPlayer from './AudioPlayer.jsx';
 import VideoPlayer from './VideoPlayer.jsx';
 import VersionHistory from './VersionHistory.jsx';
 import ShareModal from './ShareModal.jsx';
-import type { VaultFile, FileMetadata, ActivePanel } from '../types';
+import type { VaultFile, FileMetadata } from '../types';
 
 interface Props {
     file: VaultFile;
@@ -14,6 +14,8 @@ interface Props {
 interface PillProps {
     value: string | undefined | null
 }
+
+type ActivePanel = 'player' | 'history' | 'share' | null;
 
 const Pill = ({value}: PillProps) => value
     ? <span className="pill">{value}</span>

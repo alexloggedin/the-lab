@@ -8,18 +8,18 @@ const KEY_ID     = 'vault_main_key';
 
 // ─── IndexedDB helpers ────────────────────────────────────────────────────────
 
-const openDB = () => new Promise((resolve, reject) => {
+const openDB = () => new Promise<any>((resolve, reject) => {
   const req = indexedDB.open(DB_NAME, DB_VERSION);
 
-  req.onupgradeneeded = (e) => {
+  req.onupgradeneeded = (e:any) => {
     e.target.result.createObjectStore(STORE_NAME);
   };
 
-  req.onsuccess = (e) => resolve(e.target.result);
-  req.onerror   = (e) => reject(e.target.error);
+  req.onsuccess = (e) => resolve(e?.target?.result);
+  req.onerror   = (e) => reject(e?.target?.error);
 });
 
-const dbGet = async (key) => {
+const dbGet = async (key: string) => {
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const tx  = db.transaction(STORE_NAME, 'readonly');
@@ -29,22 +29,22 @@ const dbGet = async (key) => {
   });
 };
 
-const dbSet = async (key, value) => {
+const dbSet = async (key: string, value: string) => {
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const tx  = db.transaction(STORE_NAME, 'readwrite');
     const req = tx.objectStore(STORE_NAME).put(value, key);
-    req.onsuccess = () => resolve();
+    req.onsuccess = () => resolve(req.status);
     req.onerror   = () => reject(req.error);
   });
 };
 
-const dbDelete = async (key) => {
+const dbDelete = async (key: string) => {
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const tx  = db.transaction(STORE_NAME, 'readwrite');
     const req = tx.objectStore(STORE_NAME).delete(key);
-    req.onsuccess = () => resolve();
+    req.onsuccess = () => resolve(req.status);
     req.onerror   = () => reject(req.error);
   });
 };
@@ -114,7 +114,7 @@ export const encrypt = async (plaintext, key) => {
  * Decrypt a base64 string produced by encrypt().
  * Throws if data is tampered — AES-GCM authentication tag fails.
  */
-export const decrypt = async (ciphertextB64, key) => {
+export const decrypt = async (ciphertextB64: string, key: CryptoKey) => {
   const combined   = Uint8Array.from(atob(ciphertextB64), c => c.charCodeAt(0));
   const iv         = combined.slice(0, 12);
   const ciphertext = combined.slice(12);

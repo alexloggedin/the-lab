@@ -4,13 +4,19 @@ import WaveSurfer from 'wavesurfer.js';
 import { getAuthHeader } from '../auth/authStore.js';
 import { USE_MOCK } from '../dev/useMockData.js';
 
-export default function AudioPlayer({ fileUrl, isPlaying, onPlayPause }) {
-  const containerRef = useRef(null);
-  const wavesurferRef = useRef(null);
-  const [blobUrl, setBlobUrl] = useState(null);
-  const [ready, setReady] = useState(false); // WaveSurfer decoded and ready
+interface Props {
+  fileUrl: string | null;
+  isPlaying: boolean;
+  onPlayPause: (playing: boolean) => void;
+}
+
+export default function AudioPlayer({ fileUrl, isPlaying, onPlayPause }: Props) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const wavesurferRef = useRef<WaveSurfer>(null);
+  const [blobUrl, setBlobUrl] = useState<string|null>(null);
+  const [ready, setReady] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<any>(null);
 
   // Step 1 — fetch the file and create a blob URL
   useEffect(() => {
@@ -25,7 +31,7 @@ export default function AudioPlayer({ fileUrl, isPlaying, onPlayPause }) {
       return;
     }
 
-    let objectUrl = null;
+    let objectUrl = "";
     setLoading(true);
 
     getAuthHeader().then(authHeader => {

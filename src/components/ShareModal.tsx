@@ -1,28 +1,42 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api.js';
+import type { ShareLink} from '../types';
 
-export default function ShareModal({ filePath, fileName, isFolder = false }) {
-    const [shares, setShares] = useState([]);
-    const [creating, setCreating] = useState(false);
-    const [copied, setCopied] = useState(null);
-    const [form, setForm] = useState({
+interface Props {
+    filePath: string;
+    fileName: string;
+    isFolder?: boolean;  // optional — defaults to false
+}
+
+interface ModalForm {
+    password: string,
+    expiryDate: string,
+    hideDownload: boolean,
+    allowUpload: boolean,
+}
+
+export default function ShareModal({ filePath, fileName, isFolder = false }: Props) {
+    const [shares, setShares] = useState<ShareLink[]>([]);
+    const [creating, setCreating] = useState<boolean>(false);
+    const [copied, setCopied] = useState<string | null>(null);
+    const [form, setForm] = useState<ModalForm>({
         password: '',
         expiryDate: '',
         hideDownload: false,
-        allowUpload: false, 
+        allowUpload: false,
     });
 
     useEffect(() => {
         api.getShares().then(res => {
             console.log("Raw response", res)
             console.log(filePath)
-            const fileShares = res.data.filter(s => s.path === 'files/'+filePath);
+            const fileShares = res.data.filter(s => s.path === 'files/' + filePath);
             console.log("fileShare List: ", fileShares);
             setShares(fileShares);
         });
     }, [filePath]);
 
-    const handleFormChange = (field, value) =>
+    const handleFormChange = (field:string, value:string|boolean) =>
         setForm(prev => ({ ...prev, [field]: value }));
 
     const handleCreate = async () => {
@@ -32,7 +46,7 @@ export default function ShareModal({ filePath, fileName, isFolder = false }) {
             password: form.password,
             expiryDate: form.expiryDate,
             hideDownload: form.hideDownload,
-            permissions: 1,  
+            permissions: 1,
         });
         console.log(fileName, filePath);
         setShares(prev => [...prev, res.data]);
@@ -40,12 +54,12 @@ export default function ShareModal({ filePath, fileName, isFolder = false }) {
         setCreating(false);
     };
 
-    const handleRevoke = async (id) => {
+    const handleRevoke = async (id: string) => {
         await api.deleteShare(id);
         setShares(prev => prev.filter(s => s.id !== id));
     };
 
-    const handleCopy = (url) => {
+    const handleCopy = (url: string) => {
         navigator.clipboard.writeText(url);
         setCopied(url);
         setTimeout(() => setCopied(null), 2000);
@@ -141,7 +155,12 @@ export default function ShareModal({ filePath, fileName, isFolder = false }) {
     );
 }
 
-function ShareHeader({ isFolder, fileName }) {
+interface ShareHeaderProps {
+    isFolder: boolean;
+    fileName: string;
+}
+
+function ShareHeader({ isFolder, fileName }: ShareHeaderProps) {
     return (
         <div style={{
             display: 'flex',

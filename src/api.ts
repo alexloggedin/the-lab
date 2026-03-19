@@ -1,5 +1,5 @@
 // src/api.ts
-import type { VaultFile, FileMetadata, ShareLink, ShareInfo, ApiResponse, DavEntry } from './types';
+import type { VaultFile, FileMetadata, ShareLink, ShareInfo, ApiResponse, DavEntry, ShareLinkForm } from './types';
 import { USE_MOCK } from './dev/useMockData';
 import { mockFiles, mockFolders, mockMetadata, mockShareLinks } from './dev/fixtures';
 import { getAuthHeader, touchActivity } from './auth/authStore';
@@ -52,17 +52,6 @@ export const entryToFile = (entry: DavEntry): VaultFile => {
   };
 };
 
-function getMockShareInfoFromToken(token: string): Promise<ApiResponse<ShareInfo>> {
-  switch (token) {
-    case 'invalid':
-      return Promise.reject(new Error('not found'));
-    case 'folder':
-      return Promise.resolve({ data: { token, fileName: 'ep-demos', mimetype: 'httpd/unix-directory', isFolder: true, hideDownload: false } });
-    default:
-      return Promise.resolve({ data: { token, fileName: 'track_01_v3.wav', mimetype: 'audio/wav', isFolder: false, hideDownload: false, meta: { bpm: '128', key: 'Am', genre: 'Electronic' } } });
-  }
-}
-
 export const api = {
 
   initVault: (): Promise<ApiResponse<{ success: boolean }> | void> =>
@@ -113,8 +102,8 @@ export const api = {
   getShares: (_path?: string): Promise<ApiResponse<ShareLink[]>> =>
     USE_MOCK ? Promise.resolve({ data: mockShareLinks }) : Promise.resolve({ data: [] }),
 
-  createShare: (_path?: string): Promise<ApiResponse<{ id: string; token: string }>> =>
-    USE_MOCK ? Promise.resolve({ data: { id: '2', token: 'newXyz' } }) : Promise.resolve({ data: { id: '', token: '' } }),
+  createShare: (_shareLinkForm?: ShareLinkForm): Promise<ApiResponse<ShareLink>> =>
+    USE_MOCK ? Promise.resolve({ data: mockShareLinks[0]}) : Promise.resolve({ data: mockShareLinks[0]}),
 
   deleteShare: (_id?: string): Promise<ApiResponse<{ success: boolean }>> =>
     USE_MOCK ? Promise.resolve({ data: { success: true } }) : Promise.resolve({ data: { success: true } }),
@@ -125,6 +114,17 @@ export const api = {
   getShareContents: (_token?: string): Promise<ApiResponse<VaultFile[]>> =>
     USE_MOCK ? Promise.resolve({ data: mockFiles }) : Promise.resolve({ data: [] }),
 
-  publicStreamUrl: (token: string, _path?: string): string =>
+  publicStreamUrl: (_token: string, _path?: string): string =>
     USE_MOCK ? '/mock-audio/test.wav' : '',
 };
+
+function getMockShareInfoFromToken(token: string): Promise<ApiResponse<ShareInfo>> {
+  switch (token) {
+    case 'invalid':
+      return Promise.reject(new Error('not found'));
+    case 'folder':
+      return Promise.resolve({ data: { token, fileName: 'ep-demos', mimetype: 'httpd/unix-directory', isFolder: true, hideDownload: false } });
+    default:
+      return Promise.resolve({ data: { token, fileName: 'track_01_v3.wav', mimetype: 'audio/wav', isFolder: false, hideDownload: false, meta: { bpm: '128', key: 'Am', genre: 'Electronic' } } });
+  }
+}
