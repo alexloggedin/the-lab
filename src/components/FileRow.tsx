@@ -4,25 +4,34 @@ import AudioPlayer from './AudioPlayer.jsx';
 import VideoPlayer from './VideoPlayer.jsx';
 import VersionHistory from './VersionHistory.jsx';
 import ShareModal from './ShareModal.jsx';
+import type { VaultFile, FileMetadata, ActivePanel } from '../types';
 
-const Pill = ({ value }) => value
+interface Props {
+    file: VaultFile;
+    meta: FileMetadata | null;
+}
+
+interface PillProps {
+    value: string | undefined | null
+}
+
+const Pill = ({value}: PillProps) => value
     ? <span className="pill">{value}</span>
     : null;
 
-const formatSize = (bytes) =>
+const formatSize = (bytes: number) =>
     (bytes / 1024 / 1024).toFixed(1) + ' MB';
 
-export default function FileRow({ file, meta }) {
+export default function FileRow({ file, meta }: Props) {
 
-    const [activePanel, setActivePanel] = useState(null);
-    const [resolvedUrl, setResolvedUrl] = useState(null);
+    const [activePanel, setActivePanel] = useState<ActivePanel>(null);
+    const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
+    const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
     const isAudio = file.mimetype?.startsWith('audio/');
     const isVideo = file.mimetype?.startsWith('video/');
 
-    const [isPlaying, setIsPlaying] = useState(false);
-
-    const togglePanel = (panel) => {
+    const togglePanel = (panel: ActivePanel) => {
         setActivePanel(prev => prev === panel ? null : panel);
     };
 

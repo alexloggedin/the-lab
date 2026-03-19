@@ -1,9 +1,15 @@
-// src/components/LoginPage.jsx
 import { useState } from 'react';
 
-export default function LoginPage({ onStartLogin, loginState, loginError, loginUrl }) {
-  const [serverUrl, setServerUrl] = useState('');
-  const [warning,   setWarning]   = useState(null);
+interface Props {
+  onStartLogin: (serverUrl: string) => void;
+  loginState: 'idle' | 'polling' | 'error';
+  loginError: string | null;
+  loginUrl: string | null;
+}
+
+export default function LoginPage({ onStartLogin, loginState, loginError, loginUrl }: Props) {
+  const [serverUrl, setServerUrl] = useState<string>('');
+  const [warning, setWarning] = useState<string | null>(null);
 
   const handleSubmit = () => {
     const trimmed = serverUrl.trim();

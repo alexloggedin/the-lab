@@ -1,5 +1,6 @@
-// src/hooks/useAuth.js
+// src/hooks/useAuth.ts
 import { useState, useEffect, useCallback } from 'react';
+import type { AuthState, Credentials } from '../types';
 import {
   saveCredentials,
   getCredentials,
@@ -7,40 +8,22 @@ import {
   hasStoredCredentials,
   needsRotation,
   touchActivity,
-} from '../auth/authStore.js';
-import { initiateLoginFlow, pollForCredentials } from '../auth/loginFlow.js';
+} from '../auth/authStore';
+import { initiateLoginFlow, pollForCredentials } from '../auth/loginFlow';
 
-/**
- * Custom hook managing the full authentication lifecycle.
- *
- * Returns:
- *   authStatus   - 'loading' | 'authenticated' | 'unauthenticated'
- *   credentials  - decrypted { serverUrl, username, appPassword } or null
- *   startLogin   - async fn(serverUrl): begins Login Flow V2
- *   logout       - fn(): clears credentials, returns to login page
- *   loginState   - 'idle' | 'polling' | 'error'
- *   loginError   - string | null
- *   loginUrl     - string | null (Nextcloud login URL to open in a new tab)
- *   rotationDue  - boolean: true when appPassword is >30 days old
- */
-export const useAuth = () => {
-  // 'loading' while we check and decrypt stored credentials
-  const [authStatus,   setAuthStatus]   = useState('loading');
-  const [credentials,  setCredentials]  = useState(null);
-  const [loginState,   setLoginState]   = useState('idle');
-  const [loginError,   setLoginError]   = useState(null);
-  const [loginUrl,     setLoginUrl]     = useState(null);
-  const [rotationDue,  setRotationDue]  = useState(false);
+export const useAuth = (): AuthState => {
+  const [authStatus, setAuthStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading');
+  const [credentials, setCredentials] = useState<Credentials | null>(null);
+  const [loginState, setLoginState] = useState<'idle' | 'polling' | 'error'>('idle');
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [loginUrl, setLoginUrl] = useState<string | null>(null);
+  const [rotationDue, setRotationDue] = useState<boolean>(false);
 
-  // On mount: try to load existing credentials from localStorage
   useEffect(() => {
-    // Fast synchronous check — avoids a flash of the login page
     if (!hasStoredCredentials()) {
       setAuthStatus('unauthenticated');
       return;
     }
-
-    // Slow async check — actually decrypts and validates
     getCredentials().then(creds => {
       if (creds) {
         setCredentials(creds);
@@ -53,7 +36,7 @@ export const useAuth = () => {
     });
   }, []);
 
-  const startLogin = useCallback(async (serverUrl) => {
+  const startLogin = useCallback(async (serverUrl: string): Promise<void> => {
     setLoginState('polling');
     setLoginError(null);
 
@@ -62,7 +45,7 @@ export const useAuth = () => {
       flowData = await initiateLoginFlow(serverUrl.trim());
     } catch (err) {
       setLoginState('error');
-      setLoginError(err.message);
+      setLoginError(err instanceof Error ? err.message : 'Unknown error');
       return;
     }
 
@@ -70,15 +53,14 @@ export const useAuth = () => {
 
     const { token: pollToken, endpoint: pollEndpoint } = flowData.poll;
     let pollCount = 0;
-    const MAX_POLLS = 100; // ~5 minutes at 3s intervals
+    const MAX_POLLS = 100;
 
-    const poll = async () => {
+    const poll = async (): Promise<void> => {
       if (pollCount++ > MAX_POLLS) {
         setLoginState('error');
         setLoginError('Login timed out. Please try again.');
         return;
       }
-
       try {
         const creds = await pollForCredentials(pollEndpoint, pollToken);
         if (creds) {
@@ -93,14 +75,14 @@ export const useAuth = () => {
         }
       } catch (err) {
         setLoginState('error');
-        setLoginError(`Authentication failed: ${err.message}`);
+        setLoginError(err instanceof Error ? `Authentication failed: ${err.message}` : 'Authentication failed');
       }
     };
 
     poll();
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback((): void => {
     clearCredentials();
     setCredentials(null);
     setAuthStatus('unauthenticated');
@@ -110,14 +92,5 @@ export const useAuth = () => {
     setRotationDue(false);
   }, []);
 
-  return {
-    authStatus,
-    credentials,
-    startLogin,
-    logout,
-    loginState,
-    loginError,
-    loginUrl,
-    rotationDue,
-  };
+  return { authStatus, credentials, startLogin, logout, loginState, loginError, loginUrl, rotationDue };
 };
