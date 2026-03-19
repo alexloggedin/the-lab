@@ -1,5 +1,6 @@
 // src/api/sharesApi.js
 import { getAuthHeader, getCredentials } from '../auth/authStore.js';
+import { OCSShareResponse } from '../types.js';
 
 // ─── Internal helpers ──────────────────────────────────────────────────────────
 
@@ -19,7 +20,7 @@ const ocsBase = async () => {
  *   OCS-APIRequest: true   — tells Nextcloud this is an API call, not a web UI request
  *   Accept: application/json — returns JSON instead of XML
  */
-const ocsFetch = async (url, options = {}) => {
+const ocsFetch = async (url: string, options = {}) => {
     const authHeader = await getAuthHeader();
 
     console.log('[sharesApi] ocsFetch →', url);
@@ -69,7 +70,7 @@ const parseOCS = async (res) => {
  *   item_type   — "file" or "folder"
  *   hide_download — 0 or 1
  */
-const normalizeShare = (raw) => ({
+const normalizeShare = (raw: OCSShareResponse) => ({
     id: String(raw.id),
     path: raw.path,           // includes leading slash: "/theVault/project/song.wav"
     url: raw.url,
@@ -86,7 +87,7 @@ const normalizeShare = (raw) => ({
  *
  * Reference: https://docs.nextcloud.com/server/33/developer_manual/client_apis/OCS/ocs-share-api.html
  */
-export const listShares = async () => {
+export const ocsListShares = async () => {
     const base = await ocsBase();
     const res = await ocsFetch(base);
 
@@ -108,7 +109,7 @@ export const listShares = async () => {
  *
  * Reference: https://docs.nextcloud.com/server/33/developer_manual/client_apis/OCS/ocs-share-api.html
  */
-export const createShare = async ({ path, hideDownload = false }) => {
+export const oscCreateShare = async ({ path = '', hideDownload = false }) => {
     const base = await ocsBase();
 
     // OCS create share uses application/x-www-form-urlencoded body
@@ -135,7 +136,7 @@ export const createShare = async ({ path, hideDownload = false }) => {
 /**
  * Delete a share by its numeric ID.
  */
-export const deleteShare = async (id) => {
+export const oscDeleteShare = async (id: string) => {
     const base = await ocsBase();
     const res = await ocsFetch(`${base}/${id}`, { method: 'DELETE' });
     if (!res.ok) throw new Error(`deleteShare failed: ${res.status}`);

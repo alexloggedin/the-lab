@@ -154,6 +154,15 @@ export interface ShareInfo {
   };
 }
 
+export interface OCSShareResponse {
+    id: string,
+    path: string,           // includes leading slash: "/theVault/project/song.wav"
+    url: string,
+    token: string,
+    item_type: string,
+    hide_download: Number, 
+}
+
 // ─── API Response Wrapper ─────────────────────────────────────────────────
 
 /**
