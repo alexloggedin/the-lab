@@ -1,11 +1,10 @@
-// src/api.ts
-import type { VaultFile, FileMetadata, ShareLink, ShareInfo, ApiResponse, DavEntry } from './types';
-import { USE_MOCK } from './dev/useMockData';
-import { mockFiles, mockFolders, mockMetadata, mockShareLinks } from './dev/fixtures';
-import { getAuthHeader, touchActivity } from './auth/authStore';
-import { davFilesUrl, parseMultistatus } from './webdav';
-import { ocsListShares, ocsCreateShare, ocsDeleteShare } from './api/sharesApi.ts';
-import { getShareInfo, listShareContents, publicStreamUrl as buildPublicStreamUrl } from './api/publicShareApi.ts';
+import type { VaultFile, FileMetadata, ShareLink, ShareInfo, ApiResponse, DavEntry } from '../types.ts';
+import { USE_MOCK } from '../dev/useMockData.ts';
+import { mockFiles, mockFolders, mockMetadata, mockShareLinks } from '../dev/fixtures.ts';
+import { getAuthHeader, touchActivity } from '../auth/authStore.ts';
+import { davFilesUrl, parseMultistatus } from './webdav.ts';
+import { ocsListShares, ocsCreateShare, ocsDeleteShare } from '../api/sharesApi.ts';
+import { getShareInfo, listShareContents, publicStreamUrl as buildPublicStreamUrl } from '../api/publicShareApi.ts';
 
 
 const authedFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { api } from '../api.js';
-import type { ShareLink } from '../types';
+import { api } from '../../api/api.ts';
+import type { ShareLink } from '../../types.js';
 
 interface Props {
     filePath: string;

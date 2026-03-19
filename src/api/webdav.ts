@@ -1,6 +1,6 @@
 // src/webdav.ts
-import type { DavEntry, FileVersion } from './types';
-import { getCredentials, getAuthHeader } from './auth/authStore';
+import type { DavEntry, FileVersion } from '../types';
+import { getCredentials, getAuthHeader } from '../auth/authStore';
 
 // ─── Internal helpers ─────────────────────────────────────────────────────
 

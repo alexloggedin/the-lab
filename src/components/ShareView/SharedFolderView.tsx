@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import AudioPlayer from './AudioPlayer.tsx';
-import { listShareContents, publicStreamUrl, getPublicAuthHeader } from '../api/publicShareApi.js';
-import { VaultFile } from '../types.ts';
+import AudioPlayer from '../Players/AudioPlayer.tsx';
+import { listShareContents, publicStreamUrl, getPublicAuthHeader } from '../../api/publicShareApi.js';
+import { VaultFile } from '../../types.ts';
 
 interface Props {
     token: string|undefined,
     hideDownload: boolean
 }
 
-export default function FolderShareView({ token, hideDownload }: Props) {
+export default function SharedFolderView({ token, hideDownload }: Props) {
   const [files,      setFiles]      = useState<VaultFile[]>([]);
   const [activeFile, setActiveFile] = useState<VaultFile|null>(null);
   const [isPlaying,  setIsPlaying]  = useState(false);
@@ -48,6 +48,8 @@ export default function FolderShareView({ token, hideDownload }: Props) {
   return (
     <div className="share-folder-list">
       {files.map(file => {
+        if(!token) return;
+        
         const fileStreamUrl = publicStreamUrl(token, file?.name);
         const isAudio       = file.mimetype?.startsWith('audio/');
         const isActive      = activeFile?.name === file.name;

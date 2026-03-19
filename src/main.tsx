@@ -3,6 +3,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App.jsx';
 import './styles/globals.css';
 import './styles/auth.css';
+import './styles/shares.css';
 
 const rootEl = document.getElementById('vault-root');
 

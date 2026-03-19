@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import FileRow from './FileRow.jsx';
-import ShareModal from './ShareModal.jsx';
-import { api } from '../api.js';
-import type { VaultFile, MetadataMap } from '../types';
+import FileRow from './FileRow.tsx';
+import ShareModal from './ShareModal.tsx';
+import { api } from '../../api/api.ts';
+import type { VaultFile, MetadataMap } from '../../types.ts';
 
 interface Props {
   folders: VaultFile[];
@@ -25,7 +25,7 @@ export default function ProjectList({ folders, openFolder, onFolderClick }: Prop
     let cancelled = false;
 
     // TODO: Implement Metadata calls
-    const fetchMetadataInBatches = async (files : VaultFile[], batchSize = 5) => {
+    const fetchMetadataInBatches = async (files: VaultFile[], batchSize = 5) => {
       for (let i = 0; i < files.length; i += batchSize) {
         if (cancelled) return;
         const batch = files.slice(i, i + batchSize);
@@ -78,7 +78,7 @@ export default function ProjectList({ folders, openFolder, onFolderClick }: Prop
               }}>
                 ▶
               </span>
-              <span className="proj-name">{folder.name}</span>
+              <span className="proj-name">{folder.name} </span>
               <span className="proj-date">
                 {new Date(folder.modified * 1000).toLocaleDateString()}
               </span>
@@ -112,7 +112,6 @@ export default function ProjectList({ folders, openFolder, onFolderClick }: Prop
                 meta={metadata[file.path] ?? null}
               />
             ))}
-
           </div>
         );
       })}

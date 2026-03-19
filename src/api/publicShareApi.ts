@@ -15,7 +15,7 @@ const publicDavBase = (token: string) =>
  * Build the Authorization header for a public share.
  * Public DAV uses Basic Auth where username = token, password = empty string.
  */
-const publicAuthHeader = (token: string) =>
+const publicAuthHeader = (token: string|undefined) =>
   `Basic ${btoa(`${token}:`)}`;
 
 /**
@@ -173,4 +173,4 @@ export const publicStreamUrl = (token: string, fileName: string|null = null ) =>
  * Build the Authorization header for use in fetch calls on the share page.
  * Exported so AudioPlayer/VideoPlayer can use it for blob fetching.
  */
-export const getPublicAuthHeader = (token: string) => publicAuthHeader(token);
+export const getPublicAuthHeader = (token: string|undefined) => publicAuthHeader(token);

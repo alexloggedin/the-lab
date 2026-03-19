@@ -7,7 +7,7 @@ interface Props {
   loginUrl: string | null;
 }
 
-export default function LoginPage({ onStartLogin, loginState, loginError, loginUrl }: Props) {
+export default function LoginView({ onStartLogin, loginState, loginError, loginUrl }: Props) {
   const [serverUrl, setServerUrl] = useState<string>('');
   const [warning, setWarning] = useState<string | null>(null);
 
