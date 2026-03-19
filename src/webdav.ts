@@ -1,14 +1,10 @@
-// src/webdav.js
-import { getCredentials, getAuthHeader } from './auth/authStore.js';
+// src/webdav.ts
+import type { DavEntry, FileVersion } from './types';
+import { getCredentials, getAuthHeader } from './auth/authStore';
 
-// ─── Internal helpers ─────────────────────────────────────────────────────────
+// ─── Internal helpers ─────────────────────────────────────────────────────
 
-/**
- * Authenticated fetch for WebDAV calls.
- * Mirrors the one in api.jsx — webdav.js functions are called directly
- * by components (e.g. VersionHistory) so they need their own auth wrapper.
- */
-const authedFetch = async (url, options = {}) => {
+const authedFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
   const authHeader = await getAuthHeader();
   return fetch(url, {
     ...options,
@@ -20,42 +16,46 @@ const authedFetch = async (url, options = {}) => {
   });
 };
 
-// ─── URL builders ─────────────────────────────────────────────────────────────
+// ─── URL builders ─────────────────────────────────────────────────────────
 
-export const davFilesUrl = async (path = '') => {
+export const davFilesUrl = async (path = ''): Promise<string> => {
   const creds = await getCredentials();
   if (!creds) throw new Error('Not authenticated');
   const base = `${creds.serverUrl}/remote.php/dav/files/${encodeURIComponent(creds.username)}`;
   if (!path) return base;
-  const encodedPath = path.replace(/^\//, '').split('/').map(segment => encodeURIComponent(segment)).join('/');
+  const encodedPath = path
+    .replace(/^\//, '')
+    .split('/')
+    .map(segment => encodeURIComponent(segment))
+    .join('/');
   return `${base}/${encodedPath}`;
 };
 
-export const davVersionsUrl = async (fileId) => {
+export const davVersionsUrl = async (fileId: string): Promise<string> => {
   const creds = await getCredentials();
   if (!creds) throw new Error('Not authenticated');
-  // fileId is always a numeric string — encodeURIComponent is safe but has no effect here
   return `${creds.serverUrl}/remote.php/dav/versions/${encodeURIComponent(creds.username)}/versions/${encodeURIComponent(fileId)}`;
 };
 
-export const davRestoreUrl = async (fileName) => {
+export const davRestoreUrl = async (fileName: string): Promise<string> => {
   const creds = await getCredentials();
   if (!creds) throw new Error('Not authenticated');
-  // fileName is just the bare filename (no slashes) so encode the whole thing
   return `${creds.serverUrl}/remote.php/dav/versions/${encodeURIComponent(creds.username)}/restore/${encodeURIComponent(fileName)}`;
 };
 
-export const versionStreamUrl = async (versionHref) => {
+export const versionStreamUrl = async (versionHref: string): Promise<string> => {
   const creds = await getCredentials();
   if (!creds) throw new Error('Not authenticated');
-  // versionHref is a root-relative path already returned by Nextcloud's PROPFIND
-  // It comes back pre-encoded from Nextcloud so do NOT encode it again — just prepend origin
   return `${creds.serverUrl}${versionHref}`;
 };
 
-// ─── XML parser ───────────────────────────────────────────────────────────────
+// ─── XML parser ───────────────────────────────────────────────────────────
 
-export const parseMultistatus = (xmlText) => {
+/**
+ * Parses a WebDAV multistatus XML response into an array of DavEntry objects.
+ * Reference: https://docs.nextcloud.com/server/33/developer_manual/client_apis/WebDAV/basic.html
+ */
+export const parseMultistatus = (xmlText: string): DavEntry[] => {
   const parser = new DOMParser();
   const doc = parser.parseFromString(xmlText, 'application/xml');
 
@@ -64,7 +64,7 @@ export const parseMultistatus = (xmlText) => {
     const propstat = response.getElementsByTagNameNS('DAV:', 'propstat')[0];
     const props = propstat?.getElementsByTagNameNS('DAV:', 'prop')[0];
 
-    const get = (ns, local) =>
+    const get = (ns: string, local: string): string | null =>
       props?.getElementsByTagNameNS(ns, local)[0]?.textContent ?? null;
 
     return {
@@ -77,13 +77,13 @@ export const parseMultistatus = (xmlText) => {
   });
 };
 
-// ─── WebDAV operations ────────────────────────────────────────────────────────
+// ─── WebDAV operations ────────────────────────────────────────────────────
 
 /**
  * Get the oc:fileid for a file at the given user-relative path.
  * Reference: https://docs.nextcloud.com/server/33/developer_manual/client_apis/WebDAV/basic.html
  */
-export const getFileId = async (path) => {
+export const getFileId = async (path: string): Promise<string> => {
   const url = await davFilesUrl(path);
   const body = `<?xml version="1.0" encoding="UTF-8"?>
 <d:propfind xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns">
@@ -92,10 +92,7 @@ export const getFileId = async (path) => {
 
   const res = await authedFetch(url, {
     method: 'PROPFIND',
-    headers: {
-      'Content-Type': 'application/xml',
-      'Depth': '0',
-    },
+    headers: { 'Content-Type': 'application/xml', 'Depth': '0' },
     body,
   });
 
@@ -111,15 +108,12 @@ export const getFileId = async (path) => {
  * List all versions for a file by its oc:fileid.
  * Reference: https://docs.nextcloud.com/server/33/developer_manual/client_apis/WebDAV/versions.html
  */
-export const listVersions = async (fileId) => {
+export const listVersions = async (fileId: string): Promise<FileVersion[]> => {
   const url = await davVersionsUrl(fileId);
 
   const res = await authedFetch(url, {
     method: 'PROPFIND',
-    headers: {
-      'Content-Type': 'application/xml',
-      'Depth': '1',
-    },
+    headers: { 'Content-Type': 'application/xml', 'Depth': '1' },
     body: `<?xml version="1.0" encoding="UTF-8"?>
 <d:propfind xmlns:d="DAV:">
   <d:prop>
@@ -133,7 +127,7 @@ export const listVersions = async (fileId) => {
   if (!res.ok) throw new Error(`PROPFIND versions failed: ${res.status}`);
 
   return parseMultistatus(await res.text()).slice(1).map(entry => ({
-    versionId: entry.href.split('/').pop(),
+    versionId: entry.href.split('/').pop() ?? '',
     href: entry.href,
     size: entry.contentLength ? parseInt(entry.contentLength, 10) : 0,
     modified: entry.lastModified
@@ -147,7 +141,7 @@ export const listVersions = async (fileId) => {
  * Restore a file to a previous version via WebDAV MOVE.
  * Reference: https://docs.nextcloud.com/server/33/developer_manual/client_apis/WebDAV/versions.html
  */
-export const restoreVersion = async (versionHref, fileName) => {
+export const restoreVersion = async (versionHref: string, fileName: string): Promise<void> => {
   const source = await versionStreamUrl(versionHref);
   const destination = await davRestoreUrl(fileName);
 

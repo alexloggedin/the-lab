@@ -5,6 +5,7 @@ import LoginPage from './components/LoginPage.jsx';
 import ProjectList from './components/ProjectList.jsx';
 import { api } from './api.js';
 import { USE_MOCK } from './dev/useMockData.js';
+import type { VaultFile } from './types';
 
 export default function App() {
   const {
@@ -12,10 +13,10 @@ export default function App() {
     loginState, loginError, loginUrl, rotationDue,
   } = useAuth();
 
-  const [folders,   setFolders]   = useState([]);
-  const [openFolder, setOpenFolder] = useState(null);
-  const [loading,   setLoading]   = useState(false);
-  const [initError, setInitError] = useState(null);
+  const [folders, setFolders] = useState<VaultFile[]>([]);
+  const [openFolder, setOpenFolder] = useState<VaultFile | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [initError, setInitError] = useState<string | null>(null);
 
   const isReady = authStatus === 'authenticated' || USE_MOCK;
 

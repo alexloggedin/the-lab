@@ -3,19 +3,27 @@ import { useEffect, useState } from 'react';
 import { getAuthHeader } from '../auth/authStore.js';
 import { USE_MOCK } from '../dev/useMockData.js';
 
-export default function VideoPlayer({ fileUrl }) {
-  const [blobUrl, setBlobUrl] = useState(null);
+interface Props {
+  fileUrl: string | null;
+}
+
+interface Headers {
+  Authorization: string|undefined;
+}
+
+export default function VideoPlayer({ fileUrl }: Props) {
+  const [blobUrl, setBlobUrl] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const [error,   setError]   = useState(null);
+  const [error,   setError]   = useState<any>(null);
 
   useEffect(() => {
     if (!fileUrl) return;
-    let objectUrl = null;
+    let objectUrl = "";
     setLoading(true);
 
     const load = async () => {
       try {
-        const headers = {};
+        const headers= {};
         if (!USE_MOCK) {
           const auth = await getAuthHeader();
           if (auth) headers.Authorization = auth;

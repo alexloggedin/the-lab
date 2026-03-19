@@ -1,18 +1,24 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api.js';
 import AudioPlayer from './AudioPlayer.jsx';
+import type { VaultFile, ShareInfo } from '../types';
 
-export default function FolderShareView({ share, token }) {
-    const [files, setFiles] = useState([]);
-    const [activeFile, setActiveFile] = useState(null);
-    const [isPlaying, setIsPlaying] = useState(false);
+interface Props {
+    share: ShareInfo;
+    token: string;
+}
+
+export default function FolderShareView({ share, token }: Props) {
+    const [files, setFiles] = useState<VaultFile[]>([]);
+    const [activeFile, setActiveFile] = useState<VaultFile | null>(null);
+    const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
     useEffect(() => {
         api.getShareContents(token)
             .then(res => setFiles(res.data));
     }, [token]);
 
-    const handlePlay = (file) => {
+    const handlePlay = (file: VaultFile) => {
         if (activeFile?.path === file.path) {
             // Tapping the active track toggles play/pause
             setIsPlaying(prev => !prev);

@@ -1,10 +1,14 @@
-export const mockFiles = [
+// src/dev/fixtures.ts
+import type { VaultFile, FileMetadata, FileVersion, ShareLink } from '../types';
+
+export const mockFiles: VaultFile[] = [
   {
     name: 'track_01_v3.wav',
     path: 'ep-demos/track_01_v3.wav',
     size: 14900000,
     modified: 1741900000,
     mimetype: 'audio/wav',
+    type: 'file',
   },
   {
     name: 'track_02_v1.wav',
@@ -12,6 +16,7 @@ export const mockFiles = [
     size: 8700000,
     modified: 1741800000,
     mimetype: 'audio/wav',
+    type: 'file',
   },
   {
     name: 'interlude_rough.mp3',
@@ -19,16 +24,17 @@ export const mockFiles = [
     size: 3100000,
     modified: 1741700000,
     mimetype: 'audio/mpeg',
+    type: 'file',
   },
 ];
 
-export const mockFolders = [
-  { name: 'ep demos — spring', path: 'ep-demos', type: 'dir', modified: 1741900000 },
-  { name: 'album a — rough mixes', path: 'album-a', type: 'dir', modified: 1741500000 },
-  { name: 'video — promo cuts', path: 'video-promo', type: 'dir', modified: 1740900000 },
+export const mockFolders: VaultFile[] = [
+  { name: 'ep demos — spring', path: 'ep-demos', type: 'dir', modified: 1741900000, size: 0, mimetype: 'httpd/unix-directory' },
+  { name: 'album a — rough mixes', path: 'album-a', type: 'dir', modified: 1741500000, size: 0, mimetype: 'httpd/unix-directory' },
+  { name: 'video — promo cuts', path: 'video-promo', type: 'dir', modified: 1740900000, size: 0, mimetype: 'httpd/unix-directory' },
 ];
 
-export const mockMetadata = {
+export const mockMetadata: FileMetadata = {
   title: 'Track 01',
   artist: '',
   album: 'EP Demos — Spring',
@@ -42,7 +48,7 @@ export const mockMetadata = {
   albumArt: null,
 };
 
-export const mockVersions = [
+export const mockVersions: FileVersion[] = [
   {
     versionId: '1700000000',
     href: '/remote.php/dav/versions/admin/versions/42/1700000000',
@@ -59,7 +65,7 @@ export const mockVersions = [
   },
 ];
 
-export const mockShareLinks = [
+export const mockShareLinks: ShareLink[] = [
   {
     id: '1',
     path: 'ep-demos/track_01_v3.wav',

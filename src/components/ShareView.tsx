@@ -3,16 +3,16 @@ import { api } from '../api.js';
 import AudioPlayer from './AudioPlayer.jsx';
 import VideoPlayer from './VideoPlayer.jsx';
 import FolderShareView from './FolderShareView.jsx';
+import type { ShareInfo } from '../types';
 
-export default function ShareView({ token }) {
+interface Props {
+  token: string;
+}
 
-  // share: null = loading, populated = loaded
-  const [share, setShare] = useState(null);
-
-  // notFound: true triggers the invalid/expired state
-  const [notFound, setNotFound] = useState(false);
-
-  const [isPlaying, setIsPlaying] = useState(false);
+export default function ShareView({ token }: Props) {
+  const [share, setShare] = useState<ShareInfo | null>(null);
+  const [notFound, setNotFound] = useState<boolean>(false);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
   useEffect(() => {
     console.log(token)

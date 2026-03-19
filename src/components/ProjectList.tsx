@@ -2,11 +2,18 @@ import { useState, useEffect } from 'react';
 import FileRow from './FileRow.jsx';
 import ShareModal from './ShareModal.jsx';
 import { api } from '../api.js';
+import type { VaultFile, MetadataMap } from '../types';
 
-export default function ProjectList({ folders, openFolder, onFolderClick }) {
-  const [files, setFiles] = useState([]);
-  const [metadata, setMetadata] = useState({});
-  const [shareFolder, setShareFolder] = useState(null);
+interface Props {
+  folders: VaultFile[];
+  openFolder: VaultFile | null;
+  onFolderClick: (folder: VaultFile | null) => void;
+}
+
+export default function ProjectList({ folders, openFolder, onFolderClick }: Props) {
+  const [files, setFiles] = useState<VaultFile[]>([]);
+  const [metadata, setMetadata] = useState<MetadataMap>({});
+  const [shareFolder, setShareFolder] = useState<VaultFile | null>(null);
 
   useEffect(() => {
     if (!openFolder) {
@@ -18,7 +25,7 @@ export default function ProjectList({ folders, openFolder, onFolderClick }) {
     let cancelled = false;
 
     // TODO: Implement Metadata calls
-    const fetchMetadataInBatches = async (files, batchSize = 5) => {
+    const fetchMetadataInBatches = async (files : VaultFile[], batchSize = 5) => {
       for (let i = 0; i < files.length; i += batchSize) {
         if (cancelled) return;
         const batch = files.slice(i, i + batchSize);
