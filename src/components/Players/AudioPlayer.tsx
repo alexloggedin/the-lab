@@ -25,6 +25,8 @@ export default function AudioPlayer({ fileUrl, isPlaying, onPlayPause, authHeade
     setReady(false);
     setError(null);
 
+    console.log("[AudioPlayer]: FileUrl ", fileUrl)
+
     if (USE_MOCK || !fileUrl.startsWith('http') && !fileUrl.startsWith('/')) {
       setBlobUrl(fileUrl);
       return;

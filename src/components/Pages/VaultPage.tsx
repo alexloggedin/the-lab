@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth.ts';
-import LoginView from '../UserView/LoginView.tsx';
-import ProjectList from '../UserView/ProjectList.tsx';
-import { api } from '../../api.ts';
+import LoginView from '../VaultView/LoginView.tsx';
+import ProjectList from '../VaultView/ProjectList.tsx';
+import { api } from '../../api/api.ts';
 import { USE_MOCK } from '../../dev/useMockData.ts';
 import { VaultFile } from '../../types.ts';
 

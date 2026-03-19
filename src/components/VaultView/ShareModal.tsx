@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { api } from '../../api.js';
+import { api } from '../../api/api.ts';
 import type { ShareLink } from '../../types.js';
 
 interface Props {

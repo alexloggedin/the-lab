@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { api } from '../../api.js';
+import { api } from '../../api/api.ts';
 import AudioPlayer from '../Players/AudioPlayer.tsx';
 import VideoPlayer from '../Players/VideoPlayer.tsx';
 import VersionHistory from './VersionHistory.tsx';

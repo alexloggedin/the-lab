@@ -21,7 +21,7 @@ body, #vault-root {
 }
 
 /* Layout */
-.app-container { max-width: 860px; margin: 0 auto; padding: 48px 24px; }
+.app-container { max-width: 960px; margin: 0 auto; padding: 48px 24px; }
 .project-header {
   font-size: 11px;
   letter-spacing: 0.1em;
@@ -30,6 +30,31 @@ body, #vault-root {
   padding-bottom: 8px;
   border-bottom: 1px solid var(--border);
   margin-bottom: 4px;
+}
+
+.proj-arrow {
+  margin-right: 2%;
+  margin-left: 1%;
+}
+
+.project-row {
+  display: flex;
+  flex-direction: row;
+  padding-top: 2%;
+  padding-bottom: 5%;
+  margin-left: 2%;
+}
+
+.proj-name {
+  flex-grow: 10;
+}
+
+.proj-date {
+  flex-grow: 1;
+}
+
+.proj-actions {
+  flex-grow: 1;
 }
 
 /* File rows */

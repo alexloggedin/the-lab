@@ -1,6 +1,6 @@
 // src/components/VersionHistory.jsx
 import { useState, useEffect } from 'react';
-import { getFileId, listVersions, versionStreamUrl, restoreVersion } from '../../webdav.js';
+import { getFileId, listVersions, versionStreamUrl, restoreVersion } from '../../api/webdav.js';
 import { USE_MOCK } from '../../dev/useMockData.js';
 import { mockVersions } from '../../dev/fixtures.js';
 import AudioPlayer from '../Players/AudioPlayer.js';
