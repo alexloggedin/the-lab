@@ -1,24 +1,23 @@
-// src/components/AudioPlayer.jsx
 import { useEffect, useRef, useState } from 'react';
 import WaveSurfer from 'wavesurfer.js';
-import { getAuthHeader } from '../auth/authStore.js';
-import { USE_MOCK } from '../dev/useMockData.js';
+import { getAuthHeader } from '../auth/authStore.ts';
+import { USE_MOCK } from '../dev/useMockData.ts';
 
 interface Props {
   fileUrl: string | null;
   isPlaying: boolean;
   onPlayPause: (playing: boolean) => void;
+  authHeader: string|null;
 }
 
-export default function AudioPlayer({ fileUrl, isPlaying, onPlayPause }: Props) {
+export default function AudioPlayer({ fileUrl, isPlaying, onPlayPause, authHeader = null }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const wavesurferRef = useRef<WaveSurfer>(null);
-  const [blobUrl, setBlobUrl] = useState<string|null>(null);
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<any>(null);
 
-  // Step 1 — fetch the file and create a blob URL
   useEffect(() => {
     if (!fileUrl) return;
 
@@ -26,25 +25,30 @@ export default function AudioPlayer({ fileUrl, isPlaying, onPlayPause }: Props) 
     setReady(false);
     setError(null);
 
-    if (USE_MOCK || !fileUrl.startsWith('http')) {
+    if (USE_MOCK || !fileUrl.startsWith('http') && !fileUrl.startsWith('/')) {
       setBlobUrl(fileUrl);
       return;
     }
 
-    let objectUrl = "";
+    let objectUrl = '';
     setLoading(true);
 
-    getAuthHeader().then(authHeader => {
+    // Use provided authHeader, or fall back to stored credentials
+    const getHeader = authHeader
+      ? Promise.resolve(authHeader)
+      : getAuthHeader();
+
+    getHeader.then(header => {
       fetch(fileUrl, {
         credentials: 'omit',
-        headers: authHeader ? { Authorization: authHeader } : {},
+        headers: header ? { Authorization: header } : {},
       })
         .then(res => {
           if (!res.ok) throw new Error(`Failed to load audio: ${res.status}`);
           return res.blob();
         })
         .then(blob => {
-          console.log('blob type:', blob.type, 'size:', blob.size); // temporary
+          console.log('[AudioPlayer] blob type:', blob.type, 'size:', blob.size);
           objectUrl = URL.createObjectURL(blob);
           setBlobUrl(objectUrl);
         })
@@ -57,7 +61,7 @@ export default function AudioPlayer({ fileUrl, isPlaying, onPlayPause }: Props) 
       wavesurferRef.current?.destroy();
       wavesurferRef.current = null;
     };
-  }, [fileUrl]);
+  }, [fileUrl, authHeader]);
 
   // Step 2 — initialize WaveSurfer once blob URL exists and container is mounted
   useEffect(() => {

@@ -1,70 +1,90 @@
 import { useState, useEffect } from 'react';
-import { api } from '../api.js';
-import AudioPlayer from './AudioPlayer.jsx';
-import type { VaultFile, ShareInfo } from '../types';
+import AudioPlayer from './AudioPlayer.tsx';
+import { listShareContents, publicStreamUrl, getPublicAuthHeader } from '../api/publicShareApi.js';
+import { VaultFile } from '../types.ts';
 
 interface Props {
-    share: ShareInfo;
-    token: string;
+    token: string|undefined,
+    hideDownload: boolean
 }
 
-export default function FolderShareView({ share, token }: Props) {
-    const [files, setFiles] = useState<VaultFile[]>([]);
-    const [activeFile, setActiveFile] = useState<VaultFile | null>(null);
-    const [isPlaying, setIsPlaying] = useState<boolean>(false);
+export default function FolderShareView({ token, hideDownload }: Props) {
+  const [files,      setFiles]      = useState<VaultFile[]>([]);
+  const [activeFile, setActiveFile] = useState<VaultFile|null>(null);
+  const [isPlaying,  setIsPlaying]  = useState(false);
+  const [error,      setError]      = useState<any>(null);
 
-    useEffect(() => {
-        api.getShareContents(token)
-            .then(res => setFiles(res.data));
-    }, [token]);
+  useEffect(() => {
+    if (!token){
+        setError('no share token provided');
+        return;
+    } 
+     
+    console.log('[FolderShareView] loading contents for token:', token);
 
-    const handlePlay = (file: VaultFile) => {
-        if (activeFile?.path === file.path) {
-            // Tapping the active track toggles play/pause
-            setIsPlaying(prev => !prev);
-        } else {
-            // Tapping a different track starts it from the beginning
-            setActiveFile(file);
-            setIsPlaying(true);
-        }
-    };
+    listShareContents(token)
+      .then(files => {
+        console.log('[FolderShareView] files loaded:', files.length, files.map(f => f.name));
+        setFiles(files);
+      })
+      .catch(err => {
+        console.error('[FolderShareView] load error:', err);
+        setError('could not load folder contents');
+      });
+  }, [token]);
 
-    return (
-        <div>
-            {files.map(file => (
-                <div key={file.path} style={{ display: 'flex', flexDirection: 'column' }}>
-                    <div className="file-row">
-                        <span className="file-name">{file.name}</span>
-                        <span className="file-meta">
-                            {(file.size / 1024 / 1024).toFixed(1)} MB
-                        </span>
-                        <button
-                            className={activeFile?.path === file.path ? 'fbtn on' : 'fbtn'}
-                            onClick={() => handlePlay(file)}
-                        >
-                            {activeFile?.path === file.path
-                                ? (isPlaying ? 'pause' : 'play')
-                                : 'play'
-                            }
-                        </button>
-                        <a
-                            href={api.publicStreamUrl(token, file.path)}
-                            download={file.name}
-                        >
-                            download
-                        </a>
-                    </div>
+  const handlePlay = (file: VaultFile) => {
+    if (activeFile?.name === file.name) {
+      setIsPlaying(prev => !prev);
+    } else {
+      setActiveFile(file);
+      setIsPlaying(true);
+    }
+  };
 
-                    {/* Inline player appears only under the active file row */}
-                    {activeFile?.path === file.path && (
-                        <AudioPlayer
-                            fileUrl={api.publicStreamUrl(token, file.path)}
-                            isPlaying={isPlaying}
-                            onPlayPause={setIsPlaying}
-                        />
-                    )}
-                </div>
-            ))}
-        </div>
-    );
+  if (error) return <p className="muted">{error}</p>;
+  if (!files.length) return <p className="muted share-loading">loading files...</p>;
+
+  return (
+    <div className="share-folder-list">
+      {files.map(file => {
+        const fileStreamUrl = publicStreamUrl(token, file?.name);
+        const isAudio       = file.mimetype?.startsWith('audio/');
+        const isActive      = activeFile?.name === file.name;
+
+        return (
+          <div key={file.name} className="share-folder-item">
+            <div className="file-row">
+              <span className="file-name">{file.name}</span>
+              <span className="file-meta">
+                {(file.size / 1024 / 1024).toFixed(1)} MB
+              </span>
+              {isAudio && (
+                <button
+                  className={isActive ? 'fbtn on' : 'fbtn'}
+                  onClick={() => handlePlay(file)}
+                >
+                  {isActive ? (isPlaying ? 'pause' : 'play') : 'play'}
+                </button>
+              )}
+              {!hideDownload && (
+                <a href={fileStreamUrl} download={file.name} className="fbtn">
+                  download
+                </a>
+              )}
+            </div>
+
+            {isActive && isAudio && (
+              <AudioPlayer
+                fileUrl={fileStreamUrl}
+                authHeader={getPublicAuthHeader(token)}
+                isPlaying={isPlaying}
+                onPlayPause={setIsPlaying}
+              />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
 }

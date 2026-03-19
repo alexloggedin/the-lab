@@ -1,6 +1,6 @@
 // src/api/sharesApi.js
 import { getAuthHeader, getCredentials } from '../auth/authStore.js';
-import { OCSShareResponse } from '../types.js';
+import { OCSParsedResponse, OCSResponseItem } from '../types.js';
 
 // ─── Internal helpers ──────────────────────────────────────────────────────────
 
@@ -37,6 +37,8 @@ const ocsFetch = async (url: string, options = {}) => {
     });
 
     console.log('[sharesApi] response status:', res.status);
+    console.log('[sharesApi] response Object:', res);
+
     return res;
 };
 
@@ -45,23 +47,25 @@ const ocsFetch = async (url: string, options = {}) => {
  * OCS wraps all responses in: { ocs: { meta: { status, statuscode }, data: [...] } }
  * A statuscode of 100 means success.
  */
-const parseOCS = async (res) => {
-    const json = await res.json();
-    console.log('[sharesApi] raw OCS response:', JSON.stringify(json).slice(0, 200));
-    console.log('[sharesApi] raw OCS response:', json?.ocs?.meta);
+const parseOCS = async (res: Response) => {
+    const json = await res.json()
+    console.log('[sharesApi] JSON response:', JSON.stringify(json).slice(0,200));
 
-    const meta = json?.ocs?.meta;
+    // transform res into OCSResponse Object
+    let ocsRes = json as OCSParsedResponse;
+
+    const meta = ocsRes?.ocs?.meta;
     if (!meta) throw new Error('Invalid OCS response structure');
     if (meta.statuscode !== 200) {
         throw new Error(`OCS error ${meta.statuscode}: ${meta.message}`);
     }
-    return json.ocs.data;
+    return ocsRes.ocs.data;
 };
 
 /**
  * Normalize a raw OCS share object into the shape ShareModal expects.
  * OCS returns a lot of fields — we extract only what P2 needs.
- *
+ * 
  * Raw OCS share fields used:
  *   id          — numeric string, unique share identifier
  *   path        — server-relative path, e.g. "/theVault/project/song.wav"
@@ -70,13 +74,13 @@ const parseOCS = async (res) => {
  *   item_type   — "file" or "folder"
  *   hide_download — 0 or 1
  */
-const normalizeShare = (raw: OCSShareResponse) => ({
-    id: String(raw.id),
-    path: raw.path,           // includes leading slash: "/theVault/project/song.wav"
-    url: raw.url,
-    token: raw.token,
-    isFolder: raw.item_type === 'folder',
-    hideDownload: raw.hide_download === 1,
+const normalizeShare = (item: OCSResponseItem) => ({
+    id: String(item.id),
+    path: item.path,
+    url: `${window.location.origin}/share/${item.token}${item.hide_download ? '?hideDownload=1' : ''}`,  //NOTE - Replace NextCloud URL with VaultInstance URL
+    token: item.token,
+    expiry: item.expiration? item.expiration : '',
+    hasPassword: false
 });
 
 // ─── Public API ───────────────────────────────────────────────────────────────
@@ -109,7 +113,7 @@ export const ocsListShares = async () => {
  *
  * Reference: https://docs.nextcloud.com/server/33/developer_manual/client_apis/OCS/ocs-share-api.html
  */
-export const oscCreateShare = async ({ path = '', hideDownload = false }) => {
+export const ocsCreateShare = async ({ path = '', hideDownload = false }) => {
     const base = await ocsBase();
 
     // OCS create share uses application/x-www-form-urlencoded body
@@ -130,15 +134,21 @@ export const oscCreateShare = async ({ path = '', hideDownload = false }) => {
 
     if (!res.ok) throw new Error(`createShare failed: ${res.status}`);
     const raw = await parseOCS(res);
-    return normalizeShare(raw);
+
+    // Should not expect array here
+    let item = raw as OCSResponseItem;
+
+    return normalizeShare(item);
 };
 
 /**
  * Delete a share by its numeric ID.
  */
-export const oscDeleteShare = async (id: string) => {
+export const ocsDeleteShare = async (id: string) => {
     const base = await ocsBase();
     const res = await ocsFetch(`${base}/${id}`, { method: 'DELETE' });
     if (!res.ok) throw new Error(`deleteShare failed: ${res.status}`);
     await parseOCS(res);
 };
+
+

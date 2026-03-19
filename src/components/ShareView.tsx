@@ -1,120 +1,102 @@
 import { useState, useEffect } from 'react';
-import { api } from '../api.js';
-import AudioPlayer from './AudioPlayer.jsx';
-import VideoPlayer from './VideoPlayer.jsx';
-import FolderShareView from './FolderShareView.jsx';
+import { useParams, useSearchParams } from 'react-router-dom';
+import AudioPlayer from './AudioPlayer.tsx';
+import VideoPlayer from './VideoPlayer.tsx';
+import FolderShareView from './FolderShareView.tsx';
+import { getShareInfo, publicStreamUrl, getPublicAuthHeader } from '../api/publicShareApi.ts';
 import type { ShareInfo } from '../types';
 
-interface Props {
-  token: string;
-}
+export default function ShareView() {
+  const { token }          = useParams();
+  const [searchParams]     = useSearchParams();
+  const hideDownload       = searchParams.get('hideDownload') === '1';
 
-export default function ShareView({ token }: Props) {
-  const [share, setShare] = useState<ShareInfo | null>(null);
-  const [notFound, setNotFound] = useState<boolean>(false);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [share,    setShare]    = useState<ShareInfo|null>(null);
+  const [notFound, setNotFound] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
-    console.log(token)
-    api.getShareByToken(token)
-      .then(res => setShare(res.data))
-      .catch(() => setNotFound(true));
-  }, [token]);
-  // [token] dependency means re-fetch if the token prop changes
+    if (!token) return;
+    console.log('[ShareView] loading share for token:', token);
 
-  // ─── State: invalid or expired ───────────────────────────────────────────
+    getShareInfo(token)
+      .then(info => {
+        console.log('[ShareView] share info:', info);
+        setShare({ ...info, hideDownload });
+      })
+      .catch(err => {
+        console.error('[ShareView] share load error:', err.message);
+        setNotFound(true);
+      });
+  }, [token]);
+
   if (notFound) {
     return (
       <div className="app-container">
-        <div className="topbar">
-          <span className="wordmark">theVault</span>
-        </div>
-        <p className="muted" style={{ marginTop: '48px' }}>
-          this link is invalid or has expired.
-        </p>
+        <div className="topbar"><span className="wordmark">theVault</span></div>
+        <p className="muted share-not-found">this link is invalid or has expired.</p>
       </div>
     );
   }
 
-  // ─── State: loading ───────────────────────────────────────────────────────
   if (!share) {
     return (
       <div className="app-container">
-        <div className="topbar">
-          <span className="wordmark">theVault</span>
-        </div>
-        <p className="muted" style={{ marginTop: '48px' }}>loading...</p>
+        <div className="topbar"><span className="wordmark">theVault</span></div>
+        <p className="muted share-loading">loading...</p>
       </div>
     );
   }
 
-  // ─── State: loaded ────────────────────────────────────────────────────────
-  const isAudio = share.mimetype?.startsWith('audio/');
-  const isVideo = share.mimetype?.startsWith('video/');
+  const isAudio    = share.mimetype?.startsWith('audio/');
+  const isVideo    = share.mimetype?.startsWith('video/');
+  const streamUrl  = publicStreamUrl(token? token : '');
 
   return (
     <div className="app-container">
+      <div className="topbar"><span className="wordmark">theVault</span></div>
 
-      <div className="topbar">
-        <span className="wordmark">theVault</span>
-      </div>
+      <div className="share-view-content">
+        <p className="share-view-label">
+          {share.isFolder ? 'shared folder' : 'shared file'}
+        </p>
+        <p className="share-view-filename">{share.fileName}</p>
 
-      <div style={{ padding: '40px 0' }}>
+        {share.isFolder ? (
+          <FolderShareView token={token} hideDownload={hideDownload} />
+        ) : (
+          <>
+            {isAudio && (
+              <AudioPlayer
+                fileUrl={streamUrl}
+                authHeader={getPublicAuthHeader(token)}
+                isPlaying={isPlaying}
+                onPlayPause={setIsPlaying}
+              />
+            )}
+            {isVideo && (
+              <VideoPlayer
+                fileUrl={streamUrl}
+                authHeader={getPublicAuthHeader(token)}
+              />
+            )}
 
-        {/* File header: label, name, metadata pills */}
-        <div>
-          <p>
-            {share.isFolder ? 'shared folder' : 'shared file'}
-          </p>
+            <div className="share-view-actions">
+              <button
+                className="abtn"
+                onClick={() => setIsPlaying(prev => !prev)}
+              >
+                {isPlaying ? 'pause' : 'play'}
+              </button>
 
-          <p style={{ fontSize: '16px', color: 'var(--text)' }}>
-            {share.fileName}
-          </p>
-
-          {/* Only render the pill row if there is at least one metadata value */}
-          {(share.meta?.bpm || share.meta?.key || share.meta?.genre) && (
-            <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
-              {share.meta.bpm && <span className="pill">{share.meta.bpm} bpm</span>}
-              {share.meta.key && <span className="pill">{share.meta.key}</span>}
-              {share.meta.genre && <span className="pill">{share.meta.genre}</span>}
-            </div>
-          )}
-        </div>
-
-        {share.isFolder
-          ? <FolderShareView share={share} token={token} />
-          : (
-            <>
-              {isAudio && (
-                <AudioPlayer
-                  fileUrl={api.publicStreamUrl(token)}
-                  isPlaying={isPlaying}
-                  onPlayPause={setIsPlaying}
-                />
+              {!hideDownload && (
+                <a href={streamUrl} download={share.fileName} className="abtn">
+                  download
+                </a>
               )}
-              {isVideo && <VideoPlayer fileUrl={api.publicStreamUrl(token)} />}
-            </>
-          )
-        }
-
-        <div>
-          {!share.isFolder && (
-            <button onClick={() => setIsPlaying(prev => !prev)}>
-              {isPlaying ? "Pause" : "Play"}
-            </button>
-          )}
-  
-          {/* TODO - Add handling for downloading entire folders */}
-          
-          {(!share.hideDownload && !share.isFolder) && (
-            <a
-              href={api.publicStreamUrl(share.token)}
-              download={share.fileName}
-            >
-              download
-            </a>
-          )}
-        </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

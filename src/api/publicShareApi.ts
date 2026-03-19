@@ -1,5 +1,7 @@
 // src/api/publicShareApi.js
 
+import { VaultFile } from "../types";
+
 /**
  * Build the public DAV base URL for a given share token.
  * Public DAV lives at /public.php/dav/files/:token/
@@ -122,7 +124,7 @@ export const listShareContents = async (token: string) => {
   const parser = new DOMParser();
   const doc    = parser.parseFromString(xml, 'application/xml');
 
-  return Array.from(doc.getElementsByTagNameNS('DAV:', 'response'))
+  const parsedData = Array.from(doc.getElementsByTagNameNS('DAV:', 'response'))
     .slice(1) // skip the collection itself (first entry at Depth:1)
     .map(response => {
       const props = response
@@ -152,14 +154,16 @@ export const listShareContents = async (token: string) => {
       };
     })
     .filter(Boolean); // remove null entries (subdirectories)
-};
+
+    return parsedData as VaultFile[];
+};  
 
 /**
  * Build the URL for streaming a file via a public share.
  * For single-file shares: /public.php/dav/files/:token/
  * For files within a folder share: /public.php/dav/files/:token/:filename
  */
-export const publicStreamUrl = (token: string, fileName = null) => {
+export const publicStreamUrl = (token: string, fileName: string|null = null ) => {
   const base = publicDavBase(token);
   if (!fileName) return `${base}/`;
   return `${base}/${encodeURIComponent(fileName)}`;
