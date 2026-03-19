@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import FileRow from './FileRow.jsx';
-import ShareModal from './ShareModal.jsx';
-import { api } from '../api.js';
-import type { VaultFile, MetadataMap } from '../types';
+import FileRow from './FileRow.tsx';
+import ShareModal from './ShareModal.tsx';
+import { api } from '../../api.ts';
+import type { VaultFile, MetadataMap } from '../../types';
 
 interface Props {
   folders: VaultFile[];

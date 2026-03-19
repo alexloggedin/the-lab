@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { api } from '../api.js';
-import AudioPlayer from './AudioPlayer.jsx';
-import VideoPlayer from './VideoPlayer.jsx';
-import VersionHistory from './VersionHistory.jsx';
-import ShareModal from './ShareModal.jsx';
-import type { VaultFile, FileMetadata } from '../types';
+import { api } from '../../api.js';
+import AudioPlayer from '../Players/AudioPlayer.tsx';
+import VideoPlayer from '../Players/VideoPlayer.tsx';
+import VersionHistory from './VersionHistory.tsx';
+import ShareModal from './ShareModal.tsx';
+import type { VaultFile, FileMetadata } from '../../types.ts';
 
 interface Props {
     file: VaultFile;

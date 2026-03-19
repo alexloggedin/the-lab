@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import WaveSurfer from 'wavesurfer.js';
-import { getAuthHeader } from '../auth/authStore.ts';
-import { USE_MOCK } from '../dev/useMockData.ts';
+import { getAuthHeader } from '../../auth/authStore.ts';
+import { USE_MOCK } from '../../dev/useMockData.ts';
 
 interface Props {
   fileUrl: string | null;
   isPlaying: boolean;
   onPlayPause: (playing: boolean) => void;
-  authHeader: string|null;
+  authHeader?: string|null;
 }
 
 export default function AudioPlayer({ fileUrl, isPlaying, onPlayPause, authHeader = null }: Props) {
