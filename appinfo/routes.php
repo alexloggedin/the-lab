@@ -1,31 +1,14 @@
 <?php
+// appinfo/routes.php
+
 return [
   'routes' => [
+    // Authenticated app shell
     ['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
+    
+    // Public share page shell — served to unauthenticated users
+    // The :token is passed to React as a data attribute; React Router handles
+    // the rest of the public share UI via /share/:token
     ['name' => 'page#showShare', 'url' => '/s/{token}', 'verb' => 'GET'],
-
-    ['name' => 'api#getFiles', 'url' => '/api/files', 'verb' => 'GET'],
-    ['name' => 'api#streamFile', 'url' => '/api/stream', 'verb' => 'GET'],
-    [
-      'name' => 'api#uploadFile',
-      'url' => '/api/upload/{path}',
-      'verb' => 'PUT',
-      'requirements' => ['path' => '.+']
-    ],
-
-    ['name' => 'api#getShares', 'url' => '/api/shares', 'verb' => 'GET'],
-    ['name' => 'api#createShare', 'url' => '/api/shares', 'verb' => 'POST'],
-    ['name' => 'api#deleteShare', 'url' => '/api/shares/{id}', 'verb' => 'DELETE'],
-
-    ['name' => 'api#getMetadata', 'url' => '/api/metadata', 'verb' => 'GET'],
-    ['name' => 'api#updateMetadata', 'url' => '/api/metadata', 'verb' => 'POST'],
-    ['name' => 'api#updateAlbumArt', 'url' => '/api/albumart', 'verb' => 'POST'],
-
-    ['name' => 'api#getActivity', 'url' => '/api/activity', 'verb' => 'GET'],
-    ['name' => 'api#initLabFolder', 'url' => '/api/init', 'verb' => 'POST'],
-
-    ['name' => 'publicShare#getShareByToken', 'url' => '/api/share/{token}', 'verb' => 'GET'],
-    ['name' => 'publicShare#getShareContents', 'url' => '/api/share/{token}/files', 'verb' => 'GET'],
-    ['name' => 'publicShare#streamFile', 'url' => '/api/share/{token}/stream', 'verb' => 'GET']
   ]
 ];

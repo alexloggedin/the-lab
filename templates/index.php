@@ -9,7 +9,7 @@ if ($_['vite_dev']) {
 
 <div id="app">
   <div id="app-content">
-    <div id="thelab-root"
+    <div id="vault-root"
       <?php if (!empty($_['share_token'])): ?>
         data-share-token="<?php p($_['share_token']) ?>"
       <?php endif; ?>

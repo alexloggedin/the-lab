@@ -12,7 +12,7 @@ set -e
 # to be synced. Vite serves the frontend directly with hot reload.
 # ---------------------------------------------------------------------------
 
-COMPOSE_FILE="docker-dev/docker-compose.dev.yml"
+COMPOSE_FILE="docker-dev/docker-compose.yml"
 APP_DIR="/var/www/html/custom_apps/thelab"
 
 CONTAINER=$(docker compose -f $COMPOSE_FILE ps -q nextcloud)

@@ -1,27 +1,55 @@
-// src/webdav.ts
+// src/api/webdav.ts
+
 import type { DavEntry, FileVersion } from '../types';
-import { getCredentials, getAuthHeader } from '../auth/authStore';
+import { getRequestToken, REQUEST_TOKEN_HEADER } from '../auth/session';
+
 
 // ─── Internal helpers ─────────────────────────────────────────────────────
 
-const authedFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
-  const authHeader = await getAuthHeader();
+/**
+ * Fetch wrapper for authenticated DAV requests.
+ *
+ * Key changes from the old version:
+ * - credentials: 'include' sends the Nextcloud session cookie automatically
+ * - No Authorization header — the session cookie handles auth
+ * - RequestVerificationToken is added for POST/DELETE/PUT/MOVE (CSRF protection)
+ *
+ * Reference: https://docs.nextcloud.com/server/33/developer_manual/digging_deeper/csrf.html
+ */
+const sessionFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
+  const method = (options.method ?? 'GET').toUpperCase();
+  const isMutating = ['POST', 'PUT', 'DELETE', 'MOVE', 'MKCOL', 'PROPFIND'].includes(method);
+
+  console.log(`[webdav] ${method} ${url}`);
+
   return fetch(url, {
     ...options,
-    credentials: 'omit',
+    credentials: 'include',
     headers: {
       ...(options.headers ?? {}),
-      ...(authHeader ? { Authorization: authHeader } : {}),
+      // CSRF token required on all requests in Nextcloud's session context
+      ...(isMutating ? { 'requesttoken': getRequestToken() } : {}),
     },
   });
 };
 
 // ─── URL builders ─────────────────────────────────────────────────────────
 
-export const davFilesUrl = async (path = ''): Promise<string> => {
-  const creds = await getCredentials();
-  if (!creds) throw new Error('Not authenticated');
-  const base = `${creds.serverUrl}/remote.php/dav/files/${encodeURIComponent(creds.username)}`;
+/**
+ * Build a root-relative WebDAV URL for the current user's files.
+ *
+ * We get the username from window.OC.currentUser, which Nextcloud injects.
+ * In mock mode, we fall back to 'admin'.
+ *
+ * Reference: https://docs.nextcloud.com/server/33/developer_manual/client_apis/WebDAV/basic.html
+ */
+const currentUser = (): string => {
+  return (window as any)?.OC?.currentUser ?? 'admin';
+};
+
+export const davFilesUrl = (path = ''): string => {
+  const user = encodeURIComponent(currentUser());
+  const base = `/remote.php/dav/files/${user}`;
   if (!path) return base;
   const encodedPath = path
     .replace(/^\//, '')
@@ -31,31 +59,27 @@ export const davFilesUrl = async (path = ''): Promise<string> => {
   return `${base}/${encodedPath}`;
 };
 
-export const davVersionsUrl = async (fileId: string): Promise<string> => {
-  const creds = await getCredentials();
-  if (!creds) throw new Error('Not authenticated');
-  return `${creds.serverUrl}/remote.php/dav/versions/${encodeURIComponent(creds.username)}/versions/${encodeURIComponent(fileId)}`;
+export const davVersionsUrl = (fileId: string): string => {
+  const user = encodeURIComponent(currentUser());
+  return `/remote.php/dav/versions/${user}/versions/${encodeURIComponent(fileId)}`;
 };
 
-export const davRestoreUrl = async (fileName: string): Promise<string> => {
-  const creds = await getCredentials();
-  if (!creds) throw new Error('Not authenticated');
-  return `${creds.serverUrl}/remote.php/dav/versions/${encodeURIComponent(creds.username)}/restore/${encodeURIComponent(fileName)}`;
+export const davRestoreUrl = (fileName: string): string => {
+  const user = encodeURIComponent(currentUser());
+  return `/remote.php/dav/versions/${user}/restore/${encodeURIComponent(fileName)}`;
 };
 
-export const versionStreamUrl = async (versionHref: string): Promise<string> => {
-  const creds = await getCredentials();
-  if (!creds) throw new Error('Not authenticated');
-  return `${creds.serverUrl}${versionHref}`;
+export const versionStreamUrl = (versionHref: string): string => {
+  // versionHref is already a root-relative path from the PROPFIND response
+  return versionHref;
 };
 
 // ─── XML parser ───────────────────────────────────────────────────────────
 
-/**
- * Parses a WebDAV multistatus XML response into an array of DavEntry objects.
- * Reference: https://docs.nextcloud.com/server/33/developer_manual/client_apis/WebDAV/basic.html
- */
 export const parseMultistatus = (xmlText: string): DavEntry[] => {
+
+  console.log('[parseMultistatus] called, xml length:', xmlText.length);
+  
   const parser = new DOMParser();
   const doc = parser.parseFromString(xmlText, 'application/xml');
 
@@ -64,8 +88,12 @@ export const parseMultistatus = (xmlText: string): DavEntry[] => {
     const propstat = response.getElementsByTagNameNS('DAV:', 'propstat')[0];
     const props = propstat?.getElementsByTagNameNS('DAV:', 'prop')[0];
 
-    const get = (ns: string, local: string): string | null =>
-      props?.getElementsByTagNameNS(ns, local)[0]?.textContent ?? null;
+    const get = (ns: string, local: string): string | null => {
+      const el = props?.getElementsByTagNameNS(ns, local)[0];
+      if (!el) return null;
+      const val = el.textContent?.trim() ?? '';
+      return val === '' ? null : val;
+    };
 
     return {
       href,
@@ -79,18 +107,14 @@ export const parseMultistatus = (xmlText: string): DavEntry[] => {
 
 // ─── WebDAV operations ────────────────────────────────────────────────────
 
-/**
- * Get the oc:fileid for a file at the given user-relative path.
- * Reference: https://docs.nextcloud.com/server/33/developer_manual/client_apis/WebDAV/basic.html
- */
 export const getFileId = async (path: string): Promise<string> => {
-  const url = await davFilesUrl(path);
+  const url = davFilesUrl(path);
   const body = `<?xml version="1.0" encoding="UTF-8"?>
 <d:propfind xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns">
   <d:prop><oc:fileid /></d:prop>
 </d:propfind>`;
 
-  const res = await authedFetch(url, {
+  const res = await sessionFetch(url, {
     method: 'PROPFIND',
     headers: { 'Content-Type': 'application/xml', 'Depth': '0' },
     body,
@@ -104,14 +128,10 @@ export const getFileId = async (path: string): Promise<string> => {
   return fileId;
 };
 
-/**
- * List all versions for a file by its oc:fileid.
- * Reference: https://docs.nextcloud.com/server/33/developer_manual/client_apis/WebDAV/versions.html
- */
 export const listVersions = async (fileId: string): Promise<FileVersion[]> => {
-  const url = await davVersionsUrl(fileId);
+  const url = davVersionsUrl(fileId);
 
-  const res = await authedFetch(url, {
+  const res = await sessionFetch(url, {
     method: 'PROPFIND',
     headers: { 'Content-Type': 'application/xml', 'Depth': '1' },
     body: `<?xml version="1.0" encoding="UTF-8"?>
@@ -137,17 +157,16 @@ export const listVersions = async (fileId: string): Promise<FileVersion[]> => {
   }));
 };
 
-/**
- * Restore a file to a previous version via WebDAV MOVE.
- * Reference: https://docs.nextcloud.com/server/33/developer_manual/client_apis/WebDAV/versions.html
- */
 export const restoreVersion = async (versionHref: string, fileName: string): Promise<void> => {
-  const source = await versionStreamUrl(versionHref);
-  const destination = await davRestoreUrl(fileName);
+  const source = versionHref;
+  const destination = davRestoreUrl(fileName);
 
-  const res = await authedFetch(source, {
+  const res = await sessionFetch(source, {
     method: 'MOVE',
-    headers: { Destination: destination },
+    headers: {
+      'Destination': destination,
+      REQUEST_TOKEN_HEADER: getRequestToken(),
+    },
   });
 
   if (!res.ok) throw new Error(`MOVE (restore) failed: ${res.status}`);
