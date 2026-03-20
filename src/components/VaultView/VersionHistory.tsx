@@ -1,17 +1,23 @@
 // src/components/VersionHistory.jsx
 import { useState, useEffect } from 'react';
-import { getFileId, listVersions, versionStreamUrl, restoreVersion } from '../webdav.jsx';
-import { USE_MOCK } from '../dev/useMockData';
-import { mockVersions } from '../dev/fixtures';
-import AudioPlayer from './AudioPlayer';
+import { getFileId, listVersions, versionStreamUrl, restoreVersion } from '../../api/webdav.js';
+import { USE_MOCK } from '../../dev/useMockData.js';
+import { mockVersions } from '../../dev/fixtures.js';
+import AudioPlayer from '../Players/AudioPlayer.js';
+import type { FileVersion } from '../../types.js';
 
-export default function VersionHistory({ filePath, mimeType }) {
-  const [versions,       setVersions]       = useState([]);
-  const [error,          setError]          = useState(null);
-  const [previewId,      setPreviewId]      = useState(null);
-  const [previewPlaying, setPreviewPlaying] = useState(false);
+interface Props {
+  filePath: string;
+  mimeType: string;
+}
 
-  // filePath is the user-relative path, e.g. "theLAB/project/song.wav"
+export default function VersionHistory({ filePath, mimeType }: Props) {
+  const [versions, setVersions] = useState<FileVersion[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [previewId, setPreviewId] = useState<string | null>(null);
+  const [previewPlaying, setPreviewPlaying] = useState<boolean>(false);
+
+  // filePath is the user-relative path, e.g. "theVault/project/song.wav"
   const fileName = filePath.split('/').pop();
 
   useEffect(() => {
@@ -36,7 +42,7 @@ export default function VersionHistory({ filePath, mimeType }) {
         if (cancelled) return;
 
         setVersions(versionList);
-      } catch (err) {
+      } catch (err:any) {
         if (!cancelled) setError(err.message);
       }
     };
@@ -45,16 +51,16 @@ export default function VersionHistory({ filePath, mimeType }) {
     return () => { cancelled = true; };
   }, [filePath]);
 
-  const handleRestore = async (version) => {
+  const handleRestore = async (version: FileVersion) => {
     if (!confirm('Restore this version? The current file will be saved as a new version.')) return;
     try {
       // Restore via WebDAV MOVE — no PHP route involved
-      await restoreVersion(version.href, fileName);
+      await restoreVersion(version.href, fileName === undefined ? "" : fileName);
       // Reload the version list after restore
       const fileId = await getFileId(filePath);
       const updated = await listVersions(fileId);
       setVersions(updated);
-    } catch (err) {
+    } catch (err:any) {
       alert(`Restore failed: ${err.message}`);
     }
   };

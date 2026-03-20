@@ -11,7 +11,7 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-body, #thelab-root {
+body, #vault-root {
   background:  var(--bg);
   color:       var(--text);
   font-family: 'DM Mono', monospace;
@@ -21,7 +21,7 @@ body, #thelab-root {
 }
 
 /* Layout */
-.app-container { max-width: 860px; margin: 0 auto; padding: 48px 24px; }
+.app-container { max-width: 960px; margin: 0 auto; padding: 48px 24px; }
 .project-header {
   font-size: 11px;
   letter-spacing: 0.1em;
@@ -30,6 +30,31 @@ body, #thelab-root {
   padding-bottom: 8px;
   border-bottom: 1px solid var(--border);
   margin-bottom: 4px;
+}
+
+.proj-arrow {
+  margin-right: 2%;
+  margin-left: 1%;
+}
+
+.project-row {
+  display: flex;
+  flex-direction: row;
+  padding-top: 2%;
+  padding-bottom: 5%;
+  margin-left: 2%;
+}
+
+.proj-name {
+  flex-grow: 10;
+}
+
+.proj-date {
+  flex-grow: 1;
+}
+
+.proj-actions {
+  flex-grow: 1;
 }
 
 /* File rows */
@@ -128,7 +153,7 @@ input:focus { outline: none; border-color: var(--muted); }
 
 .muted { color: var(--muted); font-size: 12px; }
 
-#thelab-root button {
+#vault-root button {
   background:      none !important;
   border:          none;
   color:           var(--muted);
@@ -143,35 +168,35 @@ input:focus { outline: none; border-color: var(--muted); }
   transition:      color 0.1s;
 }
 
-#thelab-root button:hover {
+#vault-root button:hover {
   color:      var(--accent);
   background: none !important;
   box-shadow: none !important;
 }
 
-#thelab-root button:focus {
+#vault-root button:focus {
   outline:    none;
   box-shadow: none !important;
 }
 
-#thelab-root button:active {
+#vault-root button:active {
   transform:  scale(0.98);
   background: none !important;
 }
 
-#thelab-root .abtn {
+#vault-root .abtn {
   border:        1px solid var(--border);
   color:         var(--muted);
   padding:       6px 16px;
   border-radius: 2px;
 }
 
-#thelab-root .abtn:hover {
+#vault-root .abtn:hover {
   border-color: var(--muted);
   color:        var(--accent);
 }
 
-#thelab-root .abtn.primary {
+#vault-root .abtn.primary {
   border-color: #3a3a3a;
   color:        var(--text);
 }

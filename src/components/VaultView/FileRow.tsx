@@ -1,27 +1,39 @@
 import { useState, useEffect } from 'react';
-import { api } from '../api.jsx';
-import AudioPlayer from './AudioPlayer.jsx';
-import VideoPlayer from './VideoPlayer.jsx';
-import VersionHistory from './VersionHistory.jsx';
-import ShareModal from './ShareModal.jsx';
+import { api } from '../../api/api.ts';
+import AudioPlayer from '../Players/AudioPlayer.tsx';
+import VideoPlayer from '../Players/VideoPlayer.tsx';
+import VersionHistory from './VersionHistory.tsx';
+import ShareModal from './ShareModal.tsx';
+import type { VaultFile, FileMetadata } from '../../types.ts';
 
-const Pill = ({ value }) => value
+interface Props {
+    file: VaultFile;
+    meta: FileMetadata | null;
+}
+
+interface PillProps {
+    value: string | undefined | null
+}
+
+type ActivePanel = 'player' | 'history' | 'share' | null;
+
+const Pill = ({value}: PillProps) => value
     ? <span className="pill">{value}</span>
     : null;
 
-const formatSize = (bytes) =>
+const formatSize = (bytes: number) =>
     (bytes / 1024 / 1024).toFixed(1) + ' MB';
 
-export default function FileRow({ file, meta }) {
+export default function FileRow({ file, meta }: Props) {
 
-    const [activePanel, setActivePanel] = useState(null);
+    const [activePanel, setActivePanel] = useState<ActivePanel>(null);
+    const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
+    const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
     const isAudio = file.mimetype?.startsWith('audio/');
     const isVideo = file.mimetype?.startsWith('video/');
 
-    const [isPlaying, setIsPlaying] = useState(false);
-
-    const togglePanel = (panel) => {
+    const togglePanel = (panel: ActivePanel) => {
         setActivePanel(prev => prev === panel ? null : panel);
     };
 
@@ -34,6 +46,11 @@ export default function FileRow({ file, meta }) {
         }
     };
 
+    useEffect(() => {
+        if (!file.path) return;
+        api.streamUrl(file.path).then(setResolvedUrl);
+    }, [file.path]);
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div className="file-row">
@@ -44,7 +61,7 @@ export default function FileRow({ file, meta }) {
                         style={{ width: 28, height: 28, borderRadius: 2, objectFit: 'cover', flexShrink: 0 }}
                     />
                 )}
-                
+
                 <span className="file-name">{file.name}</span>
 
                 <Pill value={meta?.bpm ? `${meta.bpm} bpm` : null} />
@@ -84,14 +101,14 @@ export default function FileRow({ file, meta }) {
 
             {activePanel === 'player' && isAudio && (
                 <AudioPlayer
-                    fileUrl={api.streamUrl(file.path)}
+                    fileUrl={resolvedUrl}
                     isPlaying={isPlaying}
                     onPlayPause={setIsPlaying}
                 />
             )}
 
             {activePanel === 'player' && isVideo && (
-                <VideoPlayer fileUrl={api.streamUrl(file.path)} />
+                <VideoPlayer fileUrl={resolvedUrl} />
             )}
 
             {activePanel === 'history' && (
