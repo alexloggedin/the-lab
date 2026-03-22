@@ -51,11 +51,11 @@ export default defineConfig(({ mode }) => {
       outDir: 'dist',
       emptyOutDir: true,
       rollupOptions: {
-        input: 'src/main.jsx',
+        input: 'src/main.tsx',
         output: {
-          entryFileNames: 'thelab.js',
+          entryFileNames: 'thevault.js',
           assetFileNames: (info) =>
-            info.name?.endsWith('.css') ? 'thelab.css' : '[name][extname]',
+            info.name?.endsWith('.css') ? 'thevault.css' : '[name][extname]',
         }
       },
     }

@@ -1,7 +1,7 @@
 <?php
 // lib/AppInfo/Application.php
 
-namespace OCA\TheLab\AppInfo;
+namespace OCA\TheVault\AppInfo;
 
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
@@ -10,7 +10,7 @@ use OCP\AppFramework\Bootstrap\IRegistrationContext;
 
 class Application extends App implements IBootstrap
 {
-  public const APP_ID = 'thelab';
+  public const APP_ID = 'thevault';
 
   public function __construct()
   {

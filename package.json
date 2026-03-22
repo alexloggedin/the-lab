@@ -1,5 +1,5 @@
 {
-  "name": "theLAB",
+  "name": "theVault",
   "description": "A nextcloud app for sharing/managing projects",
   "version": "1.0.0",
   "author": "Alex Little",
@@ -18,7 +18,7 @@
     "dev": "vite",
     "dev:docker": "vite --mode docker",
     "build": "vite build && npm run copy-dist",
-    "copy-dist": "cp dist/thelab.js js/thelab.js && cp dist/thelab.css css/thelab.css",
+    "copy-dist": "cp dist/thevault.js js/thevault.js && cp dist/thevault.css css/thevault.css",
     "lint": "eslint --ext .js,.vue src",
     "lint:fix": "eslint --ext .js,.vue src --fix",
     "stylelint": "stylelint css/*.css css/*.scss src/**/*.scss src/**/*.vue",

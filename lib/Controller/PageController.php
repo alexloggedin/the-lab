@@ -1,7 +1,7 @@
 <?php
 // lib/Controller/PageController.php
 
-namespace OCA\TheLab\Controller;
+namespace OCA\TheVault\Controller;
 
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
@@ -23,7 +23,7 @@ class PageController extends Controller
   {
     $viteDev = file_exists(__DIR__ . '/../../.vite-dev');
 
-    $response = new TemplateResponse('thelab', 'index', [
+    $response = new TemplateResponse('thevault', 'index', [
       'vite_dev' => $viteDev,
     ]);
 
@@ -57,7 +57,7 @@ class PageController extends Controller
   {
     $viteDev = file_exists(__DIR__ . '/../../.vite-dev');
 
-    $response = new TemplateResponse('thelab', 'index', [
+    $response = new TemplateResponse('thevault', 'index', [
       'vite_dev'    => $viteDev,
       'share_token' => $token,
     ], 'base');

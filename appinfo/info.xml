@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <id>thelab</id>
-  <name>the LAB</name>
+  <id>thevault</id>
+  <name>theVault</name>
   <summary>A minimal audio and video sharing interface for Nextcloud</summary>
   <description>
     Browse, preview, and share WIP audio and video files with collaborators
@@ -13,7 +13,7 @@
   <author mail="alexlittle330@gmail.com" homepage="https://github.com/alexloggedin/the-lab">
     Alex Little
   </author>
-  <namespace>TheLab</namespace>
+  <namespace>TheVault</namespace>
   <category>multimedia</category>
   <dependencies>
     <nextcloud min-version="28" max-version="33"/>

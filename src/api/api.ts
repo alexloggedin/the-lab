@@ -69,9 +69,9 @@ export const api = {
       ? Promise.resolve({ data: { success: true } })
       : ensureVaultFolder(),
 
-  getFiles: (path = 'theLAB'): Promise<ApiResponse<VaultFile[]>> =>
+  getFiles: (path = 'theVault'): Promise<ApiResponse<VaultFile[]>> =>
     USE_MOCK
-      ? Promise.resolve({ data: path !== 'theLAB' ? mockFiles : mockFolders })
+      ? Promise.resolve({ data: path !== 'theVault' ? mockFiles : mockFolders })
       : (async () => {
           const url = davFilesUrl(path);
           const body = `<?xml version="1.0" encoding="UTF-8"?>

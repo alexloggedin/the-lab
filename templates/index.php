@@ -2,19 +2,17 @@
 if ($_['vite_dev']) {
   $nonce = \OC::$server->getContentSecurityPolicyNonceManager()->getNonce();
 } else {
-  \OCP\Util::addScript('thelab', 'thelab');
-  \OCP\Util::addStyle('thelab', 'thelab');
+  \OCP\Util::addScript('thevault', 'thevault');
+  \OCP\Util::addStyle('thevault', 'thevault');
 }
 ?>
 
 <div id="app">
-  <div id="app-content">
     <div id="vault-root"
       <?php if (!empty($_['share_token'])): ?>
         data-share-token="<?php p($_['share_token']) ?>"
       <?php endif; ?>
     ></div>
-  </div>
 </div>
 
 <?php if ($_['vite_dev']): ?>

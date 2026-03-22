@@ -13,7 +13,7 @@ set -e
 # ---------------------------------------------------------------------------
 
 COMPOSE_FILE="docker-dev/docker-compose.yml"
-APP_DIR="/var/www/html/custom_apps/thelab"
+APP_DIR="/var/www/html/custom_apps/thevault"
 
 CONTAINER=$(docker compose -f $COMPOSE_FILE ps -q nextcloud)
 
@@ -54,8 +54,8 @@ set_permissions() {
 
 clear_cache() {
   echo "→ Clearing Nextcloud cache..."
-  docker exec -u www-data $CONTAINER php occ app:disable thelab 2>/dev/null || true
-  docker exec -u www-data $CONTAINER php occ app:enable thelab
+  docker exec -u www-data $CONTAINER php occ app:disable thevault 2>/dev/null || true
+  docker exec -u www-data $CONTAINER php occ app:enable thevault
 }
 
 enable_vite_dev() {
@@ -86,7 +86,7 @@ if [ "$1" == "--prod" ]; then
   clear_cache
 
   echo ""
-  echo "✅  Done. Open http://localhost:8080/index.php/apps/thelab/"
+  echo "✅  Done. Open http://localhost:8080/index.php/apps/thevault/"
 
 else
   # Default: PHP only — used during `npm run dev:docker`
