@@ -32,8 +32,10 @@
     "axios": "^1.13.6",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-router-dom": "^7.13.1",
     "vue": "^3.5.30",
-    "wavesurfer.js": "^7.12.3"
+    "wavesurfer.js": "^7.12.3",
+    "webdav": "^5.9.0"
   },
   "browserslist": [
     "extends @nextcloud/browserslist-config"
@@ -46,6 +48,7 @@
     "@nextcloud/browserslist-config": "^2.3.0",
     "@nextcloud/eslint-config": "^8.2.1",
     "@nextcloud/stylelint-config": "^2.3.0",
+    "@types/react": "^19.2.14",
     "@vitejs/plugin-react": "^6.0.1",
     "vite": "^8.0.0"
   },

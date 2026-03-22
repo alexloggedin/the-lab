@@ -8,10 +8,10 @@ import type { VaultFile } from '../../types';
 export default function VaultPage() {
   const { authStatus } = useAuth();
 
-  const [folders,     setFolders]     = useState<VaultFile[]>([]);
-  const [openFolder,  setOpenFolder]  = useState<VaultFile | null>(null);
-  const [loading,     setLoading]     = useState(false);
-  const [initError,   setInitError]   = useState<string | null>(null);
+  const [folders, setFolders] = useState<VaultFile[]>([]);
+  const [openFolder, setOpenFolder] = useState<VaultFile | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [initError, setInitError] = useState<string | null>(null);
 
   const isReady = authStatus === 'authenticated' || USE_MOCK;
 

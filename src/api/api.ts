@@ -5,63 +5,12 @@ import { getRequestToken, REQUEST_TOKEN_HEADER } from '../auth/session';
 import { davFilesUrl, parseMultistatus } from './webdav';
 import { ocsListShares, ocsCreateShare, ocsDeleteShare } from './sharesApi';
 import { getShareInfo, listShareContents, publicStreamUrl as buildPublicStreamUrl } from './publicShareApi';
+import type { FileStat } from 'webdav';
+import { createDavClient } from './davClient';
 
-/**
- * Session-authenticated fetch.
- * credentials: 'include' sends the Nextcloud session cookie automatically.
- * RequestVerificationToken is Nextcloud's CSRF header name.
- *
- * Reference: https://docs.nextcloud.com/server/33/developer_manual/digging_deeper/csrf.html
- */
-const sessionFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
-  const method = (options.method ?? 'GET').toUpperCase();
-  console.log(`[api] ${method} ${url}`);
+const client = createDavClient();
 
-  return fetch(url, {
-    ...options,
-    credentials: 'include',
-    headers: {
-      ...(options.headers ?? {}),
-      'requesttoken': getRequestToken(), 
-    },
-  });
-};
-
-const ensureVaultFolder = async (): Promise<void> => {
-  const url = davFilesUrl('theVault');
-  const checkRes = await sessionFetch(url, {
-    method: 'PROPFIND',
-    headers: { 'Depth': '0', 'Content-Type': 'application/xml' },
-    body: `<?xml version="1.0"?><d:propfind xmlns:d="DAV:"><d:prop><d:resourcetype/></d:prop></d:propfind>`,
-  });
-  if (checkRes.status === 404) {
-    console.log('[api] theVault folder not found, creating...');
-    const mkcolRes = await sessionFetch(url, { method: 'MKCOL' });
-    if (!mkcolRes.ok && mkcolRes.status !== 405) {
-      throw new Error(`Could not create theVault folder: ${mkcolRes.status}`);
-    }
-  }
-};
-
-export const entryToFile = (entry: DavEntry): VaultFile => {
-  const match = entry.href.match(/\/remote\.php\/dav\/files\/[^/]+\/(.+)/);
-  const path = match ? decodeURIComponent(match[1]) : entry.href;
-  const cleanPath = path.replace(/\/$/, '');
-  const name = cleanPath.split('/').pop() ?? cleanPath;
-  const isFolder = entry.contentType === null && entry.contentLength === null;
-
-  return {
-    name,
-    path: cleanPath,
-    size: entry.contentLength ? parseInt(entry.contentLength, 10) : 0,
-    modified: entry.lastModified
-      ? Math.floor(new Date(entry.lastModified).getTime() / 1000)
-      : 0,
-    mimetype: isFolder ? 'httpd/unix-directory' : (entry.contentType ?? 'application/octet-stream'),
-    type: isFolder ? 'dir' : 'file',
-  };
-};
-
+// ─── External API helpers ─────────────────────────────────────────────────────
 export const api = {
 
   initVault: (): Promise<void | ApiResponse<{ success: boolean }>> =>
@@ -69,42 +18,22 @@ export const api = {
       ? Promise.resolve({ data: { success: true } })
       : ensureVaultFolder(),
 
-  getFiles: (path = 'theVault'): Promise<ApiResponse<VaultFile[]>> =>
-    USE_MOCK
-      ? Promise.resolve({ data: path !== 'theVault' ? mockFiles : mockFolders })
-      : (async () => {
-          const url = davFilesUrl(path);
-          const body = `<?xml version="1.0" encoding="UTF-8"?>
-<d:propfind xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns">
-  <d:prop>
-    <d:getlastmodified />
-    <d:getcontentlength />
-    <d:getcontenttype />
-    <d:resourcetype />
-    <oc:fileid />
-  </d:prop>
-</d:propfind>`;
-          const res = await sessionFetch(url, {
-            method: 'PROPFIND',
-            headers: { 'Content-Type': 'application/xml', 'Depth': '1' },
-            body,
-          });
-          if (!res.ok) throw new Error(`PROPFIND failed: ${res.status}`);
-          const children = parseMultistatus(await res.text()).slice(1).map(entryToFile);
-          const filtered = path === 'theVault'
-            ? children.filter(f => f.type === 'dir')
-            : children.filter(f => f.type === 'file');
-          console.log(`[api] getFiles(${path}) → ${filtered.length} items`);
-          return { data: filtered };
-        })(),
+  getFiles: async (path = 'theVault'): Promise<ApiResponse<VaultFile[]>> => {
+    if (USE_MOCK) return { data: path !== 'theVault' ? mockFiles : mockFolders };
+    const user = (window as any)?.OC?.currentUser ?? 'admin';
 
-  /**
-   * Returns a root-relative URL for streaming a file.
-   * The browser sends the session cookie automatically when fetching this URL.
-   * 
-   * AudioPlayer and VideoPlayer use this URL to fetch the blob. Because
-   * credentials: 'include' is set in those components, the stream is authenticated.
-   */
+    const results = await client.getDirectoryContents(`/files/${user}/${path}`);
+
+    const stats = Array.isArray(results) ? results : results.data;
+
+    const files = stats.map(fileStatToVaultFile);
+    const filtered = path === 'theVault'
+      ? files.filter(f => f.type === 'dir')
+      : files.filter(f => f.type === 'file');
+
+    return { data: filtered };
+  },
+
   streamUrl: (path: string): Promise<string> => {
     if (USE_MOCK) return Promise.resolve('/mock-audio/test.wav');
     return Promise.resolve(davFilesUrl(path));
@@ -143,6 +72,42 @@ export const api = {
 
   publicStreamUrl: (token: string, fileName: string | null = null): string =>
     USE_MOCK ? '/mock-audio/test.wav' : buildPublicStreamUrl(token, fileName),
+};
+
+const ensureVaultFolder = async (): Promise<void> => {
+  const user = (window as any)?.OC?.currentUser ?? 'admin';
+  const path = `/files/${user}/theVault`;
+
+  try {
+    await client.stat(path);
+    // stat() succeeds → folder exists, nothing to do
+  } catch (err: any) {
+    if (err?.status === 404) {
+      // stat() threw a 404 → folder doesn't exist, create it
+      // createDirectory() sends a MKCOL request
+      // Docs: https://github.com/perry-mitchell/webdav-client#createdirectory
+      await client.createDirectory(path);
+    } else {
+      throw err; // unexpected error, propagate it
+    }
+  }
+};
+
+export const fileStatToVaultFile = (stat: FileStat): VaultFile => {
+  // Strip /files/username/ from the front — same logic as your current entryToFile
+  const match = stat.filename.match(/^\/files\/[^/]+\/(.+)/);
+  const path = match ? match[1] : stat.filename;
+
+  return {
+    name: stat.basename,
+    path: path.replace(/\/$/, ''),
+    size: stat.size ?? 0,
+    modified: Math.floor(new Date(stat.lastmod).getTime() / 1000),
+    mimetype: stat.type === 'directory'
+      ? 'httpd/unix-directory'
+      : (stat.mime ?? 'application/octet-stream'),
+    type: stat.type === 'directory' ? 'dir' : 'file',
+  };
 };
 
 function getMockShareInfoFromToken(token: string): Promise<ApiResponse<ShareInfo>> {
