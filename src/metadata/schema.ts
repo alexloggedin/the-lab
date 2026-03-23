@@ -30,7 +30,7 @@ export const METADATA_FIELDS: MetaFieldDef[] = [
     label: 'BPM',
     type: 'number-range',
     min: 60,
-    max: 220,
+    max: 170,
     step: 1,
   },
   {

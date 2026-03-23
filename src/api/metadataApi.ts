@@ -75,11 +75,13 @@ export async function setFileMeta(path: string, meta: Partial<FileMetadata>): Pr
   </d:set>
 </d:propertyupdate>`;
 
-  await client.customRequest(davPath, {
+  const res = await client.customRequest(davPath, {
     method: 'PROPPATCH',
     headers: { 'Content-Type': 'application/xml' },
     data: body,
   });
+
+  console.log('[metadataApi] Post:', res)
 }
 
 // ─── XML parsing helpers ───────────────────────────────────────────────────────
@@ -113,8 +115,8 @@ function parsePropfindResponse(xml: string): FileMetadata {
   };
 
   return {
-    bpm:   getTextContent('bpm')   || undefined,
-    key:   getTextContent('key')   || undefined,
+    bpm: getTextContent('bpm') || undefined,
+    key: getTextContent('key') || undefined,
     genre: getTextContent('genre') || undefined,
   };
 }
