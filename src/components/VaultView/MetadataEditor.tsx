@@ -57,6 +57,13 @@ export default function MetadataEditor({ filePath, initialMeta, onSave }: Props)
                 onChange={val => setField(field.key, val)}
               />
             )}
+            {field.type === 'select' && (
+              <SingleSelectField
+                value={draft[field.key] ?? ''}
+                options={field.options ?? []}
+                onChange={val => setField(field.key, val)}
+              />
+            )}
           </div>
         ))}
       </div>
@@ -76,7 +83,7 @@ export default function MetadataEditor({ filePath, initialMeta, onSave }: Props)
   );
 }
 
-// ---------------------- Fi
+// ---------------------- 
 
 interface NumberRangeFieldProps {
   value: string;
@@ -114,13 +121,37 @@ function NumberRangeField({ value, min, max, step, onChange }: NumberRangeFieldP
   );
 }
 
-interface MultiSelectFieldProps {
+interface SelectFieldProps {
   value: string;      // comma-separated, e.g. "Electronic,Ambient"
   options: string[];
   onChange: (val: string) => void;
 }
 
-function MultiSelectField({ value, options, onChange }: MultiSelectFieldProps) {
+
+function SingleSelectField({ value, options, onChange }: SelectFieldProps) {
+
+
+  const toggleOption = (option: string) => {
+    onChange(option);
+  };
+
+  return (
+    <div className="meta-multiselect">
+      {options.map(option => (
+        <button
+          key={option}
+          className={option ? 'meta-chip selected' : 'meta-chip'}
+          onClick={() => toggleOption(option)}
+          type="button"
+        >
+          {option}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function MultiSelectField({ value, options, onChange }: SelectFieldProps) {
   // Parse the comma-separated string into a Set for O(1) lookups
   const selected = new Set(value ? value.split(',').map(s => s.trim()) : []);
 

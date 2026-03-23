@@ -57,6 +57,20 @@ export default function FilterBar({ filters, onChange, resultCount, totalCount }
               />
             )}
 
+            {field.type === 'select' && (
+              <ChipFilter
+                options={field.options ?? []}
+                selected={filters[field.key === 'key' ? 'keys' : 'genres']}
+                onChange={selected =>
+                  update(
+                    field.key === 'key'
+                      ? { keys: selected }
+                      : { genres: selected }
+                  )
+                }
+              />
+            )}
+
             {field.type === 'multiselect' && (
               <ChipFilter
                 options={field.options ?? []}

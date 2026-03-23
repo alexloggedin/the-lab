@@ -8,7 +8,9 @@
  *   3. The editor and pill rendering will pick it up automatically
  */
 
-export type FieldType = 'number-range' | 'multiselect' | 'text';
+import { FileMetadata } from "../types";
+
+export type FieldType = 'number-range' | 'multiselect' | 'text' | 'select';
 
 export interface MetaFieldDef {
   key: keyof FileMetadata;          // must match a key in FileMetadata
@@ -34,7 +36,7 @@ export const METADATA_FIELDS: MetaFieldDef[] = [
   {
     key: 'key',
     label: 'Key',
-    type: 'multiselect',
+    type: 'select',
     options: [
       'C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F',
       'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B',
