@@ -20,8 +20,17 @@ body, #vault-root {
   min-height:  100vh;
 }
 
+#header {
+  visibility: collapse;
+}
+
+#content {
+  display: block;
+  margin-top: 0;
+}
+
 /* Layout */
-.app-container { max-width: 960px; margin: 0 auto; padding: 48px 24px; }
+.app-container { max-width: 90vw; margin: 0 auto; padding: 48px 24px; }
 .project-header {
   font-size: 11px;
   letter-spacing: 0.1em;
@@ -41,8 +50,7 @@ body, #vault-root {
   display: flex;
   flex-direction: row;
   padding-top: 2%;
-  padding-bottom: 5%;
-  margin-left: 2%;
+  margin-left: 0.5%;
 }
 
 .proj-name {

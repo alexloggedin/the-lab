@@ -1,29 +1,63 @@
-// vite.config.js
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
-export default defineConfig(({ mode }) => ({
-  plugins: [react()],
+export default defineConfig(({ mode }) => {
+  console.log('Vite mode:', mode)
 
-  server: {
-    port: 5173,
-    proxy: mode === 'nextcloud' ? {
-      '^/remote\\.php': { target: 'http://localhost:8080', changeOrigin: true },
-      '^/index\\.php': { target: 'http://localhost:8080', changeOrigin: true },
-      '^/public\\.php': { target: 'http://localhost:8080', changeOrigin: true },
-      '^/ocs': { target: 'http://localhost:8080', changeOrigin: true },
-      '^/login': { target: 'http://localhost:8080', changeOrigin: true },
-    } : {},
-  },
+  // Proxies only the paths that belong to Nextcloud.
+  // Everything else (/, /?share=token, /src, /@vite) stays on Vite.
+  const dockerProxy = {
+    '^/index\\.php': {
+      target: 'http://localhost:8080',
+      changeOrigin: true,
+    },
+    '^/remote\\.php': {
+      target: 'http://localhost:8080',
+      changeOrigin: true,
+    },
+    '^/ocs': {
+      target: 'http://localhost:8080',
+      changeOrigin: true,
+    },
+    '^/apps': {
+      target: 'http://localhost:8080',
+      changeOrigin: true,
+    },
+    '^/js': {
+      target: 'http://localhost:8080',
+      changeOrigin: true,
+    },
+    '^/css': {
+      target: 'http://localhost:8080',
+      changeOrigin: true,
+    },
+  }
 
-  build: {
-    outDir: 'dist',
-    rollupOptions: { input: 'index.html' },
-  },
+  return {
+    plugins: [react()],
 
-  test: {
-    environment: 'jsdom',
-    globals: true,
-    setupFiles: './src/test/setup.js',
-  },
-}));
+    server: {
+      port: 5173,
+      hmr: {
+        host: 'localhost',
+        port: 5173,
+      },
+      // docker mode  → proxy Nextcloud paths to container
+      // dev mode     → no proxy, all requests stay on Vite, mock data used
+      proxy: mode === 'docker' ? dockerProxy : {},
+    },
+
+    build: {
+      outDir: 'dist',
+      emptyOutDir: true,
+      rollupOptions: {
+        input: 'src/main.tsx',
+        output: {
+          entryFileNames: 'thevault.js',
+          assetFileNames: (info) =>
+            info.name?.endsWith('.css') ? 'thevault.css' : '[name][extname]',
+        }
+      },
+    }
+  }
+})

@@ -1,125 +1,179 @@
-import type { VaultFile, FileMetadata, ShareLink, ShareInfo, ApiResponse, DavEntry } from '../types.ts';
-import { USE_MOCK } from '../dev/useMockData.ts';
-import { mockFiles, mockFolders, mockMetadata, mockShareLinks } from '../dev/fixtures.ts';
-import { getAuthHeader, touchActivity } from '../auth/authStore.ts';
-import { davFilesUrl, parseMultistatus } from './webdav.ts';
-import { ocsListShares, ocsCreateShare, ocsDeleteShare } from '../api/sharesApi.ts';
-import { getShareInfo, listShareContents, publicStreamUrl as buildPublicStreamUrl } from '../api/publicShareApi.ts';
+import type { VaultFile, FileMetadata, ShareLink, ShareInfo, ApiResponse, DavEntry } from '../types';
+import { USE_MOCK } from '../dev/useMockData';
+import { mockFiles, mockFolders, mockMetadata, mockShareLinks } from '../dev/fixtures';
+import { davFilesUrl } from './versionApi';
+import { ocsListShares, ocsCreateShare, ocsDeleteShare } from './sharesApi';
+import { getShareInfo, listShareContents, publicStreamUrl as buildPublicStreamUrl } from './publicApi';
+import type { FileStat } from 'webdav';
+import { createInternalDavClient } from './davClient';
+
+const client = createInternalDavClient();
+const user = (window as any)?.OC?.currentUser ?? 'admin';
+
+// ─── External API helpers ─────────────────────────────────────────────────────
+// ─── Individual function declarations ────────────────────────────────────────
+
+function initVault(): Promise<void | ApiResponse<{ success: boolean }>> {
+  return USE_MOCK
+    ? Promise.resolve({ data: { success: true } })
+    : ensureVaultFolder();
+}
+
+//TODO - Refactor this code so that it renders a list of all files from all folders
+async function getFiles(path = 'theVault'): Promise<ApiResponse<VaultFile[]>> {
+  if (USE_MOCK) {
+    return { data: path !== 'theVault' ? mockFiles : mockFolders };
+  }
+
+  const results = await client.getDirectoryContents(`/files/${user}/${path}`);
+  const stats = Array.isArray(results) ? results : results.data;
+  const files = stats.map(fileStatToVaultFile);
+
+  const filtered = path === 'theVault'
+    ? files.filter(f => f.type === 'dir')
+    : files.filter(f => f.type === 'file');
+
+  return { data: filtered };
+}
+
+async function getAllFiles(): Promise<ApiResponse<VaultFile[]>> {
+  if (USE_MOCK) return { data: mockFiles };
+
+  const user = (window as any)?.OC?.currentUser ?? 'admin';
+
+  // Step 1: fetch the top-level theVault folder to get all project folders
+  const foldersResult = await client.getDirectoryContents(`/files/${user}/theVault`);
+  const folderStats = Array.isArray(foldersResult) ? foldersResult : foldersResult.data;
+
+  //TODO - Modify to accept files in the main folder
+  const folders = folderStats.filter(s => s.type === 'directory');
+  console.log(`[api] getAllFiles first fetch list: `, folders);
+
+  const perFolderResults = await Promise.all(
+    folders.map(folder =>
+      client
+        .getDirectoryContents(folder.filename)
+        .then(res => {
+          console.log(`[api] getAllFiles second fetch: ${folder.filename}: `, folder)
+          const stats = Array.isArray(res) ? res : res.data;
+          return stats;
+        })
+        .catch(err => {
+          // If one folder fails, log it but don't crash the whole list.
+          // Return an empty array so Promise.all can still resolve.
+          console.error(`[api] getAllFiles: failed to fetch ${folder.filename}:`, err);
+          return [];
+        })
+    )
+  );
+
+  // Step 3: flatten the array of arrays into a single file list
+  // [[file1, file2], [file3]] → [file1, file2, file3]
+  const allFiles = perFolderResults
+    .flat()
+    .map(fileStatToVaultFile);
+
+  return { data: allFiles };
+}
 
 
-const authedFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
-  const authHeader = await getAuthHeader();
-  const res = await fetch(url, {
-    ...options,
-    credentials: 'omit',
-    headers: {
-      ...(options.headers ?? {}),
-      ...(authHeader ? { Authorization: authHeader } : {}),
-    },
-  });
-  return res;
-};
+function streamUrl(path: string): Promise<string> {
+  if (USE_MOCK) return Promise.resolve('/mock-audio/test.wav');
+  return Promise.resolve(davFilesUrl(path));
+}
+
+function getMetadata(_path?: string): Promise<ApiResponse<FileMetadata>> {
+  return USE_MOCK
+    ? Promise.resolve({ data: mockMetadata })
+    : Promise.resolve({ data: {} });
+}
+
+function updateMetadata(
+  _path?: string,
+  _meta?: Partial<FileMetadata>
+): Promise<ApiResponse<{ success: boolean }>> {
+  return Promise.resolve({ data: { success: true } });
+}
+
+function getShares(): Promise<ApiResponse<ShareLink[]>> {
+  return USE_MOCK
+    ? Promise.resolve({ data: mockShareLinks })
+    : ocsListShares().then(data => ({ data }));
+}
+
+function createShare(
+  path: string,
+  hideDownload: boolean
+): Promise<ApiResponse<ShareLink>> {
+  return USE_MOCK
+    ? Promise.resolve({ data: mockShareLinks[0] })
+    : ocsCreateShare({ path, hideDownload }).then(data => ({ data }));
+}
+
+function deleteShare(id: string): Promise<ApiResponse<{ success: boolean }>> {
+  return USE_MOCK
+    ? Promise.resolve({ data: { success: true } })
+    : ocsDeleteShare(id).then(() => ({ data: { success: true } }));
+}
+
+function getShareByToken(token: string): Promise<ApiResponse<ShareInfo>> {
+  return USE_MOCK
+    ? getMockShareInfoFromToken(token)
+    : getShareInfo(token).then(data => ({ data }));
+}
+
+function getShareContents(token: string): Promise<ApiResponse<VaultFile[]>> {
+  return USE_MOCK
+    ? Promise.resolve({ data: mockFiles })
+    : listShareContents(token).then(data => ({ data }));
+}
+
+function publicStreamUrl(
+  token: string,
+  fileName: string | null = null
+): string {
+  return USE_MOCK
+    ? '/mock-audio/test.wav'
+    : buildPublicStreamUrl(token, fileName);
+}
 
 const ensureVaultFolder = async (): Promise<void> => {
-  const url = await davFilesUrl('theVault');
-  const checkRes = await authedFetch(url, {
-    method: 'PROPFIND',
-    headers: { 'Depth': '0', 'Content-Type': 'application/xml' },
-    body: `<?xml version="1.0"?><d:propfind xmlns:d="DAV:"><d:prop><d:resourcetype/></d:prop></d:propfind>`,
-  });
-  if (checkRes.status === 404) {
-    const mkcolRes = await authedFetch(url, { method: 'MKCOL' });
-    if (!mkcolRes.ok && mkcolRes.status !== 405) {
-      throw new Error(`Could not create theVault folder: ${mkcolRes.status}`);
+  const user = (window as any)?.OC?.currentUser ?? 'admin';
+  const path = `/files/${user}/theVault`;
+
+  try {
+    await client.stat(path);
+    // stat() succeeds → folder exists, nothing to do
+  } catch (err: any) {
+    if (err?.status === 404) {
+      // stat() threw a 404 → folder doesn't exist, create it
+      // createDirectory() sends a MKCOL request
+      // Docs: https://github.com/perry-mitchell/webdav-client#createdirectory
+      await client.createDirectory(path);
+    } else {
+      throw err; // unexpected error, propagate it
     }
   }
 };
 
-export const entryToFile = (entry: DavEntry): VaultFile => {
-  const match = entry.href.match(/\/remote\.php\/dav\/files\/[^/]+\/(.+)/);
-  const path = match ? decodeURIComponent(match[1]) : entry.href;
-  const cleanPath = path.replace(/\/$/, '');
-  const name = cleanPath.split('/').pop() ?? cleanPath;
-  const isFolder = entry.contentType === null && entry.contentLength === null;
+export const fileStatToVaultFile = (stat: FileStat): VaultFile => {
+  // Strip /files/username/ from the front — same logic as your current entryToFile
+  const match = stat.filename.match(/^\/files\/[^/]+\/(.+)/);
+  const path = match ? match[1] : stat.filename;
 
   return {
-    name,
-    path: cleanPath,
-    size: entry.contentLength ? parseInt(entry.contentLength, 10) : 0,
-    modified: entry.lastModified
-      ? Math.floor(new Date(entry.lastModified).getTime() / 1000)
-      : 0,
-    mimetype: isFolder ? 'httpd/unix-directory' : (entry.contentType ?? 'application/octet-stream'),
-    type: isFolder ? 'dir' : 'file',
+    name: stat.basename,
+    path: path.replace(/\/$/, ''),
+    size: stat.size ?? 0,
+    modified: Math.floor(new Date(stat.lastmod).getTime() / 1000),
+    mimetype: stat.type === 'directory'
+      ? 'httpd/unix-directory'
+      : (stat.mime ?? 'application/octet-stream'),
+    type: stat.type === 'directory' ? 'dir' : 'file',
   };
 };
 
-export const api = {
-
-  initVault: (): Promise<ApiResponse<{ success: boolean }> | void> =>
-    USE_MOCK
-      ? Promise.resolve({ data: { success: true } })
-      : ensureVaultFolder(),
-
-  getFiles: (path = 'theVault'): Promise<ApiResponse<VaultFile[]>> =>
-    USE_MOCK
-      ? Promise.resolve({ data: path !== 'theVault' ? mockFiles : mockFolders })
-      : (async () => {
-          const url = await davFilesUrl(path);
-          const body = `<?xml version="1.0" encoding="UTF-8"?>
-<d:propfind xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns">
-  <d:prop>
-    <d:getlastmodified />
-    <d:getcontentlength />
-    <d:getcontenttype />
-    <d:resourcetype />
-    <oc:fileid />
-  </d:prop>
-</d:propfind>`;
-          const res = await authedFetch(url, {
-            method: 'PROPFIND',
-            headers: { 'Content-Type': 'application/xml', 'Depth': '1' },
-            body,
-          });
-          if (!res.ok) throw new Error(`PROPFIND failed: ${res.status}`);
-          const children = parseMultistatus(await res.text()).slice(1).map(entryToFile);
-          const filtered = path === 'theVault'
-            ? children.filter(f => f.type === 'dir')
-            : children.filter(f => f.type === 'file');
-          touchActivity();
-          return { data: filtered };
-        })(),
-
-  streamUrl: async (path: string): Promise<string> => {
-    if (USE_MOCK) return '/mock-audio/test.wav';
-    return davFilesUrl(path);
-  },
-
-  getMetadata: (_path?: string): Promise<ApiResponse<FileMetadata>> =>
-    USE_MOCK ? Promise.resolve({ data: mockMetadata }) : Promise.resolve({ data: {} }),
-
-  updateMetadata: (_path?: string, _meta?: Partial<FileMetadata>): Promise<ApiResponse<{ success: boolean }>> =>
-    USE_MOCK ? Promise.resolve({ data: { success: true } }) : Promise.resolve({ data: { success: true } }),
-
-  getShares: (): Promise<ApiResponse<ShareLink[]>> =>
-    USE_MOCK ? Promise.resolve({ data: mockShareLinks }) : ocsListShares().then(data => ({ data })),
-
-  createShare: (path: string, hideDownload: boolean): Promise<ApiResponse<ShareLink>> =>
-    USE_MOCK ? Promise.resolve({ data: mockShareLinks[0]}) : ocsCreateShare({ path, hideDownload }).then(data => ({ data })),
-
-  deleteShare: (id: string): Promise<ApiResponse<{ success: boolean }>> =>
-    USE_MOCK ? Promise.resolve({ data: { success: true } }) : ocsDeleteShare(id).then(() => ({ data: { success: true } })),
-
-  getShareByToken: (token: string): Promise<ApiResponse<ShareInfo>> =>
-    USE_MOCK ? getMockShareInfoFromToken(token) : getShareInfo(token).then(data => ({ data })),
-
-  getShareContents: (token: string): Promise<ApiResponse<VaultFile[]>> =>
-    USE_MOCK ? Promise.resolve({ data: mockFiles }) : listShareContents(token).then(data => ({ data })),
-
-  publicStreamUrl: (token: string, path: string): string =>
-    USE_MOCK ? '/mock-audio/test.wav' : '',
-};
-
+// --- Helpers
 function getMockShareInfoFromToken(token: string): Promise<ApiResponse<ShareInfo>> {
   switch (token) {
     case 'invalid':
@@ -130,3 +184,20 @@ function getMockShareInfoFromToken(token: string): Promise<ApiResponse<ShareInfo
       return Promise.resolve({ data: { token, fileName: 'track_01_v3.wav', mimetype: 'audio/wav', isFolder: false, hideDownload: false, meta: { bpm: '128', key: 'Am', genre: 'Electronic' } } });
   }
 }
+
+// ─── API object — a clean manifest of available functions ────────────────────
+
+export const api = {
+  initVault,
+  getFiles,
+  getAllFiles,
+  streamUrl,
+  getMetadata,
+  updateMetadata,
+  getShares,
+  createShare,
+  deleteShare,
+  getShareByToken,
+  getShareContents,
+  publicStreamUrl,
+};
