@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import AudioPlayer from '../Players/AudioPlayer.tsx';
 import VideoPlayer from '../Players/VideoPlayer.tsx';
-import {  publicStreamUrl, getPublicAuthHeader } from '../../api/publicShareApi.ts';
+import {  publicStreamUrl, getPublicAuthHeader } from '../../api/publicApi.ts';
 import type { ShareInfo } from '../../types.ts';
 
 interface Props {

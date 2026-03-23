@@ -1,5 +1,4 @@
-import { createClient } from 'webdav';
-import { getRequestToken } from '../auth/session';
+import { createClient, WebDAVClient } from 'webdav';
 
 /**
  * Creates a webdav client configured for Nextcloud session auth.
@@ -12,23 +11,22 @@ import { getRequestToken } from '../auth/session';
  * Docs: https://docs.nextcloud.com/server/33/developer_manual/client_apis/WebDAV/basic.html
  */
 
-export function createDavClient(userSession: Boolean = true) {
-  if (userSession) {
-    return createClient('/remote.php/dav', {
-      headers: {
-        requesttoken: getRequestToken(),
-      },
-    })
-  } else {
-    return createClient('/public.php/dav', {
-      headers: {
-        requesttoken: getRequestToken(),
-      },
-    })
-  }
+export function createInternalDavClient(): WebDAVClient {
+  return createClient('/remote.php/dav', {
+    headers: {
+      requesttoken: getRequestToken(),
+    },
+  })
 }
 
-const getRequestToken = (): string => {
+export function createPublicDavClient(token: string): WebDAVClient {
+  return createClient('/public.php/dav', {
+    username: token,
+    password: '',
+  });
+}
+
+export const getRequestToken = (): string => {
   if (typeof window !== 'undefined' && (window as any).OC?.requestToken) {
     return (window as any).OC.requestToken;
   }

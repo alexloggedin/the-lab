@@ -1,6 +1,4 @@
-// src/components/VideoPlayer.jsx
 import { useEffect, useState } from 'react';
-import { getAuthHeader } from '../../auth/authStore.ts';
 import { USE_MOCK } from '../../dev/useMockData.ts';
 
 interface Props {
@@ -25,22 +23,22 @@ export default function VideoPlayer({ fileUrl, authHeader = null }: Props) {
       return;
     }
 
-    const fetchAudio = authHeader
+    const fetchVideo = authHeader
       ? fetch(fileUrl, {
         credentials: 'omit',
         headers: { Authorization: authHeader },
       })
       : fetch(fileUrl, {
-        credentials: 'include',   // session cookie for private files
+        credentials: 'include',
       });
 
-    fetchAudio
+    fetchVideo
       .then(res => {
         if (!res.ok) throw new Error(`Failed to load audio: ${res.status}`);
         return res.blob();
       })
       .then(blob => {
-        console.log('[AudioPlayer] blob type:', blob.type, 'size:', blob.size);
+        console.log('[VidePlayerPlayer] blob type:', blob.type, 'size:', blob.size);
         objectUrl = URL.createObjectURL(blob);
         setBlobUrl(objectUrl);
       })

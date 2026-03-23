@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import SharedFolderView from '../ShareView/SharedFolderView';
 import SharedFileView from '../ShareView/SharedFileView';
-import { getShareInfo } from '../../api/publicShareApi';
+import { getShareInfo } from '../../api/publicApi';
 import type { ShareInfo } from '../../types';
 
 export default function SharePage() {
@@ -38,7 +38,7 @@ export default function SharePage() {
   if (notFound) {
     return (
       <div className="app-container">
-        <div className="topbar"><span className="wordmark">theLAB</span></div>
+        <div className="topbar"><span className="wordmark">theVault</span></div>
         <p className="muted share-not-found">this link is invalid or has expired.</p>
       </div>
     );

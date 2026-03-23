@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import AudioPlayer from '../Players/AudioPlayer.tsx';
-import { listShareContents, publicStreamUrl, getPublicAuthHeader } from '../../api/publicShareApi.js';
+import { listShareContents, publicStreamUrl, getPublicAuthHeader } from '../../api/publicApi.js';
 import { VaultFile } from '../../types.ts';
 
 interface Props {
