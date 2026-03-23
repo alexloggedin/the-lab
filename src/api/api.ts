@@ -45,21 +45,18 @@ async function getAllFiles(): Promise<ApiResponse<VaultFile[]>> {
   const folderStats = Array.isArray(foldersResult) ? foldersResult : foldersResult.data;
 
   const folders = folderStats.filter(s => s.type === 'directory');
-  console.log(`[api] getAllFiles first fetch list: `, folders);
 
   const perFolderResults = await Promise.all(
     folders.map(folder =>
       client
         .getDirectoryContents(folder.filename)
         .then(res => {
-          console.log(`[api] getAllFiles second fetch: ${folder.filename}: `, folder)
           const stats = Array.isArray(res) ? res : res.data;
           return stats;
         })
         .catch(err => {
           // If one folder fails, log it but don't crash the whole list.
           // Return an empty array so Promise.all can still resolve.
-          console.error(`[api] getAllFiles: failed to fetch ${folder.filename}:`, err);
           return [];
         })
     )

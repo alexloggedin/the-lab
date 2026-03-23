@@ -44,10 +44,15 @@ export async function getFileMeta(path: string): Promise<FileMetadata> {
     data: PROPFIND_BODY,
   });
 
+  
+
   // The response body is XML. We parse it to extract our custom props.
   // The webdav package returns the raw response body as a string when
   // you use customRequest — we parse it ourselves.
-  const xml = response.data as string;
+  const xml = await response.text()
+
+  console.log('[metadataApi] PropFind:', xml)
+
   return parsePropfindResponse(xml);
 }
 
@@ -75,11 +80,13 @@ export async function setFileMeta(path: string, meta: Partial<FileMetadata>): Pr
   </d:set>
 </d:propertyupdate>`;
 
-  await client.customRequest(davPath, {
+  const res = await client.customRequest(davPath, {
     method: 'PROPPATCH',
     headers: { 'Content-Type': 'application/xml' },
     data: body,
   });
+
+  console.log('[metadataApi] PropPatch:', res)
 }
 
 // ─── XML parsing helpers ───────────────────────────────────────────────────────
@@ -113,8 +120,8 @@ function parsePropfindResponse(xml: string): FileMetadata {
   };
 
   return {
-    bpm:   getTextContent('bpm')   || undefined,
-    key:   getTextContent('key')   || undefined,
+    bpm: getTextContent('bpm') || undefined,
+    key: getTextContent('key') || undefined,
     genre: getTextContent('genre') || undefined,
   };
 }

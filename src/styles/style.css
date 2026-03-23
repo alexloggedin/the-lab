@@ -1,0 +1,779 @@
+/* ============================================================
+   style.css — theVault consolidated stylesheet
+   Merges: globals.css · shares.css · metadata.css · search.css
+   ============================================================ */
+
+
+/* ── 1. FONTS ────────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap');
+
+
+/* ── 2. DESIGN TOKENS (CSS custom properties) ────────────────── */
+/*
+   All color, surface, and spacing values live here as CSS variables.
+   Changing a value here propagates to every component automatically.
+   Reference: https://developer.mozilla.org/en-US/docs/Web/CSS/--*
+*/
+
+:root {
+  --bg:      #0e0e0e;   /* page background */
+  --surface: #161616;   /* card / panel background */
+  --border:  #2a2a2a;   /* subtle dividing lines */
+  --text:    #e8e8e8;   /* primary text */
+  --muted:   #555;      /* secondary / label text */
+  --accent:  #ffffff;   /* interactive highlight */
+}
+
+
+/* ── 3. RESET ────────────────────────────────────────────────── */
+
+* {
+  box-sizing: border-box;
+  margin:     0;
+  padding:    0;
+}
+
+
+/* ── 4. BASE / BODY ──────────────────────────────────────────── */
+
+body,
+#vault-root {
+  background:  var(--bg);
+  color:       var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size:   13px;
+  line-height: 1.6;
+  min-height:  100vh;
+}
+
+
+/* ── 5. NEXTCLOUD SHELL OVERRIDES ────────────────────────────── */
+/*
+   Nextcloud renders a persistent top bar and offsets #content.
+   We hide the bar and reset the offset so theVault fills the viewport.
+*/
+
+#header {
+  visibility: collapse;
+}
+
+#content {
+  display:    block;
+  margin-top: 0;
+}
+
+
+/* ── 6. LAYOUT ───────────────────────────────────────────────── */
+
+.app-container {
+  max-width: 90vw;
+  margin:    0 auto;
+  padding:   48px 24px;
+}
+
+.topbar {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  margin-bottom:   32px;
+}
+
+.wordmark {
+  font-size:      16px;
+  letter-spacing: 0.08em;
+  color:          var(--text);
+}
+
+.section-label {
+  font-size:      11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color:          var(--muted);
+  padding-bottom: 8px;
+  border-bottom:  1px solid var(--border);
+  margin-bottom:  4px;
+}
+
+/* Legacy alias kept for any existing uses of .project-header */
+.project-header {
+  font-size:      11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color:          var(--muted);
+  padding-bottom: 8px;
+  border-bottom:  1px solid var(--border);
+  margin-bottom:  4px;
+}
+
+.muted {
+  color:     var(--muted);
+  font-size: 12px;
+}
+
+
+/* ── 7. PROJECT LIST ─────────────────────────────────────────── */
+
+.project-row {
+  display:        flex;
+  flex-direction: row;
+  align-items:    center;
+  padding-top:    2%;
+  margin-left:    0.5%;
+  cursor:         pointer;
+}
+
+.proj-arrow {
+  margin-right: 2%;
+  margin-left:  1%;
+}
+
+.proj-name {
+  flex-grow: 10;
+}
+
+.proj-date {
+  flex-grow: 1;
+}
+
+.proj-actions {
+  flex-grow: 1;
+}
+
+
+/* ── 8. FILE ROWS ────────────────────────────────────────────── */
+
+.file-row {
+  display:       flex;
+  align-items:   center;
+  gap:           16px;
+  padding:       10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.file-row:hover {
+  color: var(--accent);
+}
+
+.file-name {
+  flex: 1;
+}
+
+.file-meta {
+  color:     var(--muted);
+  font-size: 12px;
+}
+
+
+/* ── 9. BUTTONS ──────────────────────────────────────────────── */
+/*
+   Base button reset — applied globally to every <button>.
+   The more specific .abtn and .fbtn variants override as needed.
+*/
+
+button {
+  background:     none;
+  border:         none;
+  color:          var(--muted);
+  cursor:         pointer;
+  font-family:    inherit;
+  font-size:      11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding:        4px 8px;
+  transition:     color 0.1s;
+}
+
+button:hover {
+  color: var(--accent);
+}
+
+/*
+   #vault-root scoped overrides ensure Nextcloud's own button styles
+   don't leak into our UI. background: none !important defeats
+   Nextcloud's button background declarations.
+*/
+
+#vault-root button {
+  background:     none;
+  border:         none;
+  color:          var(--muted);
+  cursor:         pointer;
+  font-family:    'DM Mono', monospace;
+  font-size:      11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding:        3px 7px;
+  border-radius:  2px;
+  box-shadow:     none !important;
+  transition:     color 0.1s;
+}
+
+#vault-root button:hover {
+  color:      var(--accent);
+  background: none !important;
+  box-shadow: none !important;
+}
+
+#vault-root button:focus {
+  outline:    none;
+  box-shadow: none !important;
+}
+
+#vault-root button:active {
+  transform:  scale(0.98);
+  background: none !important;
+}
+
+/* .abtn — bordered action button (used in modals and panels) */
+
+#vault-root .abtn {
+  border:        1px solid var(--border);
+  color:         var(--muted);
+  padding:       6px 16px;
+  border-radius: 2px;
+}
+
+#vault-root .abtn:hover {
+  border-color: var(--muted);
+  color:        var(--accent);
+}
+
+#vault-root .abtn.primary {
+  border-color: #3a3a3a;
+  color:        var(--text);
+}
+
+/* .fbtn — flat file-action button (used inside file rows and project rows) */
+
+.fbtn {
+  font-size:      11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color:          var(--muted);
+  cursor:         pointer;
+}
+
+.fbtn:hover,
+.fbtn.on {
+  color: var(--accent);
+}
+
+
+/* ── 10. INPUTS ──────────────────────────────────────────────── */
+
+input[type="text"],
+input[type="password"],
+input[type="date"] {
+  background:    var(--surface);
+  border:        1px solid var(--border);
+  border-radius: 2px;
+  color:         var(--text);
+  font-family:   inherit;
+  font-size:     13px;
+  padding:       8px 10px;
+  width:         100%;
+}
+
+input:focus {
+  outline:      none;
+  border-color: var(--muted);
+}
+
+
+/* ── 11. LOGIN VIEW ──────────────────────────────────────────── */
+
+.login-container {
+  max-width:       480px;
+  margin:          0 auto;
+  padding-top:     80px;
+}
+
+.login-tagline {
+  font-size:     13px;
+  color:         var(--muted);
+  margin-bottom: 24px;
+}
+
+.login-input-row {
+  display: flex;
+  gap:     8px;
+}
+
+.login-input-row input {
+  flex: 1;
+}
+
+.login-submit {
+  flex-shrink: 0;
+}
+
+.login-polling-message {
+  font-size:     14px;
+  margin-bottom: 8px;
+}
+
+.login-polling-sub {
+  font-size:     12px;
+  color:         var(--muted);
+  margin-bottom: 24px;
+}
+
+.login-polling-status {
+  margin-top: 16px;
+  font-size:  12px;
+  color:      var(--muted);
+}
+
+.login-error {
+  margin-top: 12px;
+  font-size:  12px;
+  color:      #cc6666;
+}
+
+.auth-warning {
+  margin-top:    12px;
+  font-size:     12px;
+  padding:       10px 12px;
+  border-radius: 2px;
+  border:        1px solid var(--border);
+  color:         var(--muted);
+}
+
+.auth-warning--danger {
+  border-color: #cc6666;
+  color:        #cc8888;
+}
+
+
+/* ── 12. VERSION HISTORY ─────────────────────────────────────── */
+
+.version-list {
+  padding:       6px 0 6px 20px;
+  border-left:   1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+.version-row {
+  padding:       6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size:     12px;
+  color:         var(--muted);
+}
+
+.version-row:last-child {
+  border-bottom: none;
+}
+
+.version-date {
+  flex: 1;
+}
+
+
+/* ── 13. DROP ZONE (upload) ──────────────────────────────────── */
+
+.drop-zone {
+  border:        1px dashed var(--border);
+  border-radius: 2px;
+  padding:       24px;
+  text-align:    center;
+  color:         var(--muted);
+  font-size:     12px;
+  cursor:        pointer;
+  transition:    border-color 0.15s, color 0.15s;
+}
+
+.drop-zone.active,
+.drop-zone:hover {
+  border-color: var(--muted);
+  color:        var(--text);
+}
+
+
+/* ── 14. METADATA PILLS ──────────────────────────────────────── */
+
+.pill {
+  display:     inline-block;
+  border:      1px solid var(--border);
+  border-radius: 2px;
+  font-size:   10px;
+  padding:     2px 6px;
+  color:       var(--muted);
+  white-space: nowrap;
+}
+
+
+/* ── 15. METADATA EDITOR ─────────────────────────────────────── */
+/*
+   Panel that opens below a FileRow when the user clicks "tag".
+   Uses CSS Grid for the field layout so fields reflow gracefully
+   on narrow viewports.
+*/
+
+.meta-editor {
+  background:     var(--surface);
+  border:         1px solid var(--border);
+  border-radius:  2px;
+  padding:        16px;
+  margin-top:     8px;
+  display:        flex;
+  flex-direction: column;
+  gap:            16px;
+}
+
+.meta-editor-fields {
+  display:               grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap:                   16px;
+}
+
+.meta-field {
+  display:        flex;
+  flex-direction: column;
+  gap:            8px;
+}
+
+.meta-field-label {
+  font-size:      11px;
+  color:          var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+/* BPM slider + number input side-by-side */
+
+.meta-number-range {
+  display:     flex;
+  align-items: center;
+  gap:         8px;
+}
+
+.meta-slider {
+  flex:         1;
+  accent-color: var(--accent);
+  cursor:       pointer;
+}
+
+.meta-number-input {
+  width: 64px;
+  padding: 4px 8px;
+  flex: 0 0 auto;
+}
+
+/* Genre / Key chip selector */
+
+.meta-multiselect {
+  display:   flex;
+  flex-wrap: wrap;
+  gap:       6px;
+}
+
+.meta-chip {
+  border:        1px solid var(--border);
+  border-radius: 2px;
+  font-size:     10px;
+  padding:       3px 8px;
+  color:         var(--muted);
+  cursor:        pointer;
+  transition:    border-color 0.1s, color 0.1s;
+}
+
+.meta-chip.selected,
+.meta-chip:hover {
+  border-color: var(--accent);
+  color:        var(--accent);
+}
+
+/* Save row */
+
+.meta-editor-actions {
+  display:         flex;
+  justify-content: flex-end;
+  gap:             8px;
+}
+
+.meta-error {
+  font-size: 11px;
+  color:     #cc6666;
+}
+
+
+/* ── 16. SHARE MODAL ─────────────────────────────────────────── */
+
+.share-panel {
+  background:     var(--surface);
+  border:         1px solid var(--border);
+  border-radius:  2px;
+  padding:        16px;
+  margin-top:     8px;
+  display:        flex;
+  flex-direction: column;
+  gap:            12px;
+}
+
+/* Legacy alias used in globals.css for the URL display */
+.share-url {
+  font-size:     12px;
+  color:         var(--accent);
+  word-break:    break-all;
+  padding:       8px;
+  border:        1px solid var(--border);
+  border-radius: 2px;
+}
+
+/* Toggle rows inside the share panel */
+
+.share-row {
+  display:     flex;
+  align-items: center;
+  gap:         8px;
+}
+
+.share-lbl {
+  font-size:      11px;
+  color:          var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.share-toggle-label {
+  display:     flex;
+  align-items: center;
+  gap:         8px;
+  cursor:      pointer;
+}
+
+.share-error {
+  font-size: 11px;
+  color:     #cc6666;
+}
+
+/* Divider between create form and active link list */
+
+.divider {
+  border:     none;
+  border-top: 1px solid var(--border);
+  margin:     0;
+}
+
+/* Active share link rows */
+
+.share-item {
+  display:       flex;
+  align-items:   center;
+  gap:           8px;
+  padding:       6px 0;
+  border-bottom: 1px solid var(--border);
+  flex-wrap:     wrap;
+}
+
+.share-item:last-child {
+  border-bottom: none;
+}
+
+.si-url {
+  flex:       1;
+  font-size:  11px;
+  color:      var(--accent);
+  word-break: break-all;
+  min-width:  0;
+}
+
+.si-meta {
+  font-size: 11px;
+  color:     var(--muted);
+}
+
+.si-revoke {
+  font-size: 11px;
+  color:     var(--muted);
+  cursor:    pointer;
+}
+
+.si-revoke:hover {
+  color: #cc6666;
+}
+
+
+/* ── 17. PUBLIC SHARE PAGE ───────────────────────────────────── */
+
+.share-view-content {
+  padding: 40px 0;
+}
+
+.share-view-label {
+  font-size:      11px;
+  color:          var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom:  8px;
+}
+
+.share-view-filename {
+  font-size:     16px;
+  color:         var(--text);
+  margin-bottom: 24px;
+}
+
+.share-view-actions {
+  display:    flex;
+  gap:        12px;
+  margin-top: 16px;
+}
+
+.share-not-found,
+.share-loading {
+  margin-top: 48px;
+}
+
+/* Folder share file list */
+
+.share-folder-list {
+  margin-top: 24px;
+}
+
+.share-folder-item {
+  display:        flex;
+  flex-direction: column;
+}
+
+
+/* ── 18. SEARCH / FILTER BAR ─────────────────────────────────── */
+
+.search-page {
+  display:        flex;
+  flex-direction: column;
+  gap:            0;
+}
+
+.search-results {
+  margin-top: 8px;
+}
+
+.search-meta-status {
+  padding:       8px 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+/* Filter bar container */
+
+.filter-bar {
+  display:        flex;
+  flex-direction: column;
+  gap:            12px;
+  padding:        16px 0;
+  border-bottom:  1px solid var(--border);
+  margin-bottom:  8px;
+}
+
+/* Search input row */
+
+.filter-search-row {
+  display:     flex;
+  gap:         8px;
+  align-items: center;
+}
+
+.filter-search-input {
+  flex: 1;
+}
+
+.filter-clear-btn {
+  flex-shrink: 0;
+}
+
+/* Result count label */
+
+.filter-count {
+  font-size: 11px;
+  color:     var(--muted);
+}
+
+/* Filter sections grid — auto-fits columns to available width */
+
+.filter-sections {
+  display:               grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap:                   16px;
+}
+
+.filter-section {
+  display:        flex;
+  flex-direction: column;
+  gap:            8px;
+}
+
+.filter-section-label {
+  font-size:      11px;
+  color:          var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+/* BPM range filter inputs */
+
+.bpm-range-filter {
+  display:     flex;
+  align-items: center;
+  gap:         6px;
+}
+
+.bpm-input {
+  width:   64px;
+  padding: 4px 8px;
+}
+
+.bpm-separator,
+.bpm-unit {
+  font-size: 11px;
+  color:     var(--muted);
+}
+
+/* Chip filter (key, genre) */
+
+.chip-filter {
+  display:   flex;
+  flex-wrap: wrap;
+  gap:       6px;
+}
+
+.filter-chip {
+  border:        1px solid var(--border);
+  border-radius: 2px;
+  font-size:     10px;
+  padding:       3px 8px;
+  color:         var(--muted);
+  cursor:        pointer;
+  transition:    border-color 0.1s, color 0.1s;
+}
+
+.filter-chip.active,
+.filter-chip:hover {
+  border-color: var(--accent);
+  color:        var(--accent);
+}
+
+
+/* ── 19. RESPONSIVE ADJUSTMENTS ──────────────────────────────── */
+
+@media (max-width: 600px) {
+  .filter-sections {
+    grid-template-columns: 1fr;
+  }
+
+  .bpm-range-filter {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .share-item {
+    flex-direction: column;
+    align-items:    flex-start;
+  }
+
+  .si-url {
+    width: 100%;
+  }
+}
