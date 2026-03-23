@@ -11,7 +11,7 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-body, #vault-root {
+body, .vault-root {
   background:  var(--bg);
   color:       var(--text);
   font-family: 'DM Mono', monospace;
@@ -188,6 +188,7 @@ input:focus { outline: none; border-color: var(--muted); }
 }
 
 #vault-root button:active {
+  color: var(--accent);
   transform:  scale(0.98);
   background: none !important;
 }

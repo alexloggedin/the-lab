@@ -103,7 +103,7 @@
   gap:       6px;
 }
 
-.filter-chip {
+button.filter-chip {
   border:        1px solid var(--border);
   border-radius: 2px;
   font-size:     10px;
@@ -113,10 +113,10 @@
   transition:    border-color 0.1s, color 0.1s;
 }
 
-.filter-chip.active,
-.filter-chip:hover {
-  border-color: var(--accent);
-  color:        var(--accent);
+button.filter-chip.active,
+button.filter-chip:hover {
+  border-color: var(--accent) !important;
+  color:        var(--accent) !important;
 }
 
 /* ── Mobile adjustments ───────────────────────────────────────── */

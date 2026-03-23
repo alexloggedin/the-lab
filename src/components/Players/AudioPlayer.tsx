@@ -71,6 +71,7 @@ export default function AudioPlayer({ fileUrl, isPlaying, onPlayPause, authHeade
   useEffect(() => {
     const ws = wavesurferRef.current;
     if (!ws || !ready) return;
+     console.log("[AudioPlayer]", ws, ready)
     if (isPlaying) ws.play(); else ws.pause();
   }, [isPlaying, ready]);
 
