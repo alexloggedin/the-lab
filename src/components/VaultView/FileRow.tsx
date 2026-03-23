@@ -5,6 +5,7 @@ import VersionHistory from './VersionHistory.tsx';
 import ShareModal from './ShareModal.tsx';
 import type { VaultFile, FileMetadata } from '../../types.ts';
 import MetadataEditor from './MetadataEditor.tsx';
+import { api } from '../../api/api.ts';
 
 interface Props {
     file: VaultFile;
@@ -47,29 +48,14 @@ export default function FileRow({ file, meta }: Props) {
         }
     };
 
-    useEffect(() => { setLocalMeta(meta); }, [meta]);
+    useEffect(() => {
+        if (!file.path) return;
+        api.streamUrl(file.path).then(setResolvedUrl);
+    }, [file.path]);
 
-    // In the file-actions div, add:
-    <button
-        className={activePanel === 'edit' ? 'fbtn on' : 'fbtn'}
-        onClick={() => togglePanel('edit')}
-    >
-        tag
-    </button>
-
-    // In the panel rendering section, add:
-    {
-        activePanel === 'edit' && (
-            <MetadataEditor
-                filePath={file.path}
-                initialMeta={localMeta}
-                onSave={(saved) => {
-                    setLocalMeta(saved);
-                    setActivePanel(null);  // close the editor after saving
-                }}
-            />
-        )
-    }
+    useEffect(() => {
+        setLocalMeta(meta);
+    }, [meta]);
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
