@@ -34,7 +34,7 @@ docker compose -f docker-dev/docker-compose.dev.yml up -d
 # Copy the Vite dev flag into the container
 # This tells the PHP controller to load from Vite instead of the built bundle
 docker cp .vite-dev \
-  $(docker compose -f docker-dev/docker-compose.dev.yml ps -q nextcloud):/var/www/html/custom_apps/thelab/.vite-dev
+  $(docker compose -f docker-dev/docker-compose.dev.yml ps -q nextcloud):/var/www/html/custom_apps/thevault/.vite-dev
 ```
 
 **Then start the dev server:**
@@ -43,7 +43,7 @@ docker cp .vite-dev \
 npm run dev:docker
 ```
 
-Open `http://localhost:5173/index.php/apps/thelab/`. The page is served by
+Open `http://localhost:5173/index.php/apps/thevault/`. The page is served by
 Nextcloud (real `window.OC` context, real CSRF tokens), but your React source
 is hot-reloaded by Vite. API calls go to the real PHP backend.
 
@@ -61,11 +61,11 @@ is hot-reloaded by Vite. API calls go to the real PHP backend.
 ### The `.vite-dev` flag
 A file at the root of the project. When copied into the container, `PageController.php`
 detects it and injects Vite dev server script tags into the page instead of loading
-the built `thelab.js` bundle. It is git-ignored and must never be committed.
+the built `thevault.js` bundle. It is git-ignored and must never be committed.
 
 ```
 .vite-dev present in container  →  loads from localhost:5173 (Vite dev)
-.vite-dev absent from container →  loads thelab.js (built bundle)
+.vite-dev absent from container →  loads thevault.js (built bundle)
 ```
 
 ### The Vite proxy
@@ -76,7 +76,7 @@ transparently — no CORS issues, real auth cookies, real CSRF tokens.
 ```
 Browser → localhost:5173/@vite/client        →  Vite (HMR)
 Browser → localhost:5173/src/main.jsx        →  Vite (your source)
-Browser → localhost:5173/apps/thelab/api/*   →  Docker :8080 (PHP)
+Browser → localhost:5173/apps/thevault/api/*   →  Docker :8080 (PHP)
 Browser → localhost:5173/index.php/*         →  Docker :8080 (Nextcloud)
 ```
 
