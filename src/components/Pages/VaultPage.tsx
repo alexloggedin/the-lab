@@ -24,7 +24,7 @@ export default function VaultPage() {
 
   // viewMode lives here in VaultPage — it's the parent of both views
   // and is the right place for state that controls which child is shown.
-  const [viewMode, setViewMode] = useState<ViewMode>('projects');
+  const [viewMode, setViewMode] = useState<ViewMode>('all-files');
 
   const isReady = authStatus === 'authenticated' || USE_MOCK;
 
