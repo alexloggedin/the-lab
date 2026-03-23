@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { api } from '../../api/api.ts';
 import AudioPlayer from '../Players/AudioPlayer.tsx';
 import VideoPlayer from '../Players/VideoPlayer.tsx';
 import VersionHistory from './VersionHistory.tsx';
 import ShareModal from './ShareModal.tsx';
 import type { VaultFile, FileMetadata } from '../../types.ts';
+import MetadataEditor from './MetadataEditor.tsx';
 
 interface Props {
     file: VaultFile;
@@ -15,9 +15,9 @@ interface PillProps {
     value: string | undefined | null
 }
 
-type ActivePanel = 'player' | 'history' | 'share' | null;
+type ActivePanel = 'player' | 'history' | 'share' | 'edit' | null;
 
-const Pill = ({value}: PillProps) => value
+const Pill = ({ value }: PillProps) => value
     ? <span className="pill">{value}</span>
     : null;
 
@@ -29,6 +29,7 @@ export default function FileRow({ file, meta }: Props) {
     const [activePanel, setActivePanel] = useState<ActivePanel>(null);
     const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
+    const [localMeta, setLocalMeta] = useState<FileMetadata | null>(meta);
 
     const isAudio = file.mimetype?.startsWith('audio/');
     const isVideo = file.mimetype?.startsWith('video/');
@@ -46,27 +47,39 @@ export default function FileRow({ file, meta }: Props) {
         }
     };
 
-    useEffect(() => {
-        if (!file.path) return;
-        api.streamUrl(file.path).then(setResolvedUrl);
-    }, [file.path]);
+    useEffect(() => { setLocalMeta(meta); }, [meta]);
+
+    // In the file-actions div, add:
+    <button
+        className={activePanel === 'edit' ? 'fbtn on' : 'fbtn'}
+        onClick={() => togglePanel('edit')}
+    >
+        tag
+    </button>
+
+    // In the panel rendering section, add:
+    {
+        activePanel === 'edit' && (
+            <MetadataEditor
+                filePath={file.path}
+                initialMeta={localMeta}
+                onSave={(saved) => {
+                    setLocalMeta(saved);
+                    setActivePanel(null);  // close the editor after saving
+                }}
+            />
+        )
+    }
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div className="file-row">
-                {meta?.albumArt && (
-                    <img
-                        src={meta.albumArt}
-                        alt="album art"
-                        style={{ width: 28, height: 28, borderRadius: 2, objectFit: 'cover', flexShrink: 0 }}
-                    />
-                )}
 
                 <span className="file-name">{file.name}</span>
 
-                <Pill value={meta?.bpm ? `${meta.bpm} bpm` : null} />
-                <Pill value={meta?.key} />
-                <Pill value={meta?.genre} />
+                <Pill value={localMeta?.bpm ? `${localMeta.bpm} bpm` : null} />
+                <Pill value={localMeta?.key} />
+                <Pill value={localMeta?.genre?.split(',')[0]} />
 
                 <span className="file-meta">{formatSize(file.size)}</span>
 
@@ -96,8 +109,25 @@ export default function FileRow({ file, meta }: Props) {
                     >
                         {activePanel === 'share' ? 'close' : 'share'}
                     </button>
+                    <button
+                        className={activePanel === 'edit' ? 'fbtn on' : 'fbtn'}
+                        onClick={() => togglePanel('edit')}
+                    >
+                        tag
+                    </button>
                 </div>
             </div>
+
+            {activePanel === 'edit' && (
+                <MetadataEditor
+                    filePath={file.path}
+                    initialMeta={localMeta}
+                    onSave={(saved) => {
+                        setLocalMeta(saved);
+                        setActivePanel(null);  // close the editor after saving
+                    }}
+                />
+            )}
 
             {activePanel === 'player' && isAudio && (
                 <AudioPlayer

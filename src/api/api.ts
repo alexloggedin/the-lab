@@ -1,4 +1,4 @@
-import type { VaultFile, FileMetadata, ShareLink, ShareInfo, ApiResponse, DavEntry } from '../types';
+import type { VaultFile, FileMetadata, ShareLink, ShareInfo, ApiResponse} from '../types';
 import { USE_MOCK } from '../dev/useMockData';
 import { mockFiles, mockFolders, mockMetadata, mockShareLinks } from '../dev/fixtures';
 import { davFilesUrl } from './versionApi';
@@ -6,11 +6,11 @@ import { ocsListShares, ocsCreateShare, ocsDeleteShare } from './sharesApi';
 import { getShareInfo, listShareContents, publicStreamUrl as buildPublicStreamUrl } from './publicApi';
 import type { FileStat } from 'webdav';
 import { createInternalDavClient } from './davClient';
+import { getFileMeta, setFileMeta } from './metadataApi';
 
 const client = createInternalDavClient();
 const user = (window as any)?.OC?.currentUser ?? 'admin';
 
-// ─── External API helpers ─────────────────────────────────────────────────────
 // ─── Individual function declarations ────────────────────────────────────────
 
 function initVault(): Promise<void | ApiResponse<{ success: boolean }>> {
@@ -19,7 +19,6 @@ function initVault(): Promise<void | ApiResponse<{ success: boolean }>> {
     : ensureVaultFolder();
 }
 
-//TODO - Refactor this code so that it renders a list of all files from all folders
 async function getFiles(path = 'theVault'): Promise<ApiResponse<VaultFile[]>> {
   if (USE_MOCK) {
     return { data: path !== 'theVault' ? mockFiles : mockFolders };
@@ -45,7 +44,6 @@ async function getAllFiles(): Promise<ApiResponse<VaultFile[]>> {
   const foldersResult = await client.getDirectoryContents(`/files/${user}/theVault`);
   const folderStats = Array.isArray(foldersResult) ? foldersResult : foldersResult.data;
 
-  //TODO - Modify to accept files in the main folder
   const folders = folderStats.filter(s => s.type === 'directory');
   console.log(`[api] getAllFiles first fetch list: `, folders);
 
@@ -76,23 +74,22 @@ async function getAllFiles(): Promise<ApiResponse<VaultFile[]>> {
   return { data: allFiles };
 }
 
-
 function streamUrl(path: string): Promise<string> {
   if (USE_MOCK) return Promise.resolve('/mock-audio/test.wav');
   return Promise.resolve(davFilesUrl(path));
 }
 
-function getMetadata(_path?: string): Promise<ApiResponse<FileMetadata>> {
-  return USE_MOCK
-    ? Promise.resolve({ data: mockMetadata })
-    : Promise.resolve({ data: {} });
+function getMetadata(path?: string): Promise<ApiResponse<FileMetadata>> {
+  if (USE_MOCK || !path) return Promise.resolve({ data: mockMetadata });
+  return getFileMeta(path).then(data => ({ data }));
 }
 
 function updateMetadata(
-  _path?: string,
-  _meta?: Partial<FileMetadata>
+  path?: string,
+  meta?: Partial<FileMetadata>
 ): Promise<ApiResponse<{ success: boolean }>> {
-  return Promise.resolve({ data: { success: true } });
+  if (USE_MOCK || !path || !meta) return Promise.resolve({ data: { success: true } });
+  return setFileMeta(path, meta).then(() => ({ data: { success: true } }));
 }
 
 function getShares(): Promise<ApiResponse<ShareLink[]>> {

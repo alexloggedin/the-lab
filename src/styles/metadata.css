@@ -1,0 +1,105 @@
+/* ============================================================
+   metadata.css — MetadataEditor and MetadataPills styles
+   Introduced in P4.
+   ============================================================ */
+
+/* ── Metadata editor panel ───────────────────────────────────── */
+
+.meta-editor {
+  background:     var(--surface);
+  border:         1px solid var(--border);
+  border-radius:  2px;
+  padding:        16px;
+  margin-top:     8px;
+  display:        flex;
+  flex-direction: column;
+  gap:            16px;
+}
+
+.meta-editor-fields {
+  display:               grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap:                   16px;
+}
+
+.meta-field {
+  display:        flex;
+  flex-direction: column;
+  gap:            8px;
+}
+
+.meta-field-label {
+  font-size:      11px;
+  color:          var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+/* ── Number range (BPM) ──────────────────────────────────────── */
+
+.meta-number-range {
+  display:     flex;
+  align-items: center;
+  gap:         8px;
+}
+
+.meta-slider {
+  flex:           1;
+  accent-color:   var(--accent);
+  cursor:         pointer;
+}
+
+.meta-number-input {
+  width:   64px;
+  padding: 4px 8px;
+  flex:    0 0 auto;
+}
+
+/* ── Multiselect chips ───────────────────────────────────────── */
+
+.meta-multiselect {
+  display:   flex;
+  flex-wrap: wrap;
+  gap:       6px;
+}
+
+.meta-chip {
+  border:         1px solid var(--border);
+  border-radius:  2px;
+  font-size:      10px;
+  padding:        3px 8px;
+  color:          var(--muted);
+  cursor:         pointer;
+  transition:     border-color 0.1s, color 0.1s;
+}
+
+.meta-chip.selected,
+.meta-chip:hover {
+  border-color: var(--accent);
+  color:        var(--accent);
+}
+
+/* ── Save actions row ────────────────────────────────────────── */
+
+.meta-editor-actions {
+  display:         flex;
+  justify-content: flex-end;
+  gap:             8px;
+}
+
+.meta-error {
+  font-size: 11px;
+  color:     #cc6666;
+}
+
+/* ── Metadata pills (inline with FileRow) ─────────────────────── */
+
+.pill {
+  display:        inline-block;
+  border:         1px solid var(--border);
+  border-radius:  2px;
+  font-size:      10px;
+  padding:        2px 6px;
+  color:          var(--muted);
+  white-space:    nowrap;
+}

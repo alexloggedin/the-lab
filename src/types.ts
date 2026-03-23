@@ -74,17 +74,12 @@ export interface VaultFile {
  * and a file may have some fields but not others.
  */
 export interface FileMetadata {
-  title?: string;
-  artist?: string;
-  album?: string;
   genre?: string;
-  bpm?: string;       // Stored as string to match how Nextcloud returns it
-  key?: string;       // Musical key, e.g. "Am", "C#"
-  year?: string;
+  bpm?: string;    
+  key?: string;       
   comment?: string;
-  duration?: number;  // Duration in seconds
-  bitrate?: number;   // Bitrate in bits per second
-  albumArt?: string | null;  // Data URL or null
+  duration?: number;
+  bitrate?: number;
 }
 
 /**

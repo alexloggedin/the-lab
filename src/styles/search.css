@@ -1,0 +1,132 @@
+/* ============================================================
+   search.css — Search page and FilterBar styles
+   Introduced in P5.
+   ============================================================ */
+
+/* ── Page layout ─────────────────────────────────────────────── */
+
+.search-page {
+  display:        flex;
+  flex-direction: column;
+  gap:            0;
+}
+
+.search-results {
+  margin-top: 8px;
+}
+
+.search-meta-status {
+  padding:      8px 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+/* ── Filter bar container ─────────────────────────────────────── */
+
+.filter-bar {
+  display:        flex;
+  flex-direction: column;
+  gap:            12px;
+  padding:        16px 0;
+  border-bottom:  1px solid var(--border);
+  margin-bottom:  8px;
+}
+
+/* ── Search input row ─────────────────────────────────────────── */
+
+.filter-search-row {
+  display:     flex;
+  gap:         8px;
+  align-items: center;
+}
+
+.filter-search-input {
+  flex: 1;
+}
+
+.filter-clear-btn {
+  flex-shrink: 0;
+}
+
+/* ── Result count ─────────────────────────────────────────────── */
+
+.filter-count {
+  font-size: 11px;
+  color:     var(--muted);
+}
+
+/* ── Filter sections grid ─────────────────────────────────────── */
+
+.filter-sections {
+  display:               grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap:                   16px;
+}
+
+.filter-section {
+  display:        flex;
+  flex-direction: column;
+  gap:            8px;
+}
+
+.filter-section-label {
+  font-size:      11px;
+  color:          var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+/* ── BPM range filter ─────────────────────────────────────────── */
+
+.bpm-range-filter {
+  display:     flex;
+  align-items: center;
+  gap:         6px;
+}
+
+.bpm-input {
+  width:   64px;
+  padding: 4px 8px;
+}
+
+.bpm-separator,
+.bpm-unit {
+  font-size: 11px;
+  color:     var(--muted);
+}
+
+/* ── Chip filter ──────────────────────────────────────────────── */
+
+.chip-filter {
+  display:   flex;
+  flex-wrap: wrap;
+  gap:       6px;
+}
+
+.filter-chip {
+  border:        1px solid var(--border);
+  border-radius: 2px;
+  font-size:     10px;
+  padding:       3px 8px;
+  color:         var(--muted);
+  cursor:        pointer;
+  transition:    border-color 0.1s, color 0.1s;
+}
+
+.filter-chip.active,
+.filter-chip:hover {
+  border-color: var(--accent);
+  color:        var(--accent);
+}
+
+/* ── Mobile adjustments ───────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .filter-sections {
+    grid-template-columns: 1fr;
+  }
+
+  .bpm-range-filter {
+    flex-wrap: wrap;
+  }
+}
