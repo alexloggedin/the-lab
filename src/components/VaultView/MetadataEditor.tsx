@@ -140,15 +140,6 @@ function NumberRangeField({ value, min, max, step, onChange }: NumberRangeFieldP
   return (
     <div className="meta-number-range">
       <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={isNaN(numVal) ? min : numVal}
-        onChange={e => onChange(e.target.value)}
-        className="meta-slider"
-      />
-      <input
         type="number"
         min={min}
         max={max}
