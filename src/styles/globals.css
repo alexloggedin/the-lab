@@ -37,6 +37,17 @@ body, .vault-root {
   margin-top: 0;
 }
 
+.app-container {
+  max-width:      90vw;
+  margin:         0 auto;
+  padding:        36px 12px;
+  
+  /* Add these three lines */
+  height:         100vh;
+  display:        flex;
+  flex-direction: column;
+}
+
 .topbar {
   display:         flex;
   align-items:     center;

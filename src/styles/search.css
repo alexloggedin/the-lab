@@ -3,10 +3,30 @@
    Introduced in P5.
    ============================================================ */
 
+/* ── Page layout ─────────────────────────────────────────────── */
+
+.search-page {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.search-results {
+  flex:       1;  
+  overflow-y: auto;       
+  min-height: 0;         
+}
+
+.search-meta-status {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
 
 /* ── Filter bar container ─────────────────────────────────────── */
 
 .filter-bar {
+  flex-shrink: 0;
   display: flex;
   flex-direction: row;
   gap: 12px;
@@ -35,6 +55,7 @@
 /* ── Result count ─────────────────────────────────────────────── */
 
 .filter-count {
+  flex-shrink: 0;
   font-size: 11px;
   color: var(--muted);
 }

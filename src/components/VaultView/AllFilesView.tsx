@@ -43,19 +43,6 @@ export default function AllFilesView() {
     return () => { cancelled = true; };
   }, []);
 
-  /**
-   * Fetch metadata for all files in batches of BATCH_SIZE.
-   *
-   * We use a `isCancelled` function (closure over the cancelled flag) rather
-   * than checking the flag directly, because by the time the async loop
-   * resumes after an await, the original `cancelled` variable may have been
-   * reassigned by the cleanup function. Passing a getter makes it live.
-   *
-   * We update metaMap after each batch rather than waiting for all batches
-   * to complete — this is the "progressive enhancement" pattern. Pills appear
-   * on files as their metadata arrives, so the UI feels responsive even if
-   * the vault has many files.
-   */
   const fetchMetadataInBatches = async (
     allFiles: VaultFile[],
     isCancelled: () => boolean
@@ -89,15 +76,6 @@ export default function AllFilesView() {
     setMetaLoading(false);
   };
 
-  /**
-   * Derive the filtered list from the current state.
-   *
-   * useMemo ensures this only recalculates when one of its three inputs
-   * actually changes. Since filterFiles() is a pure function with no
-   * side effects, this is safe and efficient.
-   *
-   * Reference: https://react.dev/reference/react/useMemo
-   */
   const filteredFiles = useMemo(
     () => filterFiles(files, metaMap, filters),
     [files, metaMap, filters]
@@ -112,7 +90,7 @@ export default function AllFilesView() {
   }
 
   return (
-    <div>
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
       <FilterBar
         filters={filters}
         onChange={setFilters}

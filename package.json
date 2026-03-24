@@ -18,6 +18,7 @@
     "dev": "vite",
     "dev:docker": "vite --mode docker",
     "build": "vite build && npm run copy-dist",
+    "preview": "vite preview",
     "copy-dist": "cp dist/thevault.js js/thevault.js && cp dist/thevault.css css/thevault.css",
     "lint": "eslint --ext .js,.vue src",
     "lint:fix": "eslint --ext .js,.vue src --fix",

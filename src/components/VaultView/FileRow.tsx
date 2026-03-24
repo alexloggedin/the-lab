@@ -119,6 +119,12 @@ export default function FileRow({ file, meta }: Props) {
 
       {/* ── Zone 3: Actions ───────────────────────────────── */}
       <div className="track-actions">
+        {activePanel === 'player' && (<button
+          className={activePanel === 'player' ? 'fbtn on' : 'fbtn'}
+          onClick={() => togglePanel(null)}
+        >
+          close
+        </button>)}
         <button
           className={activePanel === 'share' ? 'fbtn on' : 'fbtn'}
           onClick={() => togglePanel('share')}
