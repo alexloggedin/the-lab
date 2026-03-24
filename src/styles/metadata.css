@@ -75,8 +75,8 @@
 
 .meta-chip.selected,
 .meta-chip:hover {
-  border-color: var(--accent);
-  color:        var(--accent);
+  border-color: var(--accent) !important;
+  color:        var(--accent) !important;
 }
 
 /* ── Save actions row ────────────────────────────────────────── */

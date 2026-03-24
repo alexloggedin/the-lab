@@ -130,24 +130,30 @@ interface SelectFieldProps {
 
 function SingleSelectField({ value, options, onChange }: SelectFieldProps) {
 
+  const [selected, setSelect] = useState<string>('');
 
   const toggleOption = (option: string) => {
     onChange(option);
+    setSelect(option)
   };
 
   return (
-    <div className="meta-multiselect">
-      {options.map(option => (
-        <button
-          key={option}
-          className={option ? 'meta-chip selected' : 'meta-chip'}
-          onClick={() => toggleOption(option)}
-          type="button"
-        >
-          {option}
-        </button>
-      ))}
-    </div>
+    <label>
+      <select
+        defaultValue={value}
+        value={selected}
+        onChange={e => toggleOption(e.target.value)}
+      >
+        {options.map(option => (
+          <option
+            key={option}
+            value={option}
+          >
+            {option}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
 
@@ -166,17 +172,22 @@ function MultiSelectField({ value, options, onChange }: SelectFieldProps) {
   };
 
   return (
-    <div className="meta-multiselect">
-      {options.map(option => (
-        <button
-          key={option}
-          className={selected.has(option) ? 'meta-chip selected' : 'meta-chip'}
-          onClick={() => toggleOption(option)}
-          type="button"
-        >
-          {option}
-        </button>
-      ))}
-    </div>
+    <label>
+      <select
+        defaultValue={[...value]}
+        value={[...selected]}
+        multiple={true}
+        onChange={e => toggleOption(e.target.value)}
+      >
+        {options.map(option => (
+          <option
+            key={option}
+            value={option}
+          >
+            {option}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }

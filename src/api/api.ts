@@ -84,10 +84,7 @@ function getMetadata(path?: string): Promise<ApiResponse<FileMetadata>> {
   return getFileMeta(path).then(data => ({ data }));
 }
 
-function updateMetadata(
-  path?: string,
-  meta?: Partial<FileMetadata>
-): Promise<ApiResponse<{ success: boolean }>> {
+function updateMetadata(path?: string, meta?: Partial<FileMetadata>): Promise<ApiResponse<{ success: boolean }>> {
   if (USE_MOCK || !path || !meta) return Promise.resolve({ data: { success: true } });
   return setFileMeta(path, meta).then(() => ({ data: { success: true } }));
 }
