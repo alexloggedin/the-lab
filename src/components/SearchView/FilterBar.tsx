@@ -1,6 +1,5 @@
 import { METADATA_FIELDS } from '../../metadata/schema';
 import { FilterState, EMPTY_FILTER, hasActiveFilters } from '../../metadata/filterFiles';
-import { _testMeta } from '../../api/metadataApi';
 
 interface Props {
   filters: FilterState;
