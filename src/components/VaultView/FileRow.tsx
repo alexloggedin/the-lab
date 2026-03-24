@@ -3,137 +3,141 @@ import AudioPlayer from '../Players/AudioPlayer.tsx';
 import VideoPlayer from '../Players/VideoPlayer.tsx';
 import VersionHistory from './VersionHistory.tsx';
 import ShareModal from './ShareModal.tsx';
-import type { VaultFile, FileMetadata } from '../../types.ts';
 import MetadataEditor from './MetadataEditor.tsx';
 import { api } from '../../api/api.ts';
+import type { VaultFile, FileMetadata } from '../../types.ts';
 
 interface Props {
-    file: VaultFile;
-    meta: FileMetadata | null;
+  file: VaultFile;
+  meta: FileMetadata | null;
 }
 
-interface PillProps {
-    value: string | undefined | null
-}
+const formatSize = (bytes: number) =>
+  (bytes / 1024 / 1024).toFixed(1) + ' MB';
 
 type ActivePanel = 'player' | 'history' | 'share' | 'edit' | null;
 
-const Pill = ({ value }: PillProps) => value
-    ? <span className="pill">{value}</span>
-    : null;
-
-const formatSize = (bytes: number) =>
-    (bytes / 1024 / 1024).toFixed(1) + ' MB';
-
 export default function FileRow({ file, meta }: Props) {
+  const [activePanel, setActivePanel] = useState<ActivePanel>(null);
+  const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [localMeta, setLocalMeta] = useState<FileMetadata | null>(meta);
 
-    const [activePanel, setActivePanel] = useState<ActivePanel>(null);
-    const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
-    const [isPlaying, setIsPlaying] = useState<boolean>(false);
-    const [localMeta, setLocalMeta] = useState<FileMetadata | null>(meta);
+  const isAudio = file.mimetype?.startsWith('audio/');
+  const isVideo = file.mimetype?.startsWith('video/');
+  const isPlayable = isAudio || isVideo;
 
-    const isAudio = file.mimetype?.startsWith('audio/');
-    const isVideo = file.mimetype?.startsWith('video/');
+  useEffect(() => {
+    if (!file.path) return;
+    api.streamUrl(file.path).then(setResolvedUrl);
+  }, [file.path]);
 
-    const togglePanel = (panel: ActivePanel) => {
-        setActivePanel(prev => prev === panel ? null : panel);
-    };
+  useEffect(() => {
+    setLocalMeta(meta);
+  }, [meta]);
 
-    const handlePlayPause = () => {
-        if (activePanel !== 'player') {
-            setActivePanel('player');
-            setIsPlaying(true);
-        } else {
-            setIsPlaying(prev => !prev);
-        }
-    };
+  const togglePanel = (panel: ActivePanel) => {
+    setActivePanel(prev => (prev === panel ? null : panel));
+  };
 
-    useEffect(() => {
-        if (!file.path) return;
-        api.streamUrl(file.path).then(setResolvedUrl);
-    }, [file.path]);
+  const handlePlayPause = () => {
+    if (activePanel !== 'player') {
+      setActivePanel('player');
+      setIsPlaying(true);
+    } else {
+      setIsPlaying(prev => !prev);
+    }
+  };
 
-    useEffect(() => {
-        setLocalMeta(meta);
-    }, [meta]);
 
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div className="file-row">
+  const playIcon = isPlaying && activePanel === 'player' ? '⏸' : '▶';
 
-                <span className="file-name">{file.name}</span>
+  return (
+    <div
+      className={`track-card ${activePanel === 'player' && isPlaying ? 'playing' : ''}`}
+    >
+      {/* ── Zone 1: Art square ────────────────────────────── */}
+      <div className="track-art" onClick={isPlayable ? handlePlayPause : undefined}>
+        <span className="track-art-placeholder">♪</span>
 
-                <Pill value={localMeta?.bpm ? `${localMeta.bpm} bpm` : null} />
-                <Pill value={localMeta?.key} />
-                <Pill value={localMeta?.genre?.split(',')[0]} />
+        {isPlayable && (
+          <div className="track-play-btn">
+            <span className="play-circle">{playIcon}</span>
+          </div>
+        )}
+      </div>
 
-                <span className="file-meta">{formatSize(file.size)}</span>
+      {/* ── Zone 2: Info + panels ─────────────────────────── */}
+      <div className="track-info">
+        <span className="track-name">{file.name}</span>
 
-                <div className='file-actions' >
-                    {(isAudio || isVideo) && (
-                        <button className="fbtn on" onClick={handlePlayPause}>
-                            {activePanel !== 'player' ? 'play' : isPlaying ? 'pause' : 'play'}
-                        </button>
-                    )}
-                    {activePanel === 'player' && (
-                        <button className="fbtn" onClick={() => {
-                            setActivePanel(null);
-                            setIsPlaying(false);
-                        }}>
-                            close
-                        </button>
-                    )}
-                    <button
-                        className={activePanel === 'history' ? 'fbtn on' : 'fbtn'}
-                        onClick={() => togglePanel('history')}
-                    >
-                        history
-                    </button>
-                    <button
-                        className={activePanel === 'share' ? 'fbn on' : 'fbtn'}
-                        onClick={() => togglePanel('share')}
-                    >
-                        {activePanel === 'share' ? 'close' : 'share'}
-                    </button>
-                    <button
-                        className={activePanel === 'edit' ? 'fbtn on' : 'fbtn'}
-                        onClick={() => togglePanel('edit')}
-                    >
-                        tag
-                    </button>
-                </div>
-            </div>
-
-            {activePanel === 'edit' && (
-                <MetadataEditor
-                    filePath={file.path}
-                    initialMeta={localMeta}
-                    onSave={(saved) => {
-                        setLocalMeta(saved);
-                        setActivePanel(null);  // close the editor after saving
-                    }}
-                />
-            )}
-
-            {activePanel === 'player' && isAudio && (
-                <AudioPlayer
-                    fileUrl={resolvedUrl}
-                    isPlaying={isPlaying}
-                    onPlayPause={setIsPlaying}
-                />
-            )}
-
-            {activePanel === 'player' && isVideo && (
-                <VideoPlayer fileUrl={resolvedUrl} />
-            )}
-
-            {activePanel === 'history' && (
-                <VersionHistory filePath={file.path} mimeType={file.mimetype} />
-            )}
-
-            {activePanel === 'share' && (
-                <ShareModal filePath={file.path} fileName={file.name} />
-            )}
+        <div className="track-meta-row">
+          {localMeta?.bpm && (
+            <span className="track-meta-item">{localMeta.bpm} bpm</span>
+          )}
+          {localMeta?.key && (
+            <span className="track-meta-item">{localMeta.key}</span>
+          )}
+          {localMeta?.genre && (
+            <span className="track-meta-item">
+              {localMeta.genre.split(',')[0]}
+            </span>
+          )}
+          <span className="track-meta-item">{formatSize(file.size)}</span>
         </div>
-    )
+
+        {/* Panels expand inside the info column, below the meta row */}
+        {activePanel === 'player' && isAudio && (
+          <div className="track-waveform">
+            <AudioPlayer
+              fileUrl={resolvedUrl}
+              isPlaying={isPlaying}
+              onPlayPause={setIsPlaying}
+            />
+          </div>
+        )}
+        {activePanel === 'player' && isVideo && (
+          <VideoPlayer fileUrl={resolvedUrl} isPlaying={isPlaying} onPlayPause={setIsPlaying} />
+        )}
+        {activePanel === 'history' && (
+          <VersionHistory filePath={file.path} mimeType={file.mimetype} />
+        )}
+        {activePanel === 'share' && (
+          <ShareModal filePath={file.path} fileName={file.name} />
+        )}
+        {activePanel === 'edit' && (
+          <MetadataEditor
+            filePath={file.path}
+            initialMeta={localMeta}
+            onSave={saved => {
+              setLocalMeta(saved);
+              setActivePanel(null);
+            }}
+          />
+        )}
+      </div>
+
+      {/* ── Zone 3: Actions ───────────────────────────────── */}
+      <div className="track-actions">
+        <button
+          className={activePanel === 'share' ? 'fbtn on' : 'fbtn'}
+          onClick={() => togglePanel('share')}
+        >
+          share
+        </button>
+        <button
+          className={activePanel === 'history' ? 'fbtn on' : 'fbtn'}
+          onClick={() => togglePanel('history')}
+        >
+          hist
+        </button>
+        <button
+          className={activePanel === 'edit' ? 'fbtn on' : 'fbtn'}
+          onClick={() => togglePanel('edit')}
+        >
+          tag
+        </button>
+      </div>
+    </div>
+  );
 }

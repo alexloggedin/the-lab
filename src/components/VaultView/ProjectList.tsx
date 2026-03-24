@@ -67,22 +67,33 @@ export default function ProjectList({ folders, openFolder, onFolderClick }: Prop
         return (
           <div key={folder.path}>
 
+            {/* Pack card row */}
             <div
-              className="project-row"
+              className="pack-card"
               onClick={() => onFolderClick(isOpen ? null : folder)}
             >
-              <span className="proj-arrow" style={{
-                display: 'inline-block',
-                transform: isOpen ? 'rotate(90deg)' : 'none',
-                transition: 'transform 0.15s',
-              }}>
-                ▶
-              </span>
-              <span className="proj-name">{folder.name} </span>
-              <span className="proj-date">
-                {new Date(folder.modified * 1000).toLocaleDateString()}
-              </span>
-              <div className="proj-actions" onClick={e => e.stopPropagation()}>
+              {/* Folder art placeholder — same concept as track art */}
+              <div className="pack-art">🎶</div>
+
+              <div className="pack-info">
+                <span className="pack-name">{folder.name}</span>
+                <span className="pack-meta">
+                  {new Date(folder.modified * 1000).toLocaleDateString()}
+                  {isOpen && files.length > 0 && ` · ${files.length} files`}
+                </span>
+              </div>
+
+              <div className="pack-actions" onClick={e => e.stopPropagation()}>
+                {/* Arrow indicates expand state */}
+                <span style={{
+                  display: 'inline-block',
+                  transform: isOpen ? 'rotate(90deg)' : 'none',
+                  transition: 'transform 0.15s',
+                  color: 'var(--muted)',
+                  fontSize: '11px',
+                }}>
+                  ▶
+                </span>
                 <button
                   className={shareFolder?.path === folder.path ? 'fbtn on' : 'fbtn'}
                   onClick={() =>
@@ -91,10 +102,9 @@ export default function ProjectList({ folders, openFolder, onFolderClick }: Prop
                     )
                   }
                 >
-                  {shareFolder?.path === folder.path ? 'close' : 'share'}
+                  share
                 </button>
               </div>
-
             </div>
 
             {shareFolder?.path === folder.path && (
