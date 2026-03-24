@@ -1,7 +1,6 @@
 // src/hooks/useAuth.ts
 
 import { useState, useEffect } from 'react';
-import { hasSession } from '../auth/session';
 
 export type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
 
@@ -28,4 +27,9 @@ export const useAuth = (): SimpleAuthState => {
   }, []);
 
   return { authStatus };
+};
+
+
+export const hasSession = (): boolean => {
+  return typeof window !== 'undefined' && !!(window as any).OC;
 };

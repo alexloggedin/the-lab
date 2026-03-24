@@ -44,10 +44,15 @@ export async function getFileMeta(path: string): Promise<FileMetadata> {
     data: PROPFIND_BODY,
   });
 
+  
+
   // The response body is XML. We parse it to extract our custom props.
   // The webdav package returns the raw response body as a string when
   // you use customRequest — we parse it ourselves.
-  const xml = response.data as string;
+  const xml = await response.text()
+
+  console.log('[metadataApi] PropFind:', xml)
+
   return parsePropfindResponse(xml);
 }
 

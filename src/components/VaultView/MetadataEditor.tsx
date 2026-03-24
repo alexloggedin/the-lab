@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { api } from '../../api/api';
 import { METADATA_FIELDS } from '../../metadata/schema';
 import type { FileMetadata } from '../../types';
+import { autoTagFromFile } from '../../autotag/autoTagApi';
 
 interface Props {
   filePath: string;
@@ -15,6 +16,9 @@ export default function MetadataEditor({ filePath, initialMeta, onSave }: Props)
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [autoTagging, setAutoTagging] = useState(false);
+  const [autoTagStatus, setAutoTagStatus] = useState<string | null>(null);
+
   const handleSave = async () => {
     setSaving(true);
     setError(null);
@@ -27,6 +31,32 @@ export default function MetadataEditor({ filePath, initialMeta, onSave }: Props)
       setSaving(false);
     }
   };
+
+  const handleAutoTag = async () => {
+    setAutoTagging(true);
+    setAutoTagStatus(null);
+    setError(null);
+    try {
+      const streamUrl = await api.streamUrl(filePath);
+      const detected = await autoTagFromFile(streamUrl);
+
+      // Merge detected values into the draft — only overwrite fields that
+      // were actually detected. Genre is never touched by auto-detect.
+      setDraft(prev => ({ ...prev, ...detected }));
+
+      const found = Object.entries(detected)
+        .filter(([, v]) => v !== undefined)
+        .map(([k]) => k)
+        .join(', ');
+
+      setAutoTagStatus(found ? `detected: ${found}` : 'no values detected');
+    } catch (err: any) {
+      setError(`auto-detect failed: ${err.message}`);
+    } finally {
+      setAutoTagging(false);
+    }
+  };
+
 
   // Generic field updater — works for any key in FileMetadata
   const setField = (key: keyof FileMetadata, value: string) => {
@@ -78,6 +108,16 @@ export default function MetadataEditor({ filePath, initialMeta, onSave }: Props)
         >
           {saving ? 'saving...' : 'save'}
         </button>
+        <button
+          className="abtn"
+          onClick={handleAutoTag}
+          disabled={autoTagging || saving}
+        >
+          {autoTagging ? 'analysing...' : 'auto-detect'}
+        </button>
+        {autoTagStatus && (
+          <span className="meta-autotag-status">{autoTagStatus}</span>
+        )}
       </div>
     </div>
   );
