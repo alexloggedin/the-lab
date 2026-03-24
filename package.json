@@ -33,6 +33,7 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.13.1",
+    "realtime-bpm-analyzer": "^4.0.2",
     "vue": "^3.5.30",
     "wavesurfer.js": "^7.12.3",
     "webdav": "^5.9.0"
