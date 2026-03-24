@@ -65,6 +65,8 @@ export default function AllFilesView() {
     for (let i = 0; i < allFiles.length; i += BATCH_SIZE) {
       if (isCancelled()) break;
 
+      console.log(`[AllFilesView]: Fetching Metadata for batch: ${i}`)
+      
       const batch = allFiles.slice(i, i + BATCH_SIZE);
       const entries = await Promise.all(
         batch.map(f =>
@@ -73,6 +75,8 @@ export default function AllFilesView() {
             .catch(() => [f.path, {}] as [string, FileMetadata])
         )
       );
+
+      console.log(`[AllFilesView]: Fetched Metadata for batch: ${i}:`, entries)
 
       if (isCancelled()) break;
 

@@ -1,5 +1,6 @@
 import { METADATA_FIELDS } from '../../metadata/schema';
 import { FilterState, EMPTY_FILTER, hasActiveFilters } from '../../metadata/filterFiles';
+import { _testMeta } from '../../api/metadataApi';
 
 interface Props {
   filters: FilterState;
@@ -17,75 +18,72 @@ export default function FilterBar({ filters, onChange, resultCount, totalCount }
   const clearAll = () => onChange({ ...EMPTY_FILTER });
 
   return (
-    <div className="filter-bar">
-      {/* Text search */}
-      <div className="filter-search-row">
-        <input
-          type="text"
-          className="filter-search-input"
-          placeholder="search files..."
-          value={filters.query}
-          onChange={e => update({ query: e.target.value })}
-        />
-        {hasActiveFilters(filters) && (
-          <button className="filter-clear-btn" onClick={clearAll}>
-            clear
-          </button>
-        )}
-      </div>
+    <div>
+      <div className="filter-bar">
+        <div className="filter-search-row">
+          <input
+            type="text"
+            className="filter-search-input"
+            placeholder="search files..."
+            value={filters.query}
+            onChange={e => update({ query: e.target.value })}
+          />
+          {hasActiveFilters(filters) && (
+            <button className="filter-clear-btn" onClick={clearAll}>
+              clear
+            </button>
+          )}
+        </div>
+        <div className="filter-sections">
+          {METADATA_FIELDS.map(field => (
+            <div key={field.key} className="filter-section">
+              <div className="filter-section-label">{field.label}</div>
 
-      {/* Result count */}
+              {/* {field.type === 'number-range' && (
+                <BpmRangeFilter
+                  min={field.min ?? 60}
+                  max={field.max ?? 220}
+                  currentMin={filters.bpmMin}
+                  currentMax={filters.bpmMax}
+                  onChange={(min, max) => update({ bpmMin: min, bpmMax: max })}
+                />
+              )} */}
+
+              {field.type === 'select' && (
+                <ChipFilter
+                  options={field.options ?? []}
+                  selected={filters[field.key === 'key' ? 'keys' : 'genres']}
+                  onChange={selected =>
+                    update(
+                      field.key === 'key'
+                        ? { keys: selected }
+                        : { genres: selected }
+                    )
+                  }
+                />
+              )}
+
+              {field.type === 'multiselect' && (
+                <ChipFilter
+                  options={field.options ?? []}
+                  selected={filters[field.key === 'key' ? 'keys' : 'genres']}
+                  onChange={selected =>
+                    update(
+                      field.key === 'key'
+                        ? { keys: selected }
+                        : { genres: selected }
+                    )
+                  }
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
       <div className="filter-count">
         {resultCount === totalCount
           ? `${totalCount} files`
           : `${resultCount} of ${totalCount} files`}
-      </div>
-
-      {/* Metadata filters — rendered from schema */}
-      <div className="filter-sections">
-        {METADATA_FIELDS.map(field => (
-          <div key={field.key} className="filter-section">
-            <div className="filter-section-label">{field.label}</div>
-
-            {field.type === 'number-range' && (
-              <BpmRangeFilter
-                min={field.min ?? 60}
-                max={field.max ?? 220}
-                currentMin={filters.bpmMin}
-                currentMax={filters.bpmMax}
-                onChange={(min, max) => update({ bpmMin: min, bpmMax: max })}
-              />
-            )}
-
-            {field.type === 'select' && (
-              <ChipFilter
-                options={field.options ?? []}
-                selected={filters[field.key === 'key' ? 'keys' : 'genres']}
-                onChange={selected =>
-                  update(
-                    field.key === 'key'
-                      ? { keys: selected }
-                      : { genres: selected }
-                  )
-                }
-              />
-            )}
-
-            {field.type === 'multiselect' && (
-              <ChipFilter
-                options={field.options ?? []}
-                selected={filters[field.key === 'key' ? 'keys' : 'genres']}
-                onChange={selected =>
-                  update(
-                    field.key === 'key'
-                      ? { keys: selected }
-                      : { genres: selected }
-                  )
-                }
-              />
-            )}
-          </div>
-        ))}
       </div>
     </div>
   );
@@ -152,18 +150,22 @@ function ChipFilter({ options, selected, onChange }: ChipFilterProps) {
   };
 
   return (
-    <div className="chip-filter">
-      {options.map(option => (
-        <button
-          key={option}
-          className={selectedSet.has(option) ? 'filter-chip active' : 'filter-chip'}
-          onClick={() => toggle(option)}
-          type="button"
-        >
-          {option}
-        </button>
-      ))}
-    </div>
+    <label className="chip-filter">
+      <select
+        value={[...selectedSet]}
+        onChange={e => toggle(e.target.value)}
+      >
+        {options.map(option => (
+          <option
+            key={option}
+            className={selectedSet.has(option) ? 'filter-chip active' : 'filter-chip'}
+            onClick={() => toggle(option)}
+          >
+            {option}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
 

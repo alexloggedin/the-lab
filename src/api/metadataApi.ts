@@ -86,7 +86,7 @@ export async function setFileMeta(path: string, meta: Partial<FileMetadata>): Pr
     data: body,
   });
 
-  console.log('[metadataApi] PropPatch:', res)
+  console.log('[metadataApi] Post:', res)
 }
 
 // ─── XML parsing helpers ───────────────────────────────────────────────────────
