@@ -5,18 +5,18 @@ import type { Pack } from '../../api/packApi';
 import type { VaultFile } from '../../types';
 
 export default function PacksView() {
-  const [packs, setPacks]           = useState<Pack[]>([]);
-  const [loading, setLoading]       = useState(true);
-  const [creating, setCreating]     = useState(false);   // is the create form open?
-  const [saving, setSaving]         = useState(false);   // is the API call in flight?
-  const [error, setError]           = useState<string | null>(null);
+  const [packs, setPacks] = useState<Pack[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);   // is the create form open?
+  const [saving, setSaving] = useState(false);   // is the API call in flight?
+  const [error, setError] = useState<string | null>(null);
 
   // ── Create form state ──────────────────────────────────────────
-  const [packName, setPackName]     = useState('');
+  const [packName, setPackName] = useState('');
   const [stagedFiles, setStagedFiles] = useState<VaultFile[]>([]);
-  const [allFiles, setAllFiles]     = useState<VaultFile[]>([]);
-  const [fileQuery, setFileQuery]   = useState('');
-  const [copied, setCopied]         = useState<string | null>(null);
+  const [allFiles, setAllFiles] = useState<VaultFile[]>([]);
+  const [fileQuery, setFileQuery] = useState('');
+  const [copied, setCopied] = useState<string | null>(null);
 
   // Load packs and all files on mount
   useEffect(() => {
@@ -35,9 +35,9 @@ export default function PacksView() {
   // need name matching here — no BPM/key/genre filtering needed
   const filteredFiles = fileQuery
     ? allFiles.filter(f =>
-        f.name.toLowerCase().includes(fileQuery.toLowerCase()) &&
-        !stagedFiles.some(s => s.path === f.path)  // hide already-staged files
-      )
+      f.name.toLowerCase().includes(fileQuery.toLowerCase()) &&
+      !stagedFiles.some(s => s.path === f.path)  // hide already-staged files
+    )
     : [];
 
   const addFile = (file: VaultFile) => {
@@ -127,9 +127,6 @@ export default function PacksView() {
                     onClick={() => addFile(file)}
                   >
                     <span>{file.name}</span>
-                    <span className="file-meta" style={{ fontSize: 10 }}>
-                      {file.path.split('/').slice(0, -1).join('/')}
-                    </span>
                   </div>
                 ))}
               </div>
@@ -190,7 +187,6 @@ export default function PacksView() {
           </div>
 
           <div className="share-row" style={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-            <span className="si-url">{pack.shareUrl}</span>
             <div style={{ display: 'flex', gap: 8 }}>
               <button className="abtn" onClick={() => handleCopy(pack.shareUrl)}>
                 {copied === pack.shareUrl ? 'copied' : 'copy link'}
@@ -199,6 +195,12 @@ export default function PacksView() {
                 delete
               </button>
             </div>
+            <a className="si-url"
+              style={{ fontSize: '10px', overflow: 'hidden' }}
+              href={pack.shareUrl}
+              >
+                {pack.shareUrl}
+              </a>
           </div>
         </div>
       ))}

@@ -14,8 +14,8 @@ export default function PackSharePage() {
 
   const token = routerToken ?? domToken;
 
-  const [manifest, setManifest]   = useState<PackManifest | null>(null);
-  const [notFound, setNotFound]   = useState(false);
+  const [manifest, setManifest] = useState<PackManifest | null>(null);
+  const [notFound, setNotFound] = useState(false);
   const [activeTrack, setActiveTrack] = useState<string | null>(null);  // token of playing track
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -58,12 +58,10 @@ export default function PackSharePage() {
 
   return (
     <div className="app-container">
-      <div className="topbar"><span className="wordmark">theVault</span></div>
+      <div className="topbar"><span className="wordmark">theVault @ {window.origin.split('/')[2]}</span></div>
       <div className="share-view-content">
-        <p className="share-view-label">shared pack</p>
-        <p className="share-view-filename">{manifest.name}</p>
-        <p className="file-meta" style={{ marginBottom: 24 }}>
-          {manifest.files.length} files
+        <p className="share-view-filename">
+          {manifest.name}{' '} <span className='wordmark muted file-meta'>{manifest.files.length} files</span>
         </p>
 
         <div className="pack-share-list">
@@ -106,17 +104,19 @@ function PackFileRow({ entry, isActive, isPlaying, onPlay }: RowProps) {
     <div className="share-folder-item">
       <div className="file-row">
         <span className="file-name">{entry.filename}</span>
-        {isAudio && (
-          <button
-            className={isActive ? 'fbtn on' : 'fbtn'}
-            onClick={onPlay}
-          >
-            {isActive ? (isPlaying ? 'pause' : 'play') : 'play'}
-          </button>
-        )}
-        <a href={streamUrl} download={entry.filename} className="fbtn">
-          download
-        </a>
+        <div>
+          {isAudio && (
+            <button
+              className={isActive ? 'fbtn on' : 'fbtn'}
+              onClick={onPlay}
+            >
+              {isActive ? (isPlaying ? 'pause' : 'play') : 'play'}
+            </button>
+          )}
+          <a href={streamUrl} download={entry.filename} className="fbtn">
+            download
+          </a>
+        </div>
       </div>
 
       {isActive && isAudio && (

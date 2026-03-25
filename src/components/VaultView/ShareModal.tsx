@@ -111,7 +111,7 @@ export default function ShareModal({ filePath, fileName, isFolder = false }: Pro
                             <div key={share.id} className="share-item">
                                 <div style={{display: 'flex', width: '100%'}}>
                                 <button className="share-link abtn" onClick={() => handleCopy(share.url)}>
-                                    {copied === share.url ? '📋' : '📋'}
+                                    {copied === share.url ? 'copied' : 'copy'}
                                 </button>
                                 <textarea
                                     className="si-url"

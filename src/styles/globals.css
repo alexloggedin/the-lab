@@ -467,16 +467,16 @@ input:focus {
     display: grid;
     grid-template-areas:
       "ar i i"
-      ". . ac"
+      "ac ac ."
       "ca ca ca";
   }
 
   .track-card:last-child {
-    margin-bottom: 5%;
+    margin-bottom: 20%;
   }
 
   .track-info {
-    width: 90%;
+    width: 100%;
     margin: 2% 0%;
   }
 

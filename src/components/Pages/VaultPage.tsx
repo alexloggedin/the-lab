@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import ProjectList from '../VaultView/ProjectList';
 import AllFilesView from '../VaultView/AllFilesView';
-import PacksView from '../VaultView/PacksView';
+import PacksView from '../PacksView/PacksView';
 import { api } from '../../api/api';
 import { USE_MOCK } from '../../dev/useMockData';
 import type { VaultFile } from '../../types';
@@ -74,7 +74,10 @@ export default function VaultPage() {
   return (
     <div className="app-container">
       <div className="topbar">
-        <span className="wordmark">theVault @ {window.origin.split('/')[2]}</span>
+        <span className="wordmark">theVault {' '} <span className='muted'>
+          @ {window.origin.split('/')[2]}
+        </span>
+        </span>
 
         {/* View toggle — two buttons that act as a tab switcher.
             The active view gets the 'on' class from globals.css.

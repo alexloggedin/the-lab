@@ -69,13 +69,15 @@
 }
 
 .si-url {
-  font-size:    16px;
+  font-size:    12px;
   color:        var(--accent);
   resize: none;
   overflow-wrap: normal;
   margin: auto;
   padding: 2%;
   width: 100%;
+  border-top-left-radius: 2%;
+  border-bottom-left-radius: 0%;
 }
 
 .si-meta {
