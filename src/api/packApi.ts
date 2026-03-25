@@ -115,7 +115,7 @@ export async function createPack(name: string, files: VaultFile[]): Promise<Pack
   return {
     manifest,
     shareToken: manifestShare.token,
-    shareUrl: `${window.location.origin}/index.php/apps/thevault/pack/${manifestShare.token}`,
+    shareUrl: `${window.location.origin}/apps/thevault/pack/${manifestShare.token}`,
   };
 }
 
@@ -192,7 +192,7 @@ export async function listPacks(): Promise<Pack[]> {
         packs.push({
           manifest,
           shareToken: share.token,
-          shareUrl: `${window.location.origin}/index.php/apps/thevault/pack/${share.token}`,
+          shareUrl: `${window.location.origin}/apps/thevault/pack/${share.token}`,
         });
       }
     } catch (err) {

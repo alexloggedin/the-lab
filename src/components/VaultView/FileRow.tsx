@@ -85,8 +85,10 @@ export default function FileRow({ file, meta }: Props) {
           )}
           <span className="track-meta-item">{formatSize(file.size)}</span>
         </div>
+      </div>
 
-        {/* Panels expand inside the info column, below the meta row */}
+      {/* Track Action Window*/}
+      <div className='track-current-action'>
         {activePanel === 'player' && isAudio && (
           <div className="track-waveform">
             <AudioPlayer
@@ -116,6 +118,7 @@ export default function FileRow({ file, meta }: Props) {
           />
         )}
       </div>
+
 
       {/* ── Zone 3: Actions ───────────────────────────────── */}
       <div className="track-actions">
