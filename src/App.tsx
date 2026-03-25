@@ -1,4 +1,3 @@
-import SharePage from './components/Pages/SharePage.tsx';
 import VaultPage from './components/Pages/VaultPage';
 import PackSharePage from './components/Pages/PackSharePage.tsx';
 import { Routes, Route } from 'react-router-dom';
@@ -16,8 +15,6 @@ export default function App() {
   console.log('[App] domShareToken:', domShareToken);
   console.log('[App] pathname:', window.location.pathname);
 
-
-  if (domShareToken) return <SharePage />;
   if (domPackToken) return <PackSharePage />;
 
   return (
