@@ -176,11 +176,17 @@ export interface ApiResponse<T> {
   data: T;
 }
 
-// ─── Component Panel State ────────────────────────────────────────────────
+interface PackEntry {
+  token: string;        // individual OCS share token for this file
+  filename: string;     // display name
+  mimetype: string;     // "audio/wav", "audio/mpeg", etc.
+  path: string;         // original vault path (for display only)
+}
 
-/**
- * The possible panels that can be open in a FileRow.
- * Using a union type here means TypeScript will error if you try to
- * set activePanel to any string other than these four values.
- */
-export type ActivePanel = 'player' | 'history' | 'share' | null;
+// The manifest JSON — this is what gets saved to Nextcloud
+interface PackManifest {
+  id: string;           // uuid, used as the manifest filename
+  name: string;         // human-readable pack name
+  created: number;      // unix timestamp
+  files: PackEntry[];
+}

@@ -62,15 +62,22 @@ function publicFileStatToVaultFile(stat: FileStat): VaultFile {
 async function getShareInfo(token: string): Promise<ShareInfo> {
   const client = createPublicDavClient(token);
 
-  // stat() sends a PROPFIND with Depth:0 — just the root of the share.
-  // This tells us whether the share is a file or folder, and its MIME type.
-  // If the share token is invalid or expired, Nextcloud returns 404 and
-  // the package throws an error with a status property.
+  // We use getDirectoryContents with Depth:1 instead of stat with Depth:0.
   //
-  // Ref: https://docs.nextcloud.com/server/33/developer_manual/client_apis/WebDAV/basic.html
-  let statResult: FileStat;
+  // Why: stat on the root of a public share returns the token as basename,
+  // not the real filename. The actual filename only appears as a child entry
+  // one level deeper.
+  //
+  // The response has two entries:
+  //   index 0 → the share root itself (basename = token, skip it)
+  //   index 1 → the actual shared file or folder (basename = real name)
+  //
+  // This is the same slice(1) pattern used in getFiles() and listShareContents().
+  let results;
   try {
-    statResult = await client.stat(`/files/${encodeURIComponent(token)}/`,) as FileStat;
+    results = await client.getDirectoryContents(
+      `/files/${encodeURIComponent(token)}/`
+    );
   } catch (err: any) {
     if (err?.status === 404 || err?.response?.status === 404) {
       throw new Error('Share not found or has expired');
@@ -78,12 +85,27 @@ async function getShareInfo(token: string): Promise<ShareInfo> {
     throw new Error(`getShareInfo failed: ${err?.message ?? err}`);
   }
 
-  const isFolder = statResult.type === 'directory';
+  console.log(`[PublicApi]: `,results)
+
+  const stats = Array.isArray(results) ? results : results.data;
+
+  // stats[0] is the root (token). stats[1] is the shared item.
+  // If there's no stats[1], the share is empty or something went wrong.
+  const sharedItem = stats[1];
+  console.log(`[PublicApi]: `,stats[1])
+
+  if (!sharedItem) {
+    throw new Error('Share not found or has expired');
+  }
+
+  const isFolder = sharedItem.type === 'directory';
 
   return {
     token,
-    fileName: statResult.basename ?? token,
-    mimetype: isFolder ? 'httpd/unix-directory' : (statResult.mime ?? 'application/octet-stream'),
+    fileName: sharedItem.basename,   // ← the real filename, not the token
+    mimetype: isFolder
+      ? 'httpd/unix-directory'
+      : (sharedItem.mime ?? 'application/octet-stream'),
     isFolder,
     hideDownload: false,
   };

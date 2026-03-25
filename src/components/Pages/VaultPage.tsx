@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import ProjectList from '../VaultView/ProjectList';
 import AllFilesView from '../VaultView/AllFilesView';
+import PacksView from '../VaultView/PacksView';
 import { api } from '../../api/api';
 import { USE_MOCK } from '../../dev/useMockData';
 import type { VaultFile } from '../../types';
@@ -12,7 +13,7 @@ import type { VaultFile } from '../../types';
 // to any string other than these two values. This is safer than a boolean
 // (which gives you no indication of what true/false means) and cleaner
 // than a string with no type constraint.
-type ViewMode = 'projects' | 'all-files';
+type ViewMode = 'projects' | 'all-files' | 'shares';
 
 export default function VaultPage() {
   const { authStatus } = useAuth();
@@ -73,7 +74,7 @@ export default function VaultPage() {
   return (
     <div className="app-container">
       <div className="topbar">
-        <span className="wordmark">theVault</span>
+        <span className="wordmark">theVault @ {window.origin.split('/')[2]}</span>
 
         {/* View toggle — two buttons that act as a tab switcher.
             The active view gets the 'on' class from globals.css.
@@ -93,6 +94,12 @@ export default function VaultPage() {
           >
             projects
           </button>
+          <button
+            className={viewMode === 'shares' ? 'fbtn on' : 'fbtn'}
+            onClick={() => setViewMode('shares')}
+          >
+            shares
+          </button>
         </div>
       </div>
 
@@ -106,6 +113,9 @@ export default function VaultPage() {
           openFolder={openFolder}
           onFolderClick={setOpenFolder}
         />
+      )}
+      {viewMode === 'shares' && (
+        <PacksView />
       )}
     </div>
   );

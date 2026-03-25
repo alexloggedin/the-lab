@@ -7,13 +7,11 @@ if ($_['vite_dev']) {
 }
 ?>
 
-<div id="app">
-    <div id="vault-root"
-      <?php if (!empty($_['share_token'])): ?>
-        data-share-token="<?php p($_['share_token']) ?>"
-      <?php endif; ?>
-    ></div>
-</div>
+<div id="vault-root"
+  <?php if (!empty($_['pack_token'])): ?>
+    data-pack-token="<?php p($_['pack_token']) ?>"
+  <?php endif; ?>
+></div>
 
 <?php if ($_['vite_dev']): ?>
   <script type="module" nonce="<?php p($nonce) ?>">

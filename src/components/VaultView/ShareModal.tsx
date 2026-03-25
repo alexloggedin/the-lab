@@ -40,15 +40,15 @@ export default function ShareModal({ filePath, fileName, isFolder = false }: Pro
         setCreating(true);
         setError(null);
 
-        if (ocsPath.includes('..') || !ocsPath.startsWith('/theVault')) {
-            setError('invalid share path');
-            return;
-        }
+        // if (ocsPath.includes('..') || !ocsPath.startsWith('/theVault')) {
+        //     setError('invalid share path');
+        //     return;
+        // }
 
         try {
             const res = await api.createShare(ocsPath, hideDownload);
             console.log('[ShareModal] created share:', res.data);
-            
+
             setShares(prev => [...prev, res.data]);
         } catch (err: any) {
             console.error('[ShareModal] createShare error:', err);
@@ -109,10 +109,20 @@ export default function ShareModal({ filePath, fileName, isFolder = false }: Pro
                     <div>
                         {shares.map(share => (
                             <div key={share.id} className="share-item">
-                                <span className="si-url">{share.url}</span>
-                                <button className="abtn" onClick={() => handleCopy(share.url)}>
-                                    {copied === share.url ? 'copied' : 'copy'}
+                                <div style={{display: 'flex', width: '100%'}}>
+                                <button className="share-link abtn" onClick={() => handleCopy(share.url)}>
+                                    {copied === share.url ? '📋' : '📋'}
                                 </button>
+                                <textarea
+                                    className="si-url"
+                                    readOnly
+                                    disabled
+                                    rows={1}
+                                    cols={20}
+                                >
+                                    {share.url}
+                                </textarea>
+                                </div>
                                 <button className="si-revoke" onClick={() => handleRevoke(share.id)}>
                                     revoke
                                 </button>

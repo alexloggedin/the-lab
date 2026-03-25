@@ -1,31 +1,43 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap');
 
 :root {
-  --bg:           #0a0a0a;   /* slightly darker than before */
-  --surface:      #111111;   /* card background */
-  --surface-2:    #181818;   /* hover state / nested panels */
-  --border:       #222222;   /* subtle border */
+  --bg: #0a0a0a;
+  /* slightly darker than before */
+  --surface: #111111;
+  /* card background */
+  --surface-2: #181818;
+  /* hover state / nested panels */
+  --border: #222222;
+  /* subtle border */
   --border-hover: #333333;
-  --text:         #f0f0f0;
-  --text-2:       #999999;   /* secondary text — filenames meta */
-  --muted:        #555555;
-  --accent:       #00849b;
-  --accent-dim:   rgba(255,255,255,0.08);  /* for hover backgrounds */
-  --play-btn:     #ffffff;
-  --play-btn-bg:  rgba(255,255,255,0.12);
-  --card-radius:  6px;
-  --art-size:     44px;      /* album art square */
-} 
+  --text: #f0f0f0;
+  --text-2: #999999;
+  /* secondary text — filenames meta */
+  --muted: #555555;
+  --accent: #00849b;
+  --accent-dim: rgba(255, 255, 255, 0.08);
+  /* for hover backgrounds */
+  --play-btn: #ffffff;
+  --play-btn-bg: rgba(255, 255, 255, 0.12);
+  --card-radius: 6px;
+  --art-size: 44px;
+  /* album art square */
+}
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-body, .vault-root {
-  background:  var(--bg);
-  color:       var(--text);
+body,
+.vault-root {
+  background: var(--bg);
+  color: var(--text);
   font-family: 'DM Mono', monospace;
-  font-size:   13px;
+  font-size: 13px;
   line-height: 1.6;
-  min-height:  100vh;
+  min-height: 100vh;
 }
 
 #header {
@@ -38,34 +50,38 @@ body, .vault-root {
 }
 
 .app-container {
-  max-width:      90vw;
-  margin:         0 auto;
-  padding:        36px 12px;
-  
+  max-width: 90vw;
+  margin: 0 auto;
+  padding: 2% 0% !important;
+
   /* Add these three lines */
-  height:         100vh;
-  display:        flex;
+  height: 100vh;
+  display: flex;
   flex-direction: column;
 }
 
 .topbar {
-  display:         flex;
-  align-items:     center;
+  display: flex;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom:   40px;
-  padding-bottom:  20px;
-  border-bottom:   1px solid var(--border);
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
 }
 
 .wordmark {
-  font-size:      15px;
+  font-size: 15px;
   letter-spacing: 0.12em;
-  color:          var(--text);
+  color: var(--text);
   text-transform: lowercase;
 }
 
 /* Layout */
-.app-container { max-width: 90vw; margin: 0 auto; padding: 48px 24px; }
+.app-container {
+  max-width: 90vw;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
 .project-header {
   font-size: 11px;
   letter-spacing: 0.1em;
@@ -103,14 +119,15 @@ body, .vault-root {
 /* ── TRACK CARD ──────────────────────────────────────────────── */
 
 .track-card {
-  display:       grid;
+  display: grid;
   grid-template-columns: var(--art-size) 1fr auto;
-  align-items:   start;
-  gap:           0 14px;
-  padding:       12px 0;
+  align-items: start;
+  gap: 0 14px;
+  padding: 12px 0;
   border-bottom: 1px solid var(--border);
-  cursor:        default;
-  transition:    background 0.1s;
+  cursor: default;
+  transition: background 0.1s;
+  width: 100%;
 }
 
 .track-card:hover {
@@ -122,37 +139,37 @@ body, .vault-root {
 
 /* Art square — a placeholder box with a music note icon */
 .track-art {
-  width:            var(--art-size);
-  height:           var(--art-size);
-  background:       var(--surface-2);
-  border-radius:    4px;
-  border:           1px solid var(--border);
-  display:          flex;
-  align-items:      center;
-  justify-content:  center;
-  flex-shrink:      0;
-  position:         relative;
-  overflow:         hidden;
+  width: var(--art-size);
+  height: var(--art-size);
+  background: var(--surface-2);
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
 }
 
 .track-art-placeholder {
   font-size: 16px;
-  color:     var(--muted);
+  color: var(--muted);
   user-select: none;
 }
 
 /* Play button overlaid on the art when hovering the card */
 .track-play-btn {
-  position:         absolute;
-  inset:            0;
-  display:          flex;
-  align-items:      center;
-  justify-content:  center;
-  background:       rgba(0,0,0,0.55);
-  opacity:          0;
-  transition:       opacity 0.15s;
-  border-radius:    4px;
-  cursor:           pointer;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  transition: opacity 0.15s;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .track-card:hover .track-play-btn,
@@ -161,49 +178,50 @@ body, .vault-root {
 }
 
 .track-card.playing .track-play-btn {
-  background: rgba(0,0,0,0.45);
+  background: rgba(0, 0, 0, 0.45);
 }
 
 /* The circle + triangle inside the play button */
 .play-circle {
-  width:            28px;
-  height:           28px;
-  border-radius:    50%;
-  background:       rgba(255,255,255,0.9);
-  display:          flex;
-  align-items:      center;
-  justify-content:  center;
-  font-size:        10px;
-  color:            #000;
-  flex-shrink:      0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #000;
+  flex-shrink: 0;
 }
 
 /* Info column — name on top, meta row below */
 .track-info {
-  display:        flex;
+  display: flex;
   flex-direction: column;
-  gap:            3px;
-  min-width:      0;    /* allows text to truncate inside flex */
+  gap: 3px;
+  min-width: 0;
+  /* allows text to truncate inside flex */
 }
 
 .track-name {
-  font-size:     13px;
-  color:         var(--text);
-  white-space:   nowrap;
-  overflow:      hidden;
+  font-size: 13px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .track-meta-row {
-  display:     flex;
+  display: flex;
   align-items: center;
-  gap:         10px;
-  flex-wrap:   wrap;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .track-meta-item {
   font-size: 11px;
-  color:     var(--text-2);
+  color: var(--text-2);
 }
 
 /* Waveform sits below the info, spanning the full info column */
@@ -213,202 +231,235 @@ body, .vault-root {
 
 /* Actions column */
 .track-actions {
-  display:     flex;
+  display: flex;
   align-items: center;
-  gap:         4px;
-  align-self:  start;
+  gap: 4px;
+  align-self: start;
   padding-top: 2px;
 }
 
 /* ── PACK CARD (folder) ──────────────────────────────────────── */
 
 .pack-card {
-  display:       flex;
-  align-items:   center;
-  gap:           14px;
-  padding:       14px 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
   border-bottom: 1px solid var(--border);
-  cursor:        pointer;
-  transition:    background 0.1s;
+  cursor: pointer;
+  transition: background 0.1s;
 }
 
 .pack-card:hover {
-  background:    var(--accent-dim);
+  background: var(--accent-dim);
   border-radius: var(--card-radius);
-  margin:        0 -8px;
-  padding:       14px 8px;
+  margin: 0 -8px;
+  padding: 14px 8px;
 }
 
 .pack-art {
-  width:            52px;
-  height:           52px;
-  background:       var(--surface-2);
-  border-radius:    5px;
-  border:           1px solid var(--border);
-  display:          flex;
-  align-items:      center;
-  justify-content:  center;
-  flex-shrink:      0;
-  font-size:        20px;
-  color:            var(--muted);
+  width: 52px;
+  height: 52px;
+  background: var(--surface-2);
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 20px;
+  color: var(--muted);
 }
 
 .pack-info {
-  flex:           1;
-  min-width:      0;
-  display:        flex;
+  flex: 1;
+  min-width: 0;
+  display: flex;
   flex-direction: column;
-  gap:            3px;
+  gap: 3px;
 }
 
 .pack-name {
-  font-size:     13px;
-  color:         var(--text);
-  white-space:   nowrap;
-  overflow:      hidden;
+  font-size: 13px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .pack-meta {
   font-size: 11px;
-  color:     var(--text-2);
+  color: var(--text-2);
 }
 
 .pack-actions {
-  display:     flex;
+  display: flex;
   align-items: center;
-  gap:         8px;
+  gap: 8px;
 }
 
 /* Buttons */
 button {
-  background:      none;
-  border:          none;
-  color:           var(--muted);
-  cursor:          pointer;
-  font-family:     inherit;
-  font-size:       11px;
-  letter-spacing:  0.06em;
-  text-transform:  uppercase;
-  padding:         4px 8px;
-  transition:      color 0.1s;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  transition: color 0.1s;
 }
-button:hover { color: var(--accent); }
+
+button:hover {
+  color: var(--accent);
+}
 
 /* Inputs */
 input[type="text"],
 input[type="password"],
 input[type="date"] {
-  background:    var(--surface);
-  border:        1px solid var(--border);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 2px;
-  color:         var(--text);
-  font-family:   inherit;
-  font-size:     13px;
-  padding:       8px 10px;
-  width:         100%;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  padding: 8px 10px;
+  width: 100%;
 }
-input:focus { outline: none; border-color: var(--muted); }
+
+input:focus {
+  outline: none;
+  border-color: var(--muted);
+}
 
 /* Share modal */
 .share-panel {
-  background:    var(--surface);
-  border:        1px solid var(--border);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 2px;
-  padding:       16px;
-  margin-top:    8px;
-  display:       flex;
+  padding: 16px;
+  margin-top: 8px;
+  display: flex;
   flex-direction: column;
-  gap:           12px;
+  gap: 12px;
 }
+
 .share-url {
-  font-size:     12px;
-  color:         var(--accent);
-  word-break:    break-all;
-  padding:       8px;
-  border:        1px solid var(--border);
+  font-size: 12px;
+  color: var(--accent);
+  word-break: break-all;
+  padding: 8px;
+  border: 1px solid var(--border);
   border-radius: 2px;
 }
 
 /* Version list */
 .version-list {
-  padding:       6px 0 6px 20px;
-  border-left:   1px solid var(--border);
+  padding: 6px 0 6px 20px;
+  border-left: 1px solid var(--border);
   margin-bottom: 8px;
 }
+
 .version-row {
-  padding:       6px 0;
+  padding: 6px 0;
   border-bottom: 1px solid var(--border);
-  font-size:     12px;
-  color:         var(--muted);
+  font-size: 12px;
+  color: var(--muted);
 }
-.version-row:last-child { border-bottom: none; }
-.version-date { flex: 1; }
+
+.version-row:last-child {
+  border-bottom: none;
+}
+
+.version-date {
+  flex: 1;
+}
 
 /* Upload drop zone */
 .drop-zone {
-  border:        1px dashed var(--border);
+  border: 1px dashed var(--border);
   border-radius: 2px;
-  padding:       24px;
-  text-align:    center;
-  color:         var(--muted);
-  font-size:     12px;
-  cursor:        pointer;
-  transition:    border-color 0.15s, color 0.15s;
+  padding: 24px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
 }
+
 .drop-zone.active,
 .drop-zone:hover {
   border-color: var(--muted);
-  color:        var(--text);
+  color: var(--text);
 }
 
-.muted { color: var(--muted); font-size: 12px; }
+.muted {
+  color: var(--muted);
+  font-size: 12px;
+}
 
 #vault-root button {
-  background:      none !important;
-  border:          none;
-  color:           var(--muted);
-  cursor:          pointer;
-  font-family:     'DM Mono', monospace;
-  font-size:       11px;
-  letter-spacing:  0.06em;
-  text-transform:  uppercase;
-  padding:         3px 7px;
-  border-radius:   2px;
-  box-shadow:      none !important;
-  transition:      color 0.1s;
+  background: none !important;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 2px;
+  box-shadow: none !important;
+  transition: color 0.1s;
 }
 
 #vault-root button:hover {
-  color:      var(--accent);
+  color: var(--accent);
   background: none !important;
   box-shadow: none !important;
 }
 
 #vault-root button:focus {
-  outline:    none;
+  outline: none;
   box-shadow: none !important;
 }
 
 #vault-root button:active {
   color: var(--accent);
-  transform:  scale(0.98);
+  transform: scale(0.98);
   background: none !important;
 }
 
 #vault-root .abtn {
-  border:        1px solid var(--border);
-  color:         var(--muted);
-  padding:       6px 16px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 6px 16px;
   border-radius: 2px;
 }
 
 #vault-root .abtn:hover {
   border-color: var(--muted);
-  color:        var(--accent);
+  color: var(--accent);
 }
 
 #vault-root .abtn.primary {
   border-color: #3a3a3a;
-  color:        var(--text);
+  color: var(--text);
+}
+
+@media (max-width: 600px) {
+
+  .track-card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .track-info {
+    width: 90%;
+    margin: 2% 0%;
+  }
+
 }

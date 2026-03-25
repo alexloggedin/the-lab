@@ -65,7 +65,7 @@ function normalizeShare(item: OCSResponseItem) {
   return {
     id: String(item.id),
     path: item.path,
-    url: `${window.location.origin}/share/${item.token}${item.hide_download ? '?hideDownload=1' : ''}`,
+    url: `${window.location.origin}/apps/thevault/s/${item.token}${item.hide_download ? '?hideDownload=1' : ''}`,
     token: item.token,
     expiry: item.expiration ?? '',
     hasPassword: false,

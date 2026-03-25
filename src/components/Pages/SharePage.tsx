@@ -55,7 +55,7 @@ export default function SharePage() {
 
   return (
     <div className="app-container">
-      <div className="topbar"><span className="wordmark">theLAB</span></div>
+      <div className="topbar"><span className="wordmark">theVault</span></div>
       <div className="share-view-content">
         <p className="share-view-label">
           {share.isFolder ? 'shared folder' : 'shared file'}

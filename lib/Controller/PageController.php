@@ -45,36 +45,31 @@ class PageController extends Controller
   }
 
   /**
-   * Public share page — served without Nextcloud login.
-   * The share token is embedded in the page as a data attribute.
-   * React Router picks it up and renders SharePage.
-   *
    * @PublicPage
    * @NoAdminRequired
    * @NoCSRFRequired
    */
-  public function showShare(string $token): TemplateResponse
+  public function showPack(string $token): TemplateResponse
   {
     $viteDev = file_exists(__DIR__ . '/../../.vite-dev');
 
     $response = new TemplateResponse('thevault', 'index', [
-      'vite_dev'    => $viteDev,
-      'share_token' => $token,
+      'vite_dev' => $viteDev,
+      'pack_token' => $token,
     ], 'base');
 
+    // Same CSP as showShare
     $csp = new ContentSecurityPolicy();
     $csp->addAllowedMediaDomain('blob:');
     $csp->addAllowedMediaDomain("'self'");
     $csp->addAllowedScriptDomain("'self'");
     $csp->addAllowedConnectDomain("'self'");
     $csp->addAllowedConnectDomain('blob:');
-
     if ($viteDev) {
       $csp->addAllowedScriptDomain('http://localhost:5173');
       $csp->addAllowedConnectDomain('http://localhost:5173');
       $csp->addAllowedConnectDomain('ws://localhost:5173');
     }
-
     $response->setContentSecurityPolicy($csp);
     return $response;
   }

@@ -1,0 +1,98 @@
+/* ── Pack management view ─────────────────────────────────────── */
+
+.packs-view {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.packs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.pack-create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Dropdown for file search results */
+.pack-file-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 2px 2px;
+  z-index: 10;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.pack-file-option {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+}
+
+.pack-file-option:last-child { border-bottom: none; }
+.pack-file-option:hover { background: var(--bg); }
+
+/* Staged files list */
+.pack-staged-files {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pack-staged-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Pack list items */
+.pack-item {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pack-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.pack-file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pack-entry-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+/* Pack share page (public) */
+.pack-share-list {
+  display: flex;
+  flex-direction: column;
+}

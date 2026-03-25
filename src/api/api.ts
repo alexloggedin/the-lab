@@ -44,7 +44,8 @@ async function getAllFiles(): Promise<ApiResponse<VaultFile[]>> {
   const foldersResult = await client.getDirectoryContents(`/files/${user}/theVault`);
   const folderStats = Array.isArray(foldersResult) ? foldersResult : foldersResult.data;
 
-  const folders = folderStats.filter(s => s.type === 'directory');
+  const folders = folderStats.filter(s => s.type === 'directory' && s.basename != '__packs__');
+  console.log('[Api]: folders:', folders)
 
   const perFolderResults = await Promise.all(
     folders.map(folder =>
@@ -61,6 +62,8 @@ async function getAllFiles(): Promise<ApiResponse<VaultFile[]>> {
         })
     )
   );
+
+  console.log('[Api]: perFolderResults:', perFolderResults)
 
   // Step 3: flatten the array of arrays into a single file list
   // [[file1, file2], [file3]] → [file1, file2, file3]
